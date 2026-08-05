@@ -973,10 +973,13 @@
       <button onclick="closeExerciseModal()" style="background:none;border:none;color:var(--text-muted);font-size:1.5rem;cursor:pointer;">✕</button>
     </div>
 
-    <!-- Visual Banner -->
-    <div style="background:linear-gradient(135deg, rgba(124,58,237,0.15), rgba(16,185,129,0.1));border:1px solid rgba(124,58,237,0.3);border-radius:16px;padding:20px;text-align:center;margin-bottom:16px;">
-      <div id="ex-modal-animation" style="font-size:3rem;margin-bottom:6px;animation:bounce-gentle 2s infinite;">🏋️‍♂️</div>
-      <div id="ex-modal-muscles" style="font-size:0.8rem;color:var(--purple-light);font-weight:600;">Músculos: Cuádriceps & Glúteos</div>
+    <!-- Visual Banner / GIF de ejecución -->
+    <div style="background:linear-gradient(135deg, rgba(124,58,237,0.15), rgba(16,185,129,0.1));border:1px solid rgba(124,58,237,0.3);border-radius:16px;padding:16px;text-align:center;margin-bottom:16px;">
+      <div id="ex-modal-gif-wrapper" style="border-radius:12px;overflow:hidden;background:rgba(0,0,0,0.4);max-height:220px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;border:1px solid var(--border);">
+        <img id="ex-modal-gif" src="" alt="Demostración en video" style="max-height:210px;max-width:100%;object-fit:contain;border-radius:8px;" onerror="this.style.display='none';document.getElementById('ex-modal-animation').style.display='block';">
+        <div id="ex-modal-animation" style="font-size:3.5rem;display:none;animation:bounce-gentle 2s infinite;padding:20px;">🏋️‍♂️</div>
+      </div>
+      <div id="ex-modal-muscles" style="font-size:0.82rem;color:var(--purple-light);font-weight:700;">🎯 Músculos: Cuádriceps & Glúteos</div>
     </div>
 
     <!-- Guía paso a paso -->

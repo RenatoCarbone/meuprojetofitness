@@ -360,57 +360,90 @@ function renderEjercicios(dia, tipoEj) {
   }
 }
 
-// ─── Modal Guía de Ejercicio ───
+// ─── Modal Guía de Ejercicio con GIFs de ejecución ───
 const EXERCISE_GUIDES = {
   "Sentadillas": {
+    gif: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3YxeW5qZWV0NmFsOTZ5MXYzb2pnbDFodjhvbm05ZTFzeTFxNmsxYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/13hxeOYEO5qOMM/giphy.gif",
     pasos: [
       "Coloca los pies al ancho de las caderas con las puntas ligeramente hacia afuera.",
-      "Mantén el Pecho erguido y el abdomen bien contraído.",
-      "Flexiona las rodillas y lleva la cadera hacia atrás como si fueras a sentarte en una silla.",
-      "Baja hasta que los muslos queden paralelos al suelo y vuelve a subir empujando desde los talones."
+      "Mantén el pecho erguido y el abdomen bien contraído.",
+      "Flexiona las rodillas y lleva la cadera hacia atrás como si fueras a sentarte.",
+      "Baja hasta que los muslos queden paralelos al suelo y vuelve a subir empujando con los talones."
     ],
     musculos: "Cuádriceps, Glúteos y Isquiotibiales",
-    tip: "Asegúrate de que tus rodillas sigan la dirección de las puntas de tus pies y no se metan hacia adentro."
+    tip: "Asegúrate de que tus rodillas sigan la dirección de tus pies sin meterse hacia adentro."
   },
   "Flexiones de rodillas": {
+    gif: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHU1ZndwbTR4NG5xNW8xbjZxeWF4Y2RleW5vaGV2NW54ZnFmaHZ1NCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/uVOT9g0JRNDvgAamJw/giphy.gif",
     pasos: [
-      "Apoya las manos en el suelo al ancho de los hombros y las rodillas apoyadas atrás.",
-      "Forma una línea recta desde la cabeza hasta las rodillas.",
-      "Flexiona los codos bajando el pecho de forma controlada casi hasta rozar el suelo.",
-      "Empuja fuerte con los brazos hasta volver a la posición inicial."
+      "Apoya las manos al ancho de los hombros y las rodillas apoyadas atrás.",
+      "Mantén el cuerpo firme formando una línea recta desde cabeza a rodillas.",
+      "Flexiona los codos bajando el pecho de forma controlada casi al suelo.",
+      "Empuja fuerte con los brazos hasta regresar arriba."
     ],
     musculos: "Pectoral, Tríceps y Hombros",
-    tip: "Mantén los codos en un ángulo de 45° con respecto al cuerpo, evitando abrir demasiado hacia afuera."
+    tip: "Mantén los codos en un ángulo de 45° con el cuerpo, evitando abrirlos demasiado."
+  },
+  "Flexiones completas": {
+    gif: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHU1ZndwbTR4NG5xNW8xbjZxeWF4Y2RleW5vaGV2NW54ZnFmaHZ1NCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/uVOT9g0JRNDvgAamJw/giphy.gif",
+    pasos: [
+      "En posición de plancha alta con manos alineadas a hombros.",
+      "Baja todo el cuerpo recto hasta rozar el suelo con el pecho.",
+      "Empuja fuertemente hacia arriba manteniendo abdomen apretado."
+    ],
+    musculos: "Pectoral, Tríceps y Core",
+    tip: "No dejes caer la cadera; mantén los glúteos apretados durante toda la repetición."
   },
   "Plancha abdominal": {
+    gif: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHp1cWdpbmNyc3J5ZXE0ZTVid2dqYmo1dmE1cWdneGNia2tyaDRmOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xT8qBff8cRRFf7k10c/giphy.gif",
     pasos: [
       "Apoya los antebrazos y las puntas de los pies en el suelo.",
-      "Coloca los codos justo debajo de los hombros y mantén la espalda totalmente plana.",
-      "Contrae glúteos y abdomen al máximo durante todo el tiempo sin elevar ni hundir la cadera.",
-      "Respira de manera fluida y rítmica sin aguantar el aire."
+      "Coloca los codos justo debajo de los hombros y mantén la espalda plana.",
+      "Contrae glúteos y abdomen al máximo sin levantar la cadera.",
+      "Respira de manera fluida y constante."
     ],
     musculos: "Core completo, Abdomen y Lumbar",
-    tip: "Si sientes molestia en la zona lumbar, eleva ligeramente la cadera o apoya las rodillas."
+    tip: "Si sientes molestia en la zona lumbar, eleva un poco la cadera."
   },
   "Zancadas alternas": {
+    gif: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMnB2MmQ3cHE1dGt2a3o3OHk5NmdkOGl5NmRxODRqbnRyc2RiaWZyOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o6ZtqO0FkG0Q3g6lW/giphy.gif",
     pasos: [
       "De pie, da un paso largo hacia adelante con una pierna.",
-      "Baja el cuerpo perpendicularmente hasta que ambas rodillas formen un ángulo de 90°.",
-      "La rodilla trasera debe quedar a un par de centímetros del suelo.",
-      "Empuja con el talón delantero para regresar a la posición inicial y cambia de pierna."
+      "Baja el cuerpo perpendicularmente hasta que ambas rodillas queden en 90°.",
+      "Empuja con el talón delantero para regresar al inicio y cambia de pierna."
     ],
-    musculos: "Cuádriceps, Glúteos y Gemelos",
-    tip: "Mantén el torso totalmente erguido y evita que la rodilla delantera sobrepase la punta del pie."
+    musculos: "Cuádriceps, Glúteos y Isquiotibiales",
+    tip: "Mantén el torso recto en todo momento sin inclinarte hacia adelante."
   },
   "Puente de glúteos": {
+    gif: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdWp3dWV0OWZldWR2Z3hsa2Zxc3psaGl4cjh4NWNmNWxldms2Z2dsaSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKT7z6nQ6zNq972/giphy.gif",
     pasos: [
-      "Túmbate boca arriba con las rodillas flexionadas y los pies bien apoyados en el suelo.",
-      "Apoya los brazos a los lados con las palmas mirando hacia abajo.",
-      "Empuja con los talones y eleva las caderas apretando los glúteos en la parte alta.",
-      "Mantiene la posición 1 segundo arriba y baja suavemente sin tocar del todo el suelo."
+      "Túmbate boca arriba con rodillas flexionadas y pies apoyados.",
+      "Empuja con los talones y eleva las caderas apretando los glúteos arriba.",
+      "Mantiene 1 segundo en la cima y baja despacio."
     ],
-    musculos: "Glúteos, Isquiotibiales y Core",
-    tip: "No arquees la zona lumbar al subir; la elevación debe nacer exclusivamente de la fuerza glútea."
+    musculos: "Glúteos y Isquiotibiales",
+    tip: "La elevación debe nacer exclusivamente de los glúteos, sin arquear la zona lumbar."
+  },
+  "Mountain climbers": {
+    gif: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNzYydWF6MGtkMWgwdzU2cnkxeGdpam1ncm5uOW5rdnhyZWdxcXo3MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l3vR85PnGiHnOK8b6/giphy.gif",
+    pasos: [
+      "Comienza en posición de plancha con brazos extendidos.",
+      "Lleva una rodilla hacia el pecho a ritmo rápido y alterna con la otra pierna.",
+      "Mantén las caderas bajas y los hombros alineados con las muñecas."
+    ],
+    musculos: "Abdomen, Hombros y Cardio",
+    tip: "Mantén un ritmo constante sin subir demasiado la cadera."
+  },
+  "Burpees": {
+    gif: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdW5vdHlpaXgxaGVmdzhkZWVxZWVxeTB3aGtzdnkybzJrdnhrcnQyYSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/23hPPMRgPxbNBlPQe3/giphy.gif",
+    pasos: [
+      "Desde posición de pie, apoya las manos en el suelo y salta a plancha.",
+      "Realiza una flexión tocando el suelo con el pecho.",
+      "Salto de vuelta con los pies hacia las manos y salto explosivo arriba."
+    ],
+    musculos: "Cuerpo entero & Resistencia cardiovascular",
+    tip: "Si te resulta muy intenso, hazlo sin flexión o sin el salto final."
   }
 };
 
@@ -420,18 +453,30 @@ function abrirModalEjercicio(dia, tipoEj, index) {
 
   const ej = datos.ejercicios[index];
   const guide = EXERCISE_GUIDES[ej.nombre] || {
+    gif: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3YxeW5qZWV0NmFsOTZ5MXYzb2pnbDFodjhvbm05ZTFzeTFxNmsxYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/13hxeOYEO5qOMM/giphy.gif",
     pasos: [
       `Posiciona tu cuerpo en forma correcta para realizar ${ej.nombre.toLowerCase()}.`,
       `Ejecuta la fase concéntrica de forma fluida y manten el control del movimiento.`,
       `Regresa a la posición inicial de manera lenta durante la fase excéntrica.`,
       `Completa ${ej.series} series de ${ej.reps} manteniendo buena respiración.`
     ],
-    musculos: "Grupos musculares principales y estabilizadores",
-    tip: ej.descripcion || "Mantén la técnica limpia y detén la repetición si sientes molestias articulares."
+    musculos: "Grupos musculares principales",
+    tip: ej.descripcion || "Mantén la técnica limpia y detén la repetición si sientes molestias."
   };
 
-  document.getElementById('ex-modal-emoji').textContent = ej.emoji;
-  document.getElementById('ex-modal-animation').textContent = ej.emoji;
+  const imgGif = document.getElementById('ex-modal-gif');
+  const animEmoji = document.getElementById('ex-modal-animation');
+
+  if (guide.gif) {
+    imgGif.src = guide.gif;
+    imgGif.style.display = 'block';
+    animEmoji.style.display = 'none';
+  } else {
+    imgGif.style.display = 'none';
+    animEmoji.textContent = ej.emoji;
+    animEmoji.style.display = 'block';
+  }
+
   document.getElementById('ex-modal-title').textContent = ej.nombre;
   document.getElementById('ex-modal-series-reps').textContent = `${ej.series} series × ${ej.reps}`;
   document.getElementById('ex-modal-muscles').textContent = `🎯 Músculos: ${guide.musculos}`;
