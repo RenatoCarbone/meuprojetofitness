@@ -362,6 +362,7 @@ function renderEjercicios(dia, tipoEj) {
 
 // ─── Modal Guía de Ejercicio con imagens IA do usuário ───
 const EXERCISE_IMAGES = {
+  // 🏠 Exercícios em Casa
   "Sentadillas": "img/ejercicios en casa/Sentadillas (Squats).png",
   "Sentadillas sumo": "img/ejercicios en casa/Sentadillas (Squats).png",
   "Sentadilla + salto": "img/ejercicios en casa/Sentadillas (Squats).png",
@@ -391,7 +392,34 @@ const EXERCISE_IMAGES = {
   "Burpees": "img/ejercicios en casa/Burpees.png",
   "Burpee modificado": "img/ejercicios en casa/Burpees.png",
   "Burpee completo": "img/ejercicios en casa/Burpees.png",
-  "Circuito HIIT 20/10": "img/ejercicios en casa/Burpees.png"
+  "Circuito HIIT 20/10": "img/ejercicios en casa/Burpees.png",
+
+  // 🏋️ Exercícios na Academia (Gimnasio)
+  "Sentadilla en máquina": "img/ejercicios en gymnasio/Sentadilla con Barra (Barbell Squat).png",
+  "Sentadilla libre": "img/ejercicios en gymnasio/Sentadilla con Barra (Barbell Squat).png",
+  "Sentadilla + peso": "img/ejercicios en gymnasio/Sentadilla con Barra (Barbell Squat).png",
+  "Sentadilla frontal": "img/ejercicios en gymnasio/Sentadilla con Barra (Barbell Squat).png",
+
+  "Press de banca": "img/ejercicios en gymnasio/Press de Banca (Bench Press).png",
+  "Press inclinado": "img/ejercicios en gymnasio/Press de Banca (Bench Press).png",
+  "Press de banca inclinado + décliné": "img/ejercicios en gymnasio/Press de Banca (Bench Press).png",
+  "Aperturas con mancuernas": "img/ejercicios en gymnasio/Press de Banca (Bench Press).png",
+
+  "Leg press": "img/ejercicios en gymnasio/Prensa de Piernas (Leg Press).png",
+  "Extensión de cuádriceps": "img/ejercicios en gymnasio/Prensa de Piernas (Leg Press).png",
+  "Superserie: leg curl + extensión": "img/ejercicios en gymnasio/Prensa de Piernas (Leg Press).png",
+  "Zancadas con mancuernas": "img/ejercicios en casa/Zancadas (Lunges).png",
+
+  "Remo en polea baja": "img/ejercicios en gymnasio/Remo en Polea  Jalón al Pecho (Lat Pulldown).png",
+  "Jalón al pecho": "img/ejercicios en gymnasio/Remo en Polea  Jalón al Pecho (Lat Pulldown).png",
+  "Dominadas asistidas": "img/ejercicios en gymnasio/Remo en Polea  Jalón al Pecho (Lat Pulldown).png",
+
+  "Peso muerto rumano": "img/ejercicios en gymnasio/Peso Muerto (Deadlift).png",
+  "Peso muerto convencional": "img/ejercicios en gymnasio/Peso Muerto (Deadlift).png",
+
+  "Press de hombro": "img/ejercicios en gymnasio/Press de Hombros con Mancuernas (Dumbbell Shoulder Press).png",
+  "Circuito de hombros": "img/ejercicios en gymnasio/Press de Hombros con Mancuernas (Dumbbell Shoulder Press).png",
+  "Curl de bíceps": "img/ejercicios en gymnasio/Press de Hombros con Mancuernas (Dumbbell Shoulder Press).png"
 };
 
 const EXERCISE_GUIDES = {
