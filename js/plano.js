@@ -345,9 +345,12 @@ function renderEjercicios(dia, tipoEj) {
     `;
   } else {
     container.innerHTML = `<div class="exercise-list">${
-      datos.ejercicios.map(ej => `
-        <div class="exercise-item">
-          <span class="exercise-emoji">${ej.emoji}</span>
+      datos.ejercicios.map((ej, idx) => `
+        <div class="exercise-item" onclick="abrirModalEjercicio(${dia}, '${tipoEj}', ${idx})" style="cursor:pointer;position:relative;" title="Haz clic para ver cómo realizar este ejercicio paso a paso">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <span class="exercise-emoji">${ej.emoji}</span>
+            <span style="font-size:0.7rem;background:rgba(124,58,237,0.12);color:var(--purple-light);padding:2px 8px;border-radius:999px;font-weight:600;">🔍 Ver guía</span>
+          </div>
           <div class="exercise-name">${ej.nombre}</div>
           <div class="exercise-detail">${ej.series} series × ${ej.reps}</div>
           <div class="exercise-desc">${ej.descripcion}</div>
@@ -355,6 +358,93 @@ function renderEjercicios(dia, tipoEj) {
       `).join('')
     }</div>`;
   }
+}
+
+// ─── Modal Guía de Ejercicio ───
+const EXERCISE_GUIDES = {
+  "Sentadillas": {
+    pasos: [
+      "Coloca los pies al ancho de las caderas con las puntas ligeramente hacia afuera.",
+      "Mantén el Pecho erguido y el abdomen bien contraído.",
+      "Flexiona las rodillas y lleva la cadera hacia atrás como si fueras a sentarte en una silla.",
+      "Baja hasta que los muslos queden paralelos al suelo y vuelve a subir empujando desde los talones."
+    ],
+    musculos: "Cuádriceps, Glúteos y Isquiotibiales",
+    tip: "Asegúrate de que tus rodillas sigan la dirección de las puntas de tus pies y no se metan hacia adentro."
+  },
+  "Flexiones de rodillas": {
+    pasos: [
+      "Apoya las manos en el suelo al ancho de los hombros y las rodillas apoyadas atrás.",
+      "Forma una línea recta desde la cabeza hasta las rodillas.",
+      "Flexiona los codos bajando el pecho de forma controlada casi hasta rozar el suelo.",
+      "Empuja fuerte con los brazos hasta volver a la posición inicial."
+    ],
+    musculos: "Pectoral, Tríceps y Hombros",
+    tip: "Mantén los codos en un ángulo de 45° con respecto al cuerpo, evitando abrir demasiado hacia afuera."
+  },
+  "Plancha abdominal": {
+    pasos: [
+      "Apoya los antebrazos y las puntas de los pies en el suelo.",
+      "Coloca los codos justo debajo de los hombros y mantén la espalda totalmente plana.",
+      "Contrae glúteos y abdomen al máximo durante todo el tiempo sin elevar ni hundir la cadera.",
+      "Respira de manera fluida y rítmica sin aguantar el aire."
+    ],
+    musculos: "Core completo, Abdomen y Lumbar",
+    tip: "Si sientes molestia en la zona lumbar, eleva ligeramente la cadera o apoya las rodillas."
+  },
+  "Zancadas alternas": {
+    pasos: [
+      "De pie, da un paso largo hacia adelante con una pierna.",
+      "Baja el cuerpo perpendicularmente hasta que ambas rodillas formen un ángulo de 90°.",
+      "La rodilla trasera debe quedar a un par de centímetros del suelo.",
+      "Empuja con el talón delantero para regresar a la posición inicial y cambia de pierna."
+    ],
+    musculos: "Cuádriceps, Glúteos y Gemelos",
+    tip: "Mantén el torso totalmente erguido y evita que la rodilla delantera sobrepase la punta del pie."
+  },
+  "Puente de glúteos": {
+    pasos: [
+      "Túmbate boca arriba con las rodillas flexionadas y los pies bien apoyados en el suelo.",
+      "Apoya los brazos a los lados con las palmas mirando hacia abajo.",
+      "Empuja con los talones y eleva las caderas apretando los glúteos en la parte alta.",
+      "Mantiene la posición 1 segundo arriba y baja suavemente sin tocar del todo el suelo."
+    ],
+    musculos: "Glúteos, Isquiotibiales y Core",
+    tip: "No arquees la zona lumbar al subir; la elevación debe nacer exclusivamente de la fuerza glútea."
+  }
+};
+
+function abrirModalEjercicio(dia, tipoEj, index) {
+  const datos = getEjerciciosDia(dia, tipoEj);
+  if (datos.descanso || !datos.ejercicios[index]) return;
+
+  const ej = datos.ejercicios[index];
+  const guide = EXERCISE_GUIDES[ej.nombre] || {
+    pasos: [
+      `Posiciona tu cuerpo en forma correcta para realizar ${ej.nombre.toLowerCase()}.`,
+      `Ejecuta la fase concéntrica de forma fluida y manten el control del movimiento.`,
+      `Regresa a la posición inicial de manera lenta durante la fase excéntrica.`,
+      `Completa ${ej.series} series de ${ej.reps} manteniendo buena respiración.`
+    ],
+    musculos: "Grupos musculares principales y estabilizadores",
+    tip: ej.descripcion || "Mantén la técnica limpia y detén la repetición si sientes molestias articulares."
+  };
+
+  document.getElementById('ex-modal-emoji').textContent = ej.emoji;
+  document.getElementById('ex-modal-animation').textContent = ej.emoji;
+  document.getElementById('ex-modal-title').textContent = ej.nombre;
+  document.getElementById('ex-modal-series-reps').textContent = `${ej.series} series × ${ej.reps}`;
+  document.getElementById('ex-modal-muscles').textContent = `🎯 Músculos: ${guide.musculos}`;
+  document.getElementById('ex-modal-tip').textContent = guide.tip;
+
+  const stepsList = document.getElementById('ex-modal-steps');
+  stepsList.innerHTML = guide.pasos.map(paso => `<li>${paso}</li>`).join('');
+
+  document.getElementById('exercise-modal').style.display = 'flex';
+}
+
+function closeExerciseModal() {
+  document.getElementById('exercise-modal').style.display = 'none';
 }
 
 // ─── Marcar día como completado ───

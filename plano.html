@@ -959,6 +959,50 @@
   </a>
 </div>
 
+<!-- ── Modal Guía de Ejercicio ── -->
+<div class="swap-modal" id="exercise-modal" style="display:none;z-index:9999;">
+  <div class="swap-panel" style="max-width:520px;padding:24px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span id="ex-modal-emoji" style="font-size:2rem;">🏋️</span>
+        <div>
+          <h3 id="ex-modal-title" style="font-size:1.15rem;">Nombre del Ejercicio</h3>
+          <span id="ex-modal-series-reps" class="badge badge-amber" style="font-size:0.75rem;margin-top:2px;">3 series × 12 reps</span>
+        </div>
+      </div>
+      <button onclick="closeExerciseModal()" style="background:none;border:none;color:var(--text-muted);font-size:1.5rem;cursor:pointer;">✕</button>
+    </div>
+
+    <!-- Visual Banner -->
+    <div style="background:linear-gradient(135deg, rgba(124,58,237,0.15), rgba(16,185,129,0.1));border:1px solid rgba(124,58,237,0.3);border-radius:16px;padding:20px;text-align:center;margin-bottom:16px;">
+      <div id="ex-modal-animation" style="font-size:3rem;margin-bottom:6px;animation:bounce-gentle 2s infinite;">🏋️‍♂️</div>
+      <div id="ex-modal-muscles" style="font-size:0.8rem;color:var(--purple-light);font-weight:600;">Músculos: Cuádriceps & Glúteos</div>
+    </div>
+
+    <!-- Guía paso a paso -->
+    <div style="margin-bottom:16px;">
+      <h4 style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+        <span>📋</span> Cómo realizarlo paso a paso:
+      </h4>
+      <ol id="ex-modal-steps" style="padding-left:20px;font-size:0.85rem;color:var(--text-primary);display:flex;flex-direction:column;gap:8px;line-height:1.5;">
+        <!-- generado por JS -->
+      </ol>
+    </div>
+
+    <!-- Consejo de Técnica -->
+    <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:12px;padding:12px 16px;margin-bottom:18px;">
+      <div style="font-size:0.8rem;font-weight:700;color:var(--amber);margin-bottom:4px;">💡 Consejo de técnica y postura:</div>
+      <p id="ex-modal-tip" style="font-size:0.8rem;color:var(--text-secondary);line-height:1.4;margin:0;">
+        Mantén la espalda recta y respira rítmicamente durante el movimiento.
+      </p>
+    </div>
+
+    <button type="button" onclick="closeExerciseModal()" class="btn btn-primary btn-full" style="font-size:0.9rem;padding:12px;">
+      👍 ¡Entendido, a entrenar!
+    </button>
+  </div>
+</div>
+
 <script src="data/recipes.js"></script>
 <script src="data/exercises.js"></script>
 <script src="data/plans.js"></script>
