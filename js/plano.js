@@ -526,14 +526,25 @@ function abrirModalEjercicio(dia, tipoEj, index) {
   document.getElementById('ex-modal-muscles').textContent = `🎯 Músculos: ${guide.musculos}`;
   document.getElementById('ex-modal-tip').textContent = guide.tip;
 
-  // Actualizar contador y botones de navegación
-  const navCounter = document.getElementById('ex-nav-counter');
-  const btnPrev = document.getElementById('btn-prev-ex');
-  const btnNext = document.getElementById('btn-next-ex');
+  // Actualizar botones de navegación principal
+  const btnPrevSec = document.getElementById('btn-prev-ex-sec');
+  const btnNextMain = document.getElementById('btn-next-ex-main');
 
-  if (navCounter) navCounter.textContent = `${index + 1} de ${totalEj}`;
-  if (btnPrev) btnPrev.disabled = index <= 0;
-  if (btnNext) btnNext.disabled = index >= totalEj - 1;
+  if (btnPrevSec) {
+    btnPrevSec.disabled = index <= 0;
+    btnPrevSec.style.opacity = index <= 0 ? '0.4' : '1';
+  }
+
+  if (btnNextMain) {
+    if (index < totalEj - 1) {
+      const proxEj = datos.ejercicios[index + 1];
+      btnNextMain.innerHTML = `➡️ Siguiente: ${proxEj.nombre} (${index + 2}/${totalEj})`;
+      btnNextMain.onclick = () => navegarEjercicio(1);
+    } else {
+      btnNextMain.innerHTML = `✅ ¡Finalizar entrenamiento!`;
+      btnNextMain.onclick = () => closeExerciseModal();
+    }
+  }
 
   const stepsList = document.getElementById('ex-modal-steps');
   stepsList.innerHTML = guide.pasos.map(paso => `<li>${paso}</li>`).join('');
