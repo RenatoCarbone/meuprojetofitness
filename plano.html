@@ -492,11 +492,51 @@
 
     /* Responsive */
     @media (max-width: 640px) {
-      .calendar-grid { grid-template-columns: repeat(6, 1fr); }
+      /* Calendar: scroll horizontal em vez de colunas estreitas */
+      .calendar-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 8px; }
+      .calendar-grid {
+        grid-template-columns: repeat(7, minmax(44px, 1fr));
+        gap: 5px;
+        min-width: 320px;
+      }
+      .day-cell { padding: 6px 2px; }
+      .day-num { font-size: 0.75rem; }
+      .day-emoji { font-size: 0.85rem; }
+
+      /* Meals */
       .meals-grid { grid-template-columns: 1fr; }
       .meal-card.full-width { grid-column: unset; }
-      .streak-panel { gap: 14px; }
-      .plan-header-inner { flex-direction: column; align-items: flex-start; }
+
+      /* Streak panel empilhado */
+      .streak-panel {
+        gap: 10px;
+        padding: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .streak-divider { display: none; }
+      .streak-item { min-width: 80px; }
+      .streak-value { font-size: 1.4rem; }
+
+      /* Plan header */
+      .plan-header-inner { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .plan-header-inner a { align-self: flex-start; }
+
+      /* Mark day button */
+      .mark-day-section { padding: 20px 16px; }
+      .mark-day-btn { width: 100%; justify-content: center; }
+
+      /* Exercise grid: 1 coluna */
+      .exercise-list { grid-template-columns: 1fr; }
+
+      /* Navbar: compactar */
+      #nav-plan-badge { display: none; }
+      #user-info { gap: 6px; }
+    }
+
+    @media (max-width: 400px) {
+      .logros-grid { grid-template-columns: repeat(2, 1fr); }
+      .meal-cals { font-size: 0.75rem; }
     }
   </style>
 </head>
@@ -571,8 +611,10 @@
   <!-- ── Calendario ── -->
   <div class="calendar-section">
     <h3>📅 Tu calendario de 30 días</h3>
-    <div class="calendar-grid" id="calendar-grid">
-      <!-- generado por JS -->
+    <div class="calendar-wrapper">
+      <div class="calendar-grid" id="calendar-grid">
+        <!-- generado por JS -->
+      </div>
     </div>
   </div>
 

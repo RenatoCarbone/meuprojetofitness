@@ -186,10 +186,27 @@
 
     @media (max-width: 640px) {
       .form-grid, .form-grid-3 { grid-template-columns: 1fr; }
-      .form-card { padding: 24px 20px; }
-      .step-line { width: 40px; }
-      .hero-stats { gap: 20px; }
+      .form-card { padding: 24px 16px; }
+      .step-line { width: 24px; }
+      .hero-stats { gap: 16px; }
       .stat-divider { display: none; }
+      /* Hero CTA buttons empilhados */
+      .hero-cta { flex-direction: column; align-items: stretch; }
+      .hero-cta .btn { width: 100%; justify-content: center; }
+      /* Food grid 2 colunas */
+      .food-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      /* Navbar: ocultar badge no topo */
+      .navbar .badge { display: none; }
+      /* Steps indicator menor */
+      .step-dot { width: 28px; height: 28px; font-size: 0.75rem; }
+      /* Formulario pasos anim */
+      .form-step-title { font-size: 1rem; }
+    }
+    @media (max-width: 400px) {
+      .food-grid { grid-template-columns: repeat(2, 1fr); }
+      .food-tag label { font-size: 0.78rem; padding: 6px 10px; }
     }
   </style>
 </head>
@@ -202,7 +219,7 @@
         <div class="navbar-logo">🥗</div>
         <span class="navbar-title">MiPlanFit</span>
       </a>
-      <span class="badge badge-green">✅ Plan de Adelgazamiento Personalizado</span>
+      <span class="badge badge-green" style="font-size:0.75rem;">✅ Plan Personalizado</span>
     </div>
   </div>
 </nav>

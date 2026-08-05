@@ -363,10 +363,48 @@ p { color: var(--text-secondary); }
 .toast-icon   { font-size: 1.4rem; }
 .toast-msg    { font-size: 0.9rem; font-weight: 500; }
 
-/* ─── Responsive ─── */
+/* ─── Responsive 768px ─── */
 @media (max-width: 768px) {
   .container, .container-sm, .container-xs { padding: 0 16px; }
-  .card { padding: 20px; }
-  .btn-lg { padding: 16px 28px; font-size: 1rem; }
+  .card { padding: 18px; }
+
+  /* Buttons */
+  .btn-lg { padding: 14px 22px; font-size: 0.95rem; border-radius: var(--radius-md); }
+  .btn-sm { padding: 8px 14px; font-size: 0.8rem; }
+
+  /* Forms */
   .radio-group, .check-group { flex-direction: column; }
+  .radio-option label, .check-option label {
+    font-size: 0.85rem;
+    white-space: normal;
+    line-height: 1.4;
+  }
+
+  /* Navbar */
+  .navbar { padding: 12px 0; }
+  .navbar-title { font-size: 1rem; }
+
+  /* Toast */
+  .toast { bottom: 16px; right: 12px; left: 12px; max-width: none; }
+
+  /* Typography */
+  h1 { font-size: clamp(1.7rem, 6vw, 2.5rem); }
+  h2 { font-size: clamp(1.3rem, 4vw, 1.8rem); }
 }
+
+/* ─── Responsive 480px ─── */
+@media (max-width: 480px) {
+  /* Hide user name in navbar - keep avatar + button only */
+  #user-name { display: none !important; }
+
+  /* Make logout button icon-only */
+  .btn-logout-text { display: none; }
+
+  /* Full-width primary action buttons */
+  .btn-full-mobile { width: 100%; justify-content: center; }
+
+  /* Smaller navbar logo */
+  .navbar-logo { width: 30px; height: 30px; font-size: 15px; }
+  .navbar-title { font-size: 0.9rem; }
+}
+
