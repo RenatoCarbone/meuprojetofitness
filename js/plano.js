@@ -494,6 +494,221 @@ function aplicarSwap(tipo, nuevaRecetaId) {
   setTimeout(() => toast.remove(), 2500);
 }
 
+// ============================================================
+// 📊 EVOLUCIÓN Y PROGRESO (Fotos, Peso y Ánimo)
+// ============================================================
+
+let currentTempFotoBase64 = null;
+
+function abrirEvolucion() {
+  document.getElementById('evolucion-modal').style.display = 'flex';
+  // Preencher peso atual se existir no perfil
+  if (perfil && perfil.peso && !document.getElementById('evo-peso').value) {
+    document.getElementById('evo-peso').value = perfil.peso;
+  }
+  renderEvolucion();
+}
+
+function cerrarEvolucion() {
+  document.getElementById('evolucion-modal').style.display = 'none';
+  currentTempFotoBase64 = null;
+  document.getElementById('foto-preview-container').style.display = 'none';
+}
+
+function previewEvoFoto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // Converter para base64 com resize leve
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const img = new Image();
+    img.onload = function () {
+      const canvas = document.createElement('canvas');
+      const maxW = 600;
+      const scale = maxW / img.width;
+      const w = img.width > maxW ? maxW : img.width;
+      const h = img.width > maxW ? img.height * scale : img.height;
+
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+
+      currentTempFotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
+      document.getElementById('foto-preview-img').src = currentTempFotoBase64;
+      document.getElementById('foto-preview-container').style.display = 'block';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function getEvolucionKey() {
+  const nombre = perfil?.nombre || 'Usuario';
+  return `miplanfit_evolucion_${nombre.replace(/\s/g, '_')}`;
+}
+
+function leerEvolucion() {
+  return JSON.parse(localStorage.getItem(getEvolucionKey()) || '[]');
+}
+
+async function guardarEvolucionSemana() {
+  const semana = parseInt(document.getElementById('evo-semana').value);
+  const peso = parseFloat(document.getElementById('evo-peso').value);
+  const animo = document.querySelector('input[name="evo-animo"]:checked')?.value || '⚡ Con mucha energía';
+
+  if (!peso || peso < 30 || peso > 250) {
+    alert('Por favor, introduce un peso válido.');
+    return;
+  }
+
+  let evoluciones = leerEvolucion();
+  const existenteIdx = evoluciones.findIndex(e => e.semana === semana);
+
+  const registro = {
+    semana,
+    peso,
+    animo,
+    foto: currentTempFotoBase64 || (existenteIdx >= 0 ? evoluciones[existenteIdx].foto : null),
+    fecha: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
+  };
+
+  if (existenteIdx >= 0) {
+    evoluciones[existenteIdx] = registro;
+  } else {
+    evoluciones.push(registro);
+  }
+
+  // Ordenar por semana
+  evoluciones.sort((a, b) => a.semana - b.semana);
+
+  // Guardar em localStorage
+  localStorage.setItem(getEvolucionKey(), JSON.stringify(evoluciones));
+
+  // ☁️ Sincronizar na nuvem Supabase
+  if (window._userId) {
+    const client = getSupabase();
+    if (client) {
+      await client.from('planos').update({
+        perfil: { ...perfil, pesoActual: peso, evoluciones }
+      }).eq('user_id', window._userId);
+    }
+  }
+
+  currentTempFotoBase64 = null;
+  document.getElementById('foto-preview-container').style.display = 'none';
+
+  renderEvolucion();
+
+  // Toast
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `<span class="toast-icon">📊</span><span class="toast-msg">¡Avance guardado con éxito!</span>`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2500);
+}
+
+function renderEvolucion() {
+  const evoluciones = leerEvolucion();
+  const pesoInicial = perfil?.peso || (evoluciones[0]?.peso) || 0;
+
+  // Fotos Antes y Después
+  const fotoInicial = evoluciones.find(e => e.foto);
+  const fotoReciente = [...evoluciones].reverse().find(e => e.foto);
+
+  // Imagen Antes
+  const imgAntes = document.getElementById('img-antes');
+  const noImgAntes = document.getElementById('no-img-antes');
+  const pesoAntesLabel = document.getElementById('peso-antes-label');
+
+  if (fotoInicial?.foto) {
+    imgAntes.src = fotoInicial.foto;
+    imgAntes.style.display = 'block';
+    noImgAntes.style.display = 'none';
+  } else {
+    imgAntes.style.display = 'none';
+    noImgAntes.style.display = 'block';
+  }
+  pesoAntesLabel.textContent = `${pesoInicial} kg (Inicial)`;
+
+  // Imagen Después
+  const imgDespues = document.getElementById('img-despues');
+  const noImgDespues = document.getElementById('no-img-despues');
+  const pesoDespuesLabel = document.getElementById('peso-despues-label');
+  const ultimoReg = evoluciones[evoluciones.length - 1];
+  const pesoActual = ultimoReg?.peso || pesoInicial;
+
+  if (fotoReciente?.foto) {
+    imgDespues.src = fotoReciente.foto;
+    imgDespues.style.display = 'block';
+    noImgDespues.style.display = 'none';
+  } else {
+    imgDespues.style.display = 'none';
+    noImgDespues.style.display = 'block';
+  }
+  pesoDespuesLabel.textContent = `${pesoActual} kg (${ultimoReg ? 'Semana ' + ultimoReg.semana : 'Actual'})`;
+
+  // Diferencia de peso
+  const diff = (pesoActual - pesoInicial).toFixed(1);
+  const diffEl = document.getElementById('diff-peso');
+
+  if (diff < 0) {
+    diffEl.textContent = `${diff} kg`;
+    diffEl.style.color = 'var(--green)';
+  } else if (diff > 0) {
+    diffEl.textContent = `+${diff} kg`;
+    diffEl.style.color = 'var(--amber)';
+  } else {
+    diffEl.textContent = `0.0 kg`;
+    diffEl.style.color = 'var(--text-secondary)';
+  }
+
+  // Útimo ánimo
+  document.getElementById('ultimo-animo').textContent = ultimoReg?.animo || '⚡ Excelente';
+
+  // Historial
+  const container = document.getElementById('historial-evolucion-grid');
+  container.innerHTML = '';
+
+  if (evoluciones.length === 0) {
+    container.innerHTML = `
+      <div style="text-align:center;padding:20px;color:var(--text-muted);font-size:0.85rem;">
+        Aún no has registrado ningún avance. ¡Haz tu primer registro arriba!
+      </div>
+    `;
+    return;
+  }
+
+  const nombresSemanas = ['', 'Semana 1 (Inicial)', 'Semana 2', 'Semana 3', 'Semana 4', 'Final (Día 30)'];
+
+  evoluciones.forEach(evo => {
+    const card = document.createElement('div');
+    card.style.cssText = 'background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;';
+
+    const diffSem = (evo.peso - pesoInicial).toFixed(1);
+    const diffTexto = diffSem <= 0 ? `${diffSem} kg` : `+${diffSem} kg`;
+
+    card.innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;">
+        ${evo.foto
+          ? `<img src="${evo.foto}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid var(--border);">`
+          : `<div style="width:44px;height:44px;border-radius:8px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;font-size:1.2rem;">📸</div>`
+        }
+        <div>
+          <div style="font-weight:700;font-size:0.88rem;">${nombresSemanas[evo.semana] || 'Semana ' + evo.semana}</div>
+          <div style="font-size:0.75rem;color:var(--text-muted);">${evo.animo} &middot; ${evo.fecha}</div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-weight:800;font-size:0.95rem;color:var(--text-primary);">${evo.peso} kg</div>
+        <div style="font-size:0.75rem;font-weight:700;color:${diffSem <= 0 ? 'var(--green)' : 'var(--amber)'};">${diffTexto}</div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
 // ─── Celebración al terminar 30 días ───
 function mostrarCelebracion() {
   const overlay = document.getElementById('celebration-overlay');

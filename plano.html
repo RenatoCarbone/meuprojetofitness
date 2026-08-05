@@ -645,7 +645,12 @@
         <h1>👋 <span id="header-nombre">Tu</span> Plan de <span class="gradient-text">30 Días</span></h1>
         <p id="header-objetivo">Cargando tu plan personalizado...</p>
       </div>
-      <a href="resultado.html" class="btn btn-outline btn-sm">← Ver resultado</a>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <button onclick="abrirEvolucion()" class="btn btn-primary btn-sm" style="gap:6px;box-shadow:0 4px 16px rgba(124,58,237,0.4);">
+          📊 Mi Evolución
+        </button>
+        <a href="resultado.html" class="btn btn-outline btn-sm" style="font-size:0.8rem;">Ver métricas</a>
+      </div>
     </div>
   </div>
 
@@ -779,6 +784,124 @@
     <div id="swap-options">
       <!-- generado por JS -->
     </div>
+  </div>
+</div>
+
+<!-- ── Modal Mi Evolución (Fotos, Peso y Ánimo) ── -->
+<div class="swap-modal" id="evolucion-modal" style="display:none;z-index:9999;">
+  <div class="swap-panel" style="max-width:650px;max-height:88vh;padding:24px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:14px;">
+      <h3 style="font-size:1.3rem;display:flex;align-items:center;gap:8px;">
+        <span>📊</span> Mi Evolución y Progreso
+      </h3>
+      <button onclick="cerrarEvolucion()" style="background:none;border:none;color:var(--text-muted);font-size:1.5rem;cursor:pointer;">✕</button>
+    </div>
+
+    <!-- Comparador Antes y Después -->
+    <div id="antes-despues-card" style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:24px;text-align:center;">
+      <h4 style="margin-bottom:14px;color:var(--text-secondary);font-size:0.95rem;">📸 Tu transformación visual</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+        <div style="background:rgba(0,0,0,0.3);border:1px dashed var(--border);border-radius:var(--radius-md);padding:10px;text-align:center;min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+          <div style="font-size:0.75rem;font-weight:700;color:var(--text-muted);margin-bottom:8px;">DÍA 1 (INICIAL)</div>
+          <img id="img-antes" src="" alt="Antes" style="max-width:100%;max-height:140px;border-radius:8px;display:none;object-fit:cover;">
+          <span id="no-img-antes" style="font-size:0.78rem;color:var(--text-muted);">Sin foto inicial</span>
+          <span id="peso-antes-label" style="font-size:0.8rem;font-weight:700;color:var(--purple-light);margin-top:6px;">-- kg</span>
+        </div>
+
+        <div style="background:rgba(0,0,0,0.3);border:1px dashed rgba(16,185,129,0.3);border-radius:var(--radius-md);padding:10px;text-align:center;min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+          <div style="font-size:0.75rem;font-weight:700;color:var(--green-light);margin-bottom:8px;">MÁS RECIENTE</div>
+          <img id="img-despues" src="" alt="Después" style="max-width:100%;max-height:140px;border-radius:8px;display:none;object-fit:cover;">
+          <span id="no-img-despues" style="font-size:0.78rem;color:var(--text-muted);">Añade tu avance</span>
+          <span id="peso-despues-label" style="font-size:0.8rem;font-weight:700;color:var(--green);margin-top:6px;">-- kg</span>
+        </div>
+      </div>
+
+      <!-- Métricas del progreso -->
+      <div style="display:flex;justify-content:space-around;background:rgba(255,255,255,0.04);border-radius:var(--radius-md);padding:12px;gap:8px;flex-wrap:wrap;">
+        <div>
+          <div style="font-size:0.72rem;color:var(--text-muted);">PESO PERDIDO</div>
+          <div id="diff-peso" style="font-size:1.2rem;font-weight:900;color:var(--green);">0 kg</div>
+        </div>
+        <div style="width:1px;background:var(--border);"></div>
+        <div>
+          <div style="font-size:0.72rem;color:var(--text-muted);">ENERGÍA Y ÁNIMO</div>
+          <div id="ultimo-animo" style="font-size:1.2rem;font-weight:900;">⚡ Excelente</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulario Check-in Semanal -->
+    <div style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.25);border-radius:var(--radius-lg);padding:20px;margin-bottom:24px;">
+      <h4 style="margin-bottom:12px;font-size:1rem;color:var(--purple-light);display:flex;align-items:center;gap:6px;">
+        <span>📝</span> Registrar avance semanal
+      </h4>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+        <div>
+          <label class="form-label" style="font-size:0.8rem;">Semana</label>
+          <select id="evo-semana" class="form-select" style="padding:9px 12px;font-size:0.88rem;">
+            <option value="1">Semana 1 (Día 1 - Inicial)</option>
+            <option value="2">Semana 2 (Día 7)</option>
+            <option value="3">Semana 3 (Día 14)</option>
+            <option value="4">Semana 4 (Día 21)</option>
+            <option value="5">Final (Día 30)</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label" style="font-size:0.8rem;">Peso actual (kg)</label>
+          <input type="number" id="evo-peso" step="0.1" class="form-input" placeholder="Ej: 72.5" style="padding:9px 12px;font-size:0.88rem;">
+        </div>
+      </div>
+
+      <!-- Estado de ánimo -->
+      <div style="margin-bottom:14px;">
+        <label class="form-label" style="font-size:0.8rem;margin-bottom:8px;display:block;">¿Cómo te sientes esta semana?</label>
+        <div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:8px;">
+          <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-size:0.82rem;">
+            <input type="radio" name="evo-animo" value="⚡ Con mucha energía" checked>
+            <span>⚡ Súper motivado/a</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-size:0.82rem;">
+            <input type="radio" name="evo-animo" value="😄 Bien y constante">
+            <span>😄 Bien y en marcha</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-size:0.82rem;">
+            <input type="radio" name="evo-animo" value="😐 Adaptándome">
+            <span>😐 Adaptándome</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-size:0.82rem;">
+            <input type="radio" name="evo-animo" value="😴 Cansado/a pero sigo">
+            <span>😴 Un poco cansado/a</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Upload Foto -->
+      <div style="margin-bottom:16px;">
+        <label class="form-label" style="font-size:0.8rem;margin-bottom:6px;display:block;">📸 Foto de la semana (opcional)</label>
+        <input type="file" id="evo-foto-input" accept="image/*" onchange="previewEvoFoto(event)" style="display:none;">
+        <button type="button" onclick="document.getElementById('evo-foto-input').click()" class="btn btn-outline btn-sm" style="width:100%;font-size:0.85rem;">
+          📷 Seleccionar foto del dispositivo
+        </button>
+        <div id="foto-preview-container" style="display:none;margin-top:10px;text-align:center;">
+          <img id="foto-preview-img" src="" alt="Preview" style="max-height:120px;border-radius:10px;border:1px solid var(--border);">
+          <span style="display:block;font-size:0.75rem;color:var(--green-light);margin-top:4px;">✅ Foto cargada</span>
+        </div>
+      </div>
+
+      <button type="button" onclick="guardarEvolucionSemana()" class="btn btn-green btn-full" style="font-size:0.95rem;">
+        💾 Guardar registro semanal
+      </button>
+    </div>
+
+    <!-- Historial de registros -->
+    <div>
+      <h4 style="font-size:0.95rem;color:var(--text-secondary);margin-bottom:12px;">📋 Historial de semanas</h4>
+      <div id="historial-evolucion-grid" style="display:flex;flex-direction:column;gap:10px;">
+        <!-- generado por JS -->
+      </div>
+    </div>
+
   </div>
 </div>
 
