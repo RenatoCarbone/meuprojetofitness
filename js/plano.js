@@ -499,13 +499,40 @@ function aplicarSwap(tipo, nuevaRecetaId) {
 // ============================================================
 
 let currentTempFotoBase64 = null;
+let weightChartInstance = null;
+
+function switchEvoTab(tabName) {
+  const btnProgreso = document.getElementById('tab-btn-progreso');
+  const btnRegistrar = document.getElementById('tab-btn-registrar');
+  const tabProgreso = document.getElementById('evo-tab-progreso');
+  const tabRegistrar = document.getElementById('evo-tab-registrar');
+
+  if (tabName === 'progreso') {
+    btnProgreso.style.background = 'var(--purple)';
+    btnProgreso.style.color = 'white';
+    btnRegistrar.style.background = 'transparent';
+    btnRegistrar.style.color = 'var(--text-secondary)';
+
+    tabProgreso.style.display = 'block';
+    tabRegistrar.style.display = 'none';
+    renderEvolucionChart();
+  } else {
+    btnRegistrar.style.background = 'var(--purple)';
+    btnRegistrar.style.color = 'white';
+    btnProgreso.style.background = 'transparent';
+    btnProgreso.style.color = 'var(--text-secondary)';
+
+    tabProgreso.style.display = 'none';
+    tabRegistrar.style.display = 'block';
+  }
+}
 
 function abrirEvolucion() {
   document.getElementById('evolucion-modal').style.display = 'flex';
-  // Preencher peso atual se existir no perfil
   if (perfil && perfil.peso && !document.getElementById('evo-peso').value) {
     document.getElementById('evo-peso').value = perfil.peso;
   }
+  switchEvoTab('progreso');
   renderEvolucion();
 }
 
@@ -519,7 +546,6 @@ function previewEvoFoto(event) {
   const file = event.target.files[0];
   if (!file) return;
 
-  // Converter para base64 com resize leve
   const reader = new FileReader();
   reader.onload = function (e) {
     const img = new Image();
@@ -580,13 +606,9 @@ async function guardarEvolucionSemana() {
     evoluciones.push(registro);
   }
 
-  // Ordenar por semana
   evoluciones.sort((a, b) => a.semana - b.semana);
-
-  // Guardar em localStorage
   localStorage.setItem(getEvolucionKey(), JSON.stringify(evoluciones));
 
-  // ☁️ Sincronizar na nuvem Supabase
   if (window._userId) {
     const client = getSupabase();
     if (client) {
@@ -599,9 +621,9 @@ async function guardarEvolucionSemana() {
   currentTempFotoBase64 = null;
   document.getElementById('foto-preview-container').style.display = 'none';
 
+  switchEvoTab('progreso');
   renderEvolucion();
 
-  // Toast
   const toast = document.createElement('div');
   toast.className = 'toast';
   toast.innerHTML = `<span class="toast-icon">📊</span><span class="toast-msg">¡Avance guardado con éxito!</span>`;
@@ -613,11 +635,30 @@ function renderEvolucion() {
   const evoluciones = leerEvolucion();
   const pesoInicial = perfil?.peso || (evoluciones[0]?.peso) || 0;
 
+  // Stats rápidos
+  document.getElementById('stat-peso-inicio').textContent = `${pesoInicial} kg`;
+
+  const ultimoReg = evoluciones[evoluciones.length - 1];
+  const pesoActual = ultimoReg?.peso || pesoInicial;
+  const diff = (pesoActual - pesoInicial).toFixed(1);
+
+  const diffEl = document.getElementById('stat-peso-perdido');
+  if (diff < 0) {
+    diffEl.textContent = `${diff} kg`;
+    diffEl.style.color = 'var(--green)';
+  } else if (diff > 0) {
+    diffEl.textContent = `+${diff} kg`;
+    diffEl.style.color = 'var(--amber)';
+  } else {
+    diffEl.textContent = `0.0 kg`;
+  }
+
+  document.getElementById('stat-animo').textContent = ultimoReg?.animo ? ultimoReg.animo.split(' ')[0] + ' Excelente' : '⚡ Excelente';
+
   // Fotos Antes y Después
   const fotoInicial = evoluciones.find(e => e.foto);
   const fotoReciente = [...evoluciones].reverse().find(e => e.foto);
 
-  // Imagen Antes
   const imgAntes = document.getElementById('img-antes');
   const noImgAntes = document.getElementById('no-img-antes');
   const pesoAntesLabel = document.getElementById('peso-antes-label');
@@ -632,12 +673,9 @@ function renderEvolucion() {
   }
   pesoAntesLabel.textContent = `${pesoInicial} kg (Inicial)`;
 
-  // Imagen Después
   const imgDespues = document.getElementById('img-despues');
   const noImgDespues = document.getElementById('no-img-despues');
   const pesoDespuesLabel = document.getElementById('peso-despues-label');
-  const ultimoReg = evoluciones[evoluciones.length - 1];
-  const pesoActual = ultimoReg?.peso || pesoInicial;
 
   if (fotoReciente?.foto) {
     imgDespues.src = fotoReciente.foto;
@@ -649,63 +687,119 @@ function renderEvolucion() {
   }
   pesoDespuesLabel.textContent = `${pesoActual} kg (${ultimoReg ? 'Semana ' + ultimoReg.semana : 'Actual'})`;
 
-  // Diferencia de peso
-  const diff = (pesoActual - pesoInicial).toFixed(1);
-  const diffEl = document.getElementById('diff-peso');
-
-  if (diff < 0) {
-    diffEl.textContent = `${diff} kg`;
-    diffEl.style.color = 'var(--green)';
-  } else if (diff > 0) {
-    diffEl.textContent = `+${diff} kg`;
-    diffEl.style.color = 'var(--amber)';
-  } else {
-    diffEl.textContent = `0.0 kg`;
-    diffEl.style.color = 'var(--text-secondary)';
-  }
-
-  // Útimo ánimo
-  document.getElementById('ultimo-animo').textContent = ultimoReg?.animo || '⚡ Excelente';
-
   // Historial
   const container = document.getElementById('historial-evolucion-grid');
-  container.innerHTML = '';
+  if (container) {
+    container.innerHTML = '';
+    if (evoluciones.length === 0) {
+      container.innerHTML = `
+        <div style="text-align:center;padding:16px;color:var(--text-muted);font-size:0.8rem;">
+          No hay registros aún. ¡Añade tu primer avance arriba!
+        </div>
+      `;
+    } else {
+      const nombresSemanas = ['', 'Semana 1 (Inicial)', 'Semana 2', 'Semana 3', 'Semana 4', 'Final (Día 30)'];
+      evoluciones.forEach(evo => {
+        const card = document.createElement('div');
+        card.style.cssText = 'background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;padding:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;';
+        const diffSem = (evo.peso - pesoInicial).toFixed(1);
+        const diffTexto = diffSem <= 0 ? `${diffSem} kg` : `+${diffSem} kg`;
 
-  if (evoluciones.length === 0) {
-    container.innerHTML = `
-      <div style="text-align:center;padding:20px;color:var(--text-muted);font-size:0.85rem;">
-        Aún no has registrado ningún avance. ¡Haz tu primer registro arriba!
-      </div>
-    `;
-    return;
+        card.innerHTML = `
+          <div style="display:flex;align-items:center;gap:10px;">
+            ${evo.foto
+              ? `<img src="${evo.foto}" style="width:38px;height:38px;border-radius:6px;object-fit:cover;">`
+              : `<div style="width:38px;height:38px;border-radius:6px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;font-size:1rem;">📸</div>`
+            }
+            <div>
+              <div style="font-weight:700;font-size:0.82rem;">${nombresSemanas[evo.semana] || 'Semana ' + evo.semana}</div>
+              <div style="font-size:0.72rem;color:var(--text-muted);">${evo.animo} &middot; ${evo.fecha}</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-weight:800;font-size:0.88rem;">${evo.peso} kg</div>
+            <div style="font-size:0.72rem;font-weight:700;color:${diffSem <= 0 ? 'var(--green)' : 'var(--amber)'};">${diffTexto}</div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
   }
 
-  const nombresSemanas = ['', 'Semana 1 (Inicial)', 'Semana 2', 'Semana 3', 'Semana 4', 'Final (Día 30)'];
+  // Renderizar Gráfico de Linha
+  renderEvolucionChart();
+}
 
-  evoluciones.forEach(evo => {
-    const card = document.createElement('div');
-    card.style.cssText = 'background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;';
+function renderEvolucionChart() {
+  const canvas = document.getElementById('weightChart');
+  if (!canvas || typeof Chart === 'undefined') return;
 
-    const diffSem = (evo.peso - pesoInicial).toFixed(1);
-    const diffTexto = diffSem <= 0 ? `${diffSem} kg` : `+${diffSem} kg`;
+  const evoluciones = leerEvolucion();
+  const pesoInicial = perfil?.peso || 75;
 
-    card.innerHTML = `
-      <div style="display:flex;align-items:center;gap:12px;">
-        ${evo.foto
-          ? `<img src="${evo.foto}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid var(--border);">`
-          : `<div style="width:44px;height:44px;border-radius:8px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;font-size:1.2rem;">📸</div>`
+  let labels = ['Inicial'];
+  let dataPoints = [pesoInicial];
+
+  if (evoluciones.length > 0) {
+    labels = evoluciones.map(e => `Sem ${e.semana}`);
+    dataPoints = evoluciones.map(e => e.peso);
+  } else {
+    // Projeção simulada visual se nao tiver dados ainda
+    labels = ['Día 1', 'Semana 2', 'Semana 3', 'Día 30 (Meta)'];
+    const meta = Math.max(pesoInicial - (perfil?.objetivo_kg || 5), 45);
+    dataPoints = [pesoInicial, (pesoInicial - 1.5).toFixed(1), (pesoInicial - 3.2).toFixed(1), meta.toFixed(1)];
+  }
+
+  if (weightChartInstance) {
+    weightChartInstance.destroy();
+  }
+
+  const ctx = canvas.getContext('2d');
+  const gradient = ctx.createLinearGradient(0, 0, 0, 180);
+  gradient.addColorStop(0, 'rgba(16, 185, 129, 0.35)');
+  gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+
+  weightChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Peso (kg)',
+        data: dataPoints,
+        borderColor: '#10b981',
+        borderWidth: 3,
+        pointBackgroundColor: '#10b981',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        fill: true,
+        backgroundColor: gradient,
+        tension: 0.35
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (context) => ` Peso: ${context.parsed.y} kg`
+          }
         }
-        <div>
-          <div style="font-weight:700;font-size:0.88rem;">${nombresSemanas[evo.semana] || 'Semana ' + evo.semana}</div>
-          <div style="font-size:0.75rem;color:var(--text-muted);">${evo.animo} &middot; ${evo.fecha}</div>
-        </div>
-      </div>
-      <div style="text-align:right;">
-        <div style="font-weight:800;font-size:0.95rem;color:var(--text-primary);">${evo.peso} kg</div>
-        <div style="font-size:0.75rem;font-weight:700;color:${diffSem <= 0 ? 'var(--green)' : 'var(--amber)'};">${diffTexto}</div>
-      </div>
-    `;
-    container.appendChild(card);
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255, 255, 255, 0.05)' },
+          ticks: { color: '#9ca3b4', font: { size: 11 } }
+        },
+        y: {
+          grid: { color: 'rgba(255, 255, 255, 0.05)' },
+          ticks: { color: '#9ca3b4', font: { size: 11 } }
+        }
+      }
+    }
   });
 }
 
