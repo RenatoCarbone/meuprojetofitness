@@ -482,10 +482,19 @@ const EXERCISE_GUIDES = {
   }
 };
 
+let currentExDia = 1;
+let currentExTipo = 'casa';
+let currentExIndex = 0;
+
 function abrirModalEjercicio(dia, tipoEj, index) {
   const datos = getEjerciciosDia(dia, tipoEj);
-  if (datos.descanso || !datos.ejercicios[index]) return;
+  if (datos.descanso || !datos.ejercicios || !datos.ejercicios[index]) return;
 
+  currentExDia = dia;
+  currentExTipo = tipoEj;
+  currentExIndex = index;
+
+  const totalEj = datos.ejercicios.length;
   const ej = datos.ejercicios[index];
   const guide = EXERCISE_GUIDES[ej.nombre] || {
     pasos: [
@@ -517,10 +526,26 @@ function abrirModalEjercicio(dia, tipoEj, index) {
   document.getElementById('ex-modal-muscles').textContent = `🎯 Músculos: ${guide.musculos}`;
   document.getElementById('ex-modal-tip').textContent = guide.tip;
 
+  // Actualizar contador y botones de navegación
+  const navCounter = document.getElementById('ex-nav-counter');
+  const btnPrev = document.getElementById('btn-prev-ex');
+  const btnNext = document.getElementById('btn-next-ex');
+
+  if (navCounter) navCounter.textContent = `${index + 1} de ${totalEj}`;
+  if (btnPrev) btnPrev.disabled = index <= 0;
+  if (btnNext) btnNext.disabled = index >= totalEj - 1;
+
   const stepsList = document.getElementById('ex-modal-steps');
   stepsList.innerHTML = guide.pasos.map(paso => `<li>${paso}</li>`).join('');
 
   document.getElementById('exercise-modal').style.display = 'flex';
+}
+
+function navegarEjercicio(delta) {
+  const nuevoIdx = currentExIndex + delta;
+  const datos = getEjerciciosDia(currentExDia, currentExTipo);
+  if (!datos.ejercicios || nuevoIdx < 0 || nuevoIdx >= datos.ejercicios.length) return;
+  abrirModalEjercicio(currentExDia, currentExTipo, nuevoIdx);
 }
 
 function closeExerciseModal() {

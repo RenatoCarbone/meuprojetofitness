@@ -1012,6 +1012,17 @@
       </p>
     </div>
 
+    <!-- Navegación entre ejercicios (Anterior / Siguiente) -->
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;background:rgba(255,255,255,0.03);padding:10px 14px;border-radius:12px;border:1px solid var(--border);">
+      <button id="btn-prev-ex" onclick="navegarEjercicio(-1)" class="btn btn-outline btn-sm" style="padding:6px 12px;font-size:0.8rem;">
+        ◀ Anterior
+      </button>
+      <span id="ex-nav-counter" style="font-size:0.8rem;color:var(--purple-light);font-weight:700;">1 de 6</span>
+      <button id="btn-next-ex" onclick="navegarEjercicio(1)" class="btn btn-outline btn-sm" style="padding:6px 12px;font-size:0.8rem;">
+        Siguiente ▶
+      </button>
+    </div>
+
     <button type="button" onclick="closeExerciseModal()" class="btn btn-primary btn-full" style="font-size:0.9rem;padding:12px;">
       👍 ¡Entendido, a entrenar!
     </button>
