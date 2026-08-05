@@ -9,8 +9,8 @@ let planId = 'B';
 let swapTarget = null; // { dia, tipoComida }
 
 // ─── Premium config ───
-const FREE_DAYS  = 3;
-const PAYWALL_URL = 'https://miplanfit.lemonsqueezy.com/buy/placeholder';
+const FREE_DAYS   = 3;
+const PAYWALL_URL = 'https://miplanfit.lemonsqueezy.com/checkout/buy/7dccfeb2-dbe0-45c3-bfa2-eda0d0aa36fe';
 
 function isPremium() {
   return localStorage.getItem('miplanfit_premium') === 'true';
