@@ -360,10 +360,14 @@ function renderEjercicios(dia, tipoEj) {
   }
 }
 
-// ─── Modal Guía de Ejercicio con GIFs de ejecución ───
+// ─── Modal Guía de Ejercicio con ilustraciones animadas ───
 const EXERCISE_GUIDES = {
   "Sentadillas": {
-    gif: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3YxeW5qZWV0NmFsOTZ5MXYzb2pnbDFodjhvbm05ZTFzeTFxNmsxYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/13hxeOYEO5qOMM/giphy.gif",
+    svg: `<svg viewBox="0 0 100 100" width="100" height="100">
+      <circle cx="50" cy="22" r="8" fill="#a78bfa"/>
+      <path d="M50 30 L50 55 M50 55 L38 82 M50 55 L62 82 M50 42 L32 52 M50 42 L68 52" stroke="#10b981" stroke-width="5" stroke-linecap="round" fill="none"/>
+      <line x1="20" y1="88" x2="80" y2="88" stroke="rgba(255,255,255,0.2)" stroke-width="3"/>
+    </svg>`,
     pasos: [
       "Coloca los pies al ancho de las caderas con las puntas ligeramente hacia afuera.",
       "Mantén el pecho erguido y el abdomen bien contraído.",
@@ -374,7 +378,11 @@ const EXERCISE_GUIDES = {
     tip: "Asegúrate de que tus rodillas sigan la dirección de tus pies sin meterse hacia adentro."
   },
   "Flexiones de rodillas": {
-    gif: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHU1ZndwbTR4NG5xNW8xbjZxeWF4Y2RleW5vaGV2NW54ZnFmaHZ1NCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/uVOT9g0JRNDvgAamJw/giphy.gif",
+    svg: `<svg viewBox="0 0 100 100" width="100" height="100">
+      <circle cx="25" cy="40" r="8" fill="#a78bfa"/>
+      <path d="M32 45 L65 55 L80 70 M45 49 L40 68 M48 50 L45 68" stroke="#10b981" stroke-width="5" stroke-linecap="round" fill="none"/>
+      <line x1="15" y1="72" x2="85" y2="72" stroke="rgba(255,255,255,0.2)" stroke-width="3"/>
+    </svg>`,
     pasos: [
       "Apoya las manos al ancho de los hombros y las rodillas apoyadas atrás.",
       "Mantén el cuerpo firme formando una línea recta desde cabeza a rodillas.",
@@ -385,7 +393,11 @@ const EXERCISE_GUIDES = {
     tip: "Mantén los codos en un ángulo de 45° con el cuerpo, evitando abrirlos demasiado."
   },
   "Flexiones completas": {
-    gif: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHU1ZndwbTR4NG5xNW8xbjZxeWF4Y2RleW5vaGV2NW54ZnFmaHZ1NCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/uVOT9g0JRNDvgAamJw/giphy.gif",
+    svg: `<svg viewBox="0 0 100 100" width="100" height="100">
+      <circle cx="22" cy="38" r="8" fill="#a78bfa"/>
+      <path d="M30 42 L80 52 M40 44 L38 65 M44 45 L42 65" stroke="#10b981" stroke-width="5" stroke-linecap="round" fill="none"/>
+      <line x1="15" y1="68" x2="85" y2="68" stroke="rgba(255,255,255,0.2)" stroke-width="3"/>
+    </svg>`,
     pasos: [
       "En posición de plancha alta con manos alineadas a hombros.",
       "Baja todo el cuerpo recto hasta rozar el suelo con el pecho.",
@@ -395,7 +407,11 @@ const EXERCISE_GUIDES = {
     tip: "No dejes caer la cadera; mantén los glúteos apretados durante toda la repetición."
   },
   "Plancha abdominal": {
-    gif: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHp1cWdpbmNyc3J5ZXE0ZTVid2dqYmo1dmE1cWdneGNia2tyaDRmOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xT8qBff8cRRFf7k10c/giphy.gif",
+    svg: `<svg viewBox="0 0 100 100" width="100" height="100">
+      <circle cx="22" cy="48" r="8" fill="#a78bfa"/>
+      <path d="M30 52 L82 52 M35 52 L35 68 M80 52 L80 68" stroke="#10b981" stroke-width="5" stroke-linecap="round" fill="none"/>
+      <line x1="15" y1="70" x2="85" y2="70" stroke="rgba(255,255,255,0.2)" stroke-width="3"/>
+    </svg>`,
     pasos: [
       "Apoya los antebrazos y las puntas de los pies en el suelo.",
       "Coloca los codos justo debajo de los hombros y mantén la espalda plana.",
@@ -406,7 +422,11 @@ const EXERCISE_GUIDES = {
     tip: "Si sientes molestia en la zona lumbar, eleva un poco la cadera."
   },
   "Zancadas alternas": {
-    gif: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMnB2MmQ3cHE1dGt2a3o3OHk5NmdkOGl5NmRxODRqbnRyc2RiaWZyOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o6ZtqO0FkG0Q3g6lW/giphy.gif",
+    svg: `<svg viewBox="0 0 100 100" width="100" height="100">
+      <circle cx="50" cy="20" r="8" fill="#a78bfa"/>
+      <path d="M50 28 L50 50 M50 50 L35 50 L35 78 M50 50 L70 65 L70 78 M50 38 L35 45 M50 38 L65 45" stroke="#10b981" stroke-width="5" stroke-linecap="round" fill="none"/>
+      <line x1="15" y1="82" x2="85" y2="82" stroke="rgba(255,255,255,0.2)" stroke-width="3"/>
+    </svg>`,
     pasos: [
       "De pie, da un paso largo hacia adelante con una pierna.",
       "Baja el cuerpo perpendicularmente hasta que ambas rodillas queden en 90°.",
@@ -416,7 +436,11 @@ const EXERCISE_GUIDES = {
     tip: "Mantén el torso recto en todo momento sin inclinarte hacia adelante."
   },
   "Puente de glúteos": {
-    gif: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdWp3dWV0OWZldWR2Z3hsa2Zxc3psaGl4cjh4NWNmNWxldms2Z2dsaSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKT7z6nQ6zNq972/giphy.gif",
+    svg: `<svg viewBox="0 0 100 100" width="100" height="100">
+      <circle cx="22" cy="65" r="8" fill="#a78bfa"/>
+      <path d="M30 65 L55 45 L78 68 M78 68 L78 78 M30 65 L20 78" stroke="#10b981" stroke-width="5" stroke-linecap="round" fill="none"/>
+      <line x1="10" y1="80" x2="90" y2="80" stroke="rgba(255,255,255,0.2)" stroke-width="3"/>
+    </svg>`,
     pasos: [
       "Túmbate boca arriba con rodillas flexionadas y pies apoyados.",
       "Empuja con los talones y eleva las caderas apretando los glúteos arriba.",
@@ -424,26 +448,6 @@ const EXERCISE_GUIDES = {
     ],
     musculos: "Glúteos y Isquiotibiales",
     tip: "La elevación debe nacer exclusivamente de los glúteos, sin arquear la zona lumbar."
-  },
-  "Mountain climbers": {
-    gif: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNzYydWF6MGtkMWgwdzU2cnkxeGdpam1ncm5uOW5rdnhyZWdxcXo3MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l3vR85PnGiHnOK8b6/giphy.gif",
-    pasos: [
-      "Comienza en posición de plancha con brazos extendidos.",
-      "Lleva una rodilla hacia el pecho a ritmo rápido y alterna con la otra pierna.",
-      "Mantén las caderas bajas y los hombros alineados con las muñecas."
-    ],
-    musculos: "Abdomen, Hombros y Cardio",
-    tip: "Mantén un ritmo constante sin subir demasiado la cadera."
-  },
-  "Burpees": {
-    gif: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdW5vdHlpaXgxaGVmdzhkZWVxZWVxeTB3aGtzdnkybzJrdnhrcnQyYSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/23hPPMRgPxbNBlPQe3/giphy.gif",
-    pasos: [
-      "Desde posición de pie, apoya las manos en el suelo y salta a plancha.",
-      "Realiza una flexión tocando el suelo con el pecho.",
-      "Salto de vuelta con los pies hacia las manos y salto explosivo arriba."
-    ],
-    musculos: "Cuerpo entero & Resistencia cardiovascular",
-    tip: "Si te resulta muy intenso, hazlo sin flexión o sin el salto final."
   }
 };
 
@@ -453,7 +457,10 @@ function abrirModalEjercicio(dia, tipoEj, index) {
 
   const ej = datos.ejercicios[index];
   const guide = EXERCISE_GUIDES[ej.nombre] || {
-    gif: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3YxeW5qZWV0NmFsOTZ5MXYzb2pnbDFodjhvbm05ZTFzeTFxNmsxYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/13hxeOYEO5qOMM/giphy.gif",
+    svg: `<svg viewBox="0 0 100 100" width="100" height="100">
+      <circle cx="50" cy="30" r="10" fill="#a78bfa"/>
+      <path d="M50 40 L50 65 M50 65 L35 85 M50 65 L65 85 M50 50 L30 60 M50 50 L70 60" stroke="#10b981" stroke-width="5" stroke-linecap="round" fill="none"/>
+    </svg>`,
     pasos: [
       `Posiciona tu cuerpo en forma correcta para realizar ${ej.nombre.toLowerCase()}.`,
       `Ejecuta la fase concéntrica de forma fluida y manten el control del movimiento.`,
@@ -464,18 +471,11 @@ function abrirModalEjercicio(dia, tipoEj, index) {
     tip: ej.descripcion || "Mantén la técnica limpia y detén la repetición si sientes molestias."
   };
 
-  const imgGif = document.getElementById('ex-modal-gif');
-  const animEmoji = document.getElementById('ex-modal-animation');
+  const svgContainer = document.getElementById('ex-modal-animation');
+  svgContainer.innerHTML = guide.svg;
+  svgContainer.style.display = 'block';
 
-  if (guide.gif) {
-    imgGif.src = guide.gif;
-    imgGif.style.display = 'block';
-    animEmoji.style.display = 'none';
-  } else {
-    imgGif.style.display = 'none';
-    animEmoji.textContent = ej.emoji;
-    animEmoji.style.display = 'block';
-  }
+  document.getElementById('ex-modal-gif').style.display = 'none';
 
   document.getElementById('ex-modal-title').textContent = ej.nombre;
   document.getElementById('ex-modal-series-reps').textContent = `${ej.series} series × ${ej.reps}`;
