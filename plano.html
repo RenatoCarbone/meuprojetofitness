@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mi Plan de 30 Días — MiPlanFit</title>
+  <meta name="description" content="Tu plan de alimentación mediterráneo personalizado de 30 días. Menús diarios, ejercicios y seguimiento de racha."/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    /* ── Cabecera del plan ── */
+    .plan-header {
+      padding: 32px 0 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 32px;
+    }
+
+    .plan-header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .plan-header-info h1 {
+      font-size: 1.6rem;
+      font-weight: 900;
+    }
+
+    .plan-header-info p {
+      font-size: 0.9rem;
+      margin-top: 4px;
+    }
+
+    /* ── Streak card ── */
+    .streak-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+
+    .streak-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      min-width: 70px;
+    }
+
+    .streak-value {
+      font-size: 2rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .streak-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      text-align: center;
+    }
+
+    .streak-divider {
+      width: 1px;
+      height: 40px;
+      background: var(--border);
+    }
+
+    .streak-fire { color: var(--amber); }
+    .streak-green { color: var(--green); }
+    .streak-purple { color: var(--purple-light); }
+
+    /* Progress bar general */
+    .global-progress {
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .global-progress-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.82rem;
+    }
+
+    /* ── Calendario de 30 días ── */
+    .calendar-section {
+      margin-bottom: 36px;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .day-cell {
+      aspect-ratio: 1;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--bg-card);
+      position: relative;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      gap: 2px;
+    }
+
+    .day-cell:hover {
+      border-color: var(--purple);
+      color: var(--purple-light);
+      transform: scale(1.05);
+    }
+
+    .day-cell.completed {
+      background: rgba(16,185,129,0.12);
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .day-cell.completed::after {
+      content: '✓';
+      position: absolute;
+      top: 2px;
+      right: 4px;
+      font-size: 0.6rem;
+      color: var(--green);
+    }
+
+    .day-cell.active {
+      border-color: var(--purple);
+      background: rgba(124,58,237,0.12);
+      color: var(--purple-light);
+      box-shadow: 0 0 16px rgba(124,58,237,0.3);
+    }
+
+    .day-cell.active::before {
+      content: '▶';
+      position: absolute;
+      top: 2px;
+      left: 4px;
+      font-size: 0.5rem;
+      color: var(--purple-light);
+    }
+
+    .day-num { font-size: 0.9rem; font-weight: 700; }
+    .day-emoji { font-size: 0.7rem; line-height: 1; }
+
+    /* ── Día actual ── */
+    .current-day-section {
+      margin-bottom: 36px;
+    }
+
+    .day-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .day-nav-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .day-nav-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .day-nav-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+
+    .day-nav-btn:hover { border-color: var(--purple); color: var(--purple-light); }
+    .day-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* Comidas del día */
+    .meals-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .meal-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      transition: all 0.25s;
+      position: relative;
+      backdrop-filter: blur(12px);
+    }
+    .meal-card:hover {
+      border-color: var(--purple);
+      background: rgba(124,58,237,0.08);
+      transform: translateY(-2px);
+    }
+
+    .meal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .meal-type {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--purple-light);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .meal-cal {
+      font-size: 0.75rem;
+      color: var(--amber);
+      background: rgba(245,158,11,0.12);
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+      border: 1px solid rgba(245,158,11,0.25);
+    }
+
+    .meal-name {
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+
+    .meal-ingredients {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .meal-ingredients li {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.5;
+    }
+
+    .meal-ingredients li::before {
+      content: '·';
+      color: var(--green-light);
+      font-weight: 900;
+      font-size: 1rem;
+      flex-shrink: 0;
+      line-height: 1.4;
+    }
+
+    .meal-swap-btn {
+      margin-top: 14px;
+      padding: 7px 14px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.04);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .meal-swap-btn:hover {
+      border-color: var(--amber);
+      color: var(--amber);
+      background: rgba(245,158,11,0.08);
+    }
+
+    .meal-card.full-width { grid-column: 1 / -1; }
+
+    /* ── Ejercicios ── */
+    .exercise-section {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      margin-bottom: 24px;
+      backdrop-filter: blur(12px);
+    }
+
+    .exercise-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .exercise-header h3 { font-size: 1.05rem; }
+
+    .rest-day {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .rest-day-emoji { font-size: 3rem; margin-bottom: 10px; display: block; }
+
+    .exercise-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .exercise-item {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      transition: border-color 0.2s;
+    }
+    .exercise-item:hover { border-color: rgba(124,58,237,0.4); }
+
+    .exercise-emoji  { font-size: 1.6rem; margin-bottom: 8px; display: block; }
+    .exercise-name   { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; color: var(--text-primary); }
+    .exercise-detail { font-size: 0.82rem; color: var(--amber); font-weight: 700; margin-bottom: 6px; }
+    .exercise-desc   { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; }
+
+    /* ── Botón marcar día ── */
+    .mark-day-section {
+      background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(16,185,129,0.05));
+      border: 1px solid rgba(16,185,129,0.3);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      text-align: center;
+      margin-bottom: 60px;
+      backdrop-filter: blur(12px);
+    }
+
+    .mark-day-section h3 { margin-bottom: 8px; }
+    .mark-day-section p { margin-bottom: 20px; font-size: 0.9rem; }
+
+    .mark-day-btn {
+      padding: 16px 36px;
+      font-size: 1.05rem;
+    }
+
+    .day-completed-msg {
+      display: none;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--green);
+      animation: fadeInUp 0.4s ease;
+    }
+
+    /* ── Logros ── */
+    .logros-section {
+      margin-bottom: 48px;
+    }
+
+    .logros-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .logro-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      text-align: center;
+      transition: all 0.25s;
+      backdrop-filter: blur(8px);
+    }
+    .logro-card.unlocked {
+      border-color: rgba(245,158,11,0.5);
+      background: rgba(245,158,11,0.1);
+      box-shadow: 0 0 20px rgba(245,158,11,0.15);
+    }
+    .logro-card.locked { opacity: 0.35; filter: grayscale(1); }
+
+    .logro-emoji { font-size: 1.8rem; margin-bottom: 6px; display: block; }
+    .logro-name { font-size: 0.8rem; font-weight: 600; color: var(--text-primary); }
+    .logro-desc { font-size: 0.72rem; color: var(--text-muted); margin-top: 3px; }
+
+    /* ── Celebración 30 días ── */
+    .celebration-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(7,7,17,0.96);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 20px;
+      text-align: center;
+      padding: 24px;
+      backdrop-filter: blur(16px);
+    }
+    .celebration-overlay.show { display: flex; }
+
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      animation: confetti-fall linear forwards;
+      pointer-events: none;
+    }
+
+    /* ── Swap modal ── */
+    .swap-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(7,7,17,0.85);
+      z-index: 998;
+      align-items: flex-end;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+    }
+
+    .swap-modal.show { display: flex; }
+
+    .swap-panel {
+      background: #121223;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+      padding: 28px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 70vh;
+      overflow-y: auto;
+      animation: fadeInUp 0.3s ease;
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.6);
+      color: var(--text-primary);
+    }
+
+    .swap-panel h3 { margin-bottom: 18px; color: var(--text-primary); }
+
+    .swap-option {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      transition: all 0.2s;
+    }
+
+    .swap-option:hover {
+      border-color: var(--purple);
+      background: rgba(124,58,237,0.12);
+    }
+
+    .swap-option-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; color: var(--text-primary); }
+    .swap-option-cal { font-size: 0.8rem; color: var(--amber); font-weight: 600; }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .calendar-grid { grid-template-columns: repeat(6, 1fr); }
+      .meals-grid { grid-template-columns: 1fr; }
+      .meal-card.full-width { grid-column: unset; }
+      .streak-panel { gap: 14px; }
+      .plan-header-inner { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="container">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-brand">
+        <div class="navbar-logo">🥗</div>
+        <span class="navbar-title">MiPlanFit</span>
+      </a>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div id="nav-plan-badge" class="badge badge-purple">Plan B — Moderado</div>
+        <div id="user-info" style="display:none;align-items:center;gap:8px;">
+          <img id="user-avatar" src="" alt="" width="28" height="28"
+            style="border-radius:50%;border:2px solid rgba(124,58,237,0.5);" onerror="this.style.display='none'">
+          <span id="user-name" style="font-size:0.8rem;color:var(--text-secondary);font-weight:600;"></span>
+        </div>
+        <button onclick="logout()" class="btn btn-outline btn-sm" style="font-size:0.8rem;padding:6px 14px;">
+          🚪 Salir
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Header del plan ── -->
+<div class="container">
+  <div class="plan-header">
+    <div class="plan-header-inner">
+      <div class="plan-header-info">
+        <h1>👋 <span id="header-nombre">Tu</span> Plan de <span class="gradient-text">30 Días</span></h1>
+        <p id="header-objetivo">Cargando tu plan personalizado...</p>
+      </div>
+      <a href="resultado.html" class="btn btn-outline btn-sm">← Ver resultado</a>
+    </div>
+  </div>
+
+  <!-- ── Streak panel ── -->
+  <div class="streak-panel">
+    <div class="streak-item">
+      <div class="streak-value streak-fire">🔥 <span id="streak-actual">0</span></div>
+      <div class="streak-label">Racha actual</div>
+    </div>
+    <div class="streak-divider"></div>
+    <div class="streak-item">
+      <div class="streak-value streak-green" id="dias-completados">0</div>
+      <div class="streak-label">Días completados</div>
+    </div>
+    <div class="streak-divider"></div>
+    <div class="streak-item">
+      <div class="streak-value streak-purple" id="max-streak">0</div>
+      <div class="streak-label">Máxima racha</div>
+    </div>
+    <div class="streak-divider"></div>
+    <div class="global-progress">
+      <div class="global-progress-label">
+        <span>Progreso total</span>
+        <span id="progress-pct">0%</span>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+      </div>
+      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:6px;">
+        <span id="dias-restantes">30 días restantes</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Calendario ── -->
+  <div class="calendar-section">
+    <h3>📅 Tu calendario de 30 días</h3>
+    <div class="calendar-grid" id="calendar-grid">
+      <!-- generado por JS -->
+    </div>
+  </div>
+
+  <!-- ── Día actual ── -->
+  <div class="current-day-section">
+    <div class="day-nav">
+      <div class="day-nav-title">
+        <span id="day-emoji-title">🍽️</span>
+        <span id="day-title">Día 1</span>
+      </div>
+      <div class="day-nav-btns">
+        <button class="day-nav-btn" id="btn-prev-day" onclick="changeDay(-1)" disabled>‹</button>
+        <button class="day-nav-btn" id="btn-next-day" onclick="changeDay(1)">›</button>
+      </div>
+    </div>
+
+    <!-- Calorias del día -->
+    <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
+      <span class="badge badge-amber" id="cal-total-badge">~1500 kcal</span>
+      <span class="badge badge-purple" id="semana-badge">Semana 1</span>
+    </div>
+
+    <!-- Comidas -->
+    <div class="meals-grid" id="meals-container">
+      <!-- generado por JS -->
+    </div>
+  </div>
+
+  <!-- ── Ejercicios ── -->
+  <div class="exercise-section" id="exercise-section" style="display:none;">
+    <div class="exercise-header">
+      <h3>🏋️ Ejercicios del día</h3>
+      <span class="badge badge-green" id="exercise-type-badge">En casa</span>
+    </div>
+    <div id="exercise-container">
+      <!-- generado por JS -->
+    </div>
+  </div>
+
+  <!-- ── Marcar día ── -->
+  <div class="mark-day-section" id="mark-day-section">
+    <h3>¿Completaste este día? 💪</h3>
+    <p>Marca el día como completado para mantener tu racha y desbloquear logros.</p>
+    <button class="btn btn-green btn-lg mark-day-btn" id="btn-mark-day" onclick="marcarDia()">
+      ✅ ¡Día completado!
+    </button>
+    <div class="day-completed-msg" id="day-completed-msg">
+      🎉 ¡Perfecto! Racha: <span id="racha-msg">0</span> días 🔥
+    </div>
+  </div>
+
+  <!-- ── Logros ── -->
+  <div class="logros-section">
+    <h3>🏆 Tus logros</h3>
+    <div class="logros-grid" id="logros-grid">
+      <!-- generado por JS -->
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Swap Modal ── -->
+<div class="swap-modal" id="swap-modal">
+  <div class="swap-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <h3>🔄 Cambiar alimento</h3>
+      <button onclick="closeSwapModal()" style="background:none;border:none;color:var(--text-muted);font-size:1.4rem;cursor:pointer;">✕</button>
+    </div>
+    <p style="font-size:0.85rem;margin-bottom:16px;">Selecciona una alternativa:</p>
+    <div id="swap-options">
+      <!-- generado por JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ── Celebración ── -->
+<div class="celebration-overlay" id="celebration-overlay">
+  <div style="font-size:4rem; animation: bounce-gentle 1s infinite;">🏆</div>
+  <h1 class="gradient-text">¡30 Días Completados!</h1>
+  <p style="font-size:1.1rem;max-width:400px;text-align:center;">Has completado tu plan de 30 días. ¡Eres increíble! ¿Quieres seguir?</p>
+  <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:10px;">
+    <button class="btn btn-amber btn-lg" onclick="reiniciarPlan()">🔄 Repetir el plan</button>
+    <a href="index.html" class="btn btn-outline">Crear nuevo perfil</a>
+  </div>
+</div>
+
+<script src="data/recipes.js"></script>
+<script src="data/exercises.js"></script>
+<script src="data/plans.js"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/streak.js"></script>
+<script src="js/plano.js"></script>
+</body>
+</html>

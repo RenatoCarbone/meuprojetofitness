@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tu Plan Recomendado — MiPlanFit</title>
+  <meta name="description" content="Aquí está tu plan de alimentación mediterráneo personalizado. ¡Empieza tu transformación hoy!"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    .result-hero {
+      padding: 60px 0 40px;
+      text-align: center;
+    }
+
+    .welcome-msg {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    /* Plan card grande */
+    .plan-showcase {
+      background: rgba(255,255,255,0.04);
+      border-radius: var(--radius-xl);
+      padding: 36px;
+      margin: 32px 0;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+    .plan-showcase::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--plan-grad);
+      opacity: 0.12;
+      z-index: 0;
+    }
+    .plan-showcase-inner { position: relative; z-index: 1; }
+
+    .plan-emoji {
+      font-size: 4rem;
+      margin-bottom: 16px;
+      display: block;
+      animation: bounce-gentle 2s infinite;
+    }
+
+    .plan-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      border: 1px solid;
+    }
+
+    .plan-name {
+      font-size: 2.3rem;
+      font-weight: 900;
+      margin-bottom: 8px;
+      color: #ffffff;
+    }
+
+    .plan-subtitle {
+      color: var(--purple-light);
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .plan-desc {
+      color: var(--text-primary);
+      font-size: 0.98rem;
+      max-width: 520px;
+      line-height: 1.7;
+      opacity: 0.95;
+    }
+
+    .plan-features-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .plan-features-list li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .plan-features-list li::before {
+      content: '✓';
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(16,185,129,0.2);
+      color: var(--green-light);
+      font-size: 0.75rem;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+
+    /* Métricas */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 32px 0;
+    }
+
+    .metric-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      text-align: center;
+      backdrop-filter: blur(12px);
+    }
+
+    .metric-value {
+      font-size: 1.8rem;
+      font-weight: 900;
+      margin-bottom: 4px;
+    }
+
+    .metric-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .metric-sub {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* IMC progress */
+    .imc-bar-container {
+      margin: 8px 0 4px;
+      background: linear-gradient(90deg, #3b82f6 0%, #10b981 25%, #f59e0b 60%, #ef4444 100%);
+      border-radius: 999px;
+      height: 8px;
+      position: relative;
+    }
+
+    .imc-marker {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 16px;
+      height: 16px;
+      background: white;
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(255,255,255,0.5);
+      transition: left 1s ease;
+    }
+
+    /* Otros planes */
+    .other-plans {
+      padding: 40px 0;
+    }
+
+    .plans-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .mini-plan-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.25s;
+      text-align: left;
+      backdrop-filter: blur(12px);
+    }
+    .mini-plan-card:hover {
+      border-color: var(--purple);
+      background: rgba(124,58,237,0.1);
+      transform: translateY(-2px);
+    }
+    .mini-plan-card.selected {
+      border-color: var(--purple);
+      box-shadow: 0 0 20px rgba(124,58,237,0.3);
+      background: rgba(124,58,237,0.15);
+    }
+
+    .mini-plan-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .mini-plan-emoji { font-size: 1.5rem; }
+    .mini-plan-name { font-weight: 700; font-size: 1rem; }
+    .mini-plan-sub { font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px; }
+
+    /* CTA final */
+    .cta-section {
+      background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(16,185,129,0.05));
+      border: 1px solid rgba(16,185,129,0.3);
+      border-radius: var(--radius-xl);
+      padding: 40px;
+      text-align: center;
+      margin: 40px 0 60px;
+      backdrop-filter: blur(12px);
+    }
+
+    .cta-section h2 { margin-bottom: 12px; }
+    .cta-section p { margin-bottom: 28px; }
+
+    .cta-buttons {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 640px) {
+      .metrics-grid { grid-template-columns: 1fr 1fr; }
+      .plans-grid { grid-template-columns: 1fr; }
+      .plan-showcase { padding: 28px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="container">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-brand">
+        <div class="navbar-logo">🥗</div>
+        <span class="navbar-title">MiPlanFit</span>
+      </a>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div id="user-info" style="display:none;align-items:center;gap:10px;">
+          <img id="user-avatar" src="" alt="" width="32" height="32"
+            style="border-radius:50%;border:2px solid rgba(124,58,237,0.5);" onerror="this.style.display='none'">
+          <span id="user-name" style="font-size:0.85rem;color:var(--text-secondary);font-weight:600;"></span>
+        </div>
+        <button onclick="logout()" class="btn btn-outline btn-sm" style="font-size:0.8rem;padding:6px 14px;">
+          🚪 Salir
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div id="app-container">
+
+  <section class="result-hero">
+    <div class="container-sm">
+      <p class="welcome-msg" id="welcome-msg">¡Hola! Tu análisis está listo 🎉</p>
+      <h1>Tu <span class="gradient-text" id="plan-title">Plan Recomendado</span></h1>
+    </div>
+  </section>
+
+  <div class="container-sm">
+
+    <!-- Plan showcase -->
+    <div class="plan-showcase card-glow anim-fadeInUp" id="plan-showcase">
+      <div class="plan-showcase-inner">
+        <div style="display:flex; flex-wrap:wrap; gap:40px; align-items:flex-start;">
+          <div style="flex:1; min-width:260px;">
+            <span class="plan-emoji" id="plan-emoji">🌿</span>
+            <div class="plan-badge" id="plan-badge">Plan A</div>
+            <div class="plan-name" id="plan-name">Plan Ligero</div>
+            <div class="plan-subtitle" id="plan-subtitle">Pérdida gradual y sostenible</div>
+            <p class="plan-desc" id="plan-desc">Cargando descripción...</p>
+            <ul class="plan-features-list" id="plan-features"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Métricas -->
+    <h3 style="margin-bottom:8px;">📊 Tus métricas personales</h3>
+    <div class="metrics-grid anim-fadeInUp delay-2">
+      <div class="metric-card">
+        <div class="metric-value gradient-text" id="metric-imc">—</div>
+        <div class="metric-label">IMC</div>
+        <div class="metric-sub" id="metric-imc-class">—</div>
+        <div style="margin-top:12px;">
+          <div class="imc-bar-container">
+            <div class="imc-marker" id="imc-marker" style="left:0%"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:4px;">
+            <span style="font-size:0.65rem;color:var(--text-muted);">Bajo</span>
+            <span style="font-size:0.65rem;color:var(--text-muted);">Normal</span>
+            <span style="font-size:0.65rem;color:var(--text-muted);">Sobre</span>
+            <span style="font-size:0.65rem;color:var(--text-muted);">Obesidad</span>
+          </div>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value gradient-text-amber" id="metric-tmb">—</div>
+        <div class="metric-label">TMB</div>
+        <div class="metric-sub">kcal/día en reposo</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" style="color:var(--purple-light);" id="metric-tdee">—</div>
+        <div class="metric-label">TDEE</div>
+        <div class="metric-sub">kcal/día totales</div>
+      </div>
+    </div>
+
+    <!-- Otros planes -->
+    <section class="other-plans anim-fadeInUp delay-3">
+      <h3>¿Quieres elegir otro plan?</h3>
+      <p style="margin-top:6px; font-size:0.9rem;">Puedes seleccionar el que mejor se adapte a ti.</p>
+      <div class="plans-grid" id="plans-grid">
+        <!-- generado por JS -->
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <div class="cta-section anim-fadeInUp delay-4">
+      <h2>¿Listo para empezar? 💪</h2>
+      <p>Accede a tu plan completo de 30 días con todos los menús, ejercicios y seguimiento de racha.</p>
+      <div class="cta-buttons">
+        <button class="btn btn-green btn-lg" id="btn-aceptar">
+          🚀 ¡Empezar mi plan ahora!
+        </button>
+        <a href="index.html" class="btn btn-outline">
+          Recalcular perfil
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="data/recipes.js"></script>
+<script src="data/exercises.js"></script>
+<script src="data/plans.js"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/resultado.js"></script>
+</body>
+</html>
