@@ -373,7 +373,8 @@ p { color: var(--text-secondary); }
   .btn-sm { padding: 8px 14px; font-size: 0.8rem; }
 
   /* Forms */
-  .radio-group, .check-group { flex-direction: column; }
+  .check-group { flex-direction: column; }
+  .radio-group { flex-wrap: wrap; gap: 8px; }
   .radio-option label, .check-option label {
     font-size: 0.85rem;
     white-space: normal;
