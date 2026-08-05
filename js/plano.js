@@ -360,14 +360,42 @@ function renderEjercicios(dia, tipoEj) {
   }
 }
 
-// ─── Modal Guía de Ejercicio con ilustraciones animadas ───
+// ─── Modal Guía de Ejercicio con imagens IA do usuário ───
+const EXERCISE_IMAGES = {
+  "Sentadillas": "img/ejercicios en casa/Sentadillas (Squats).png",
+  "Sentadillas sumo": "img/ejercicios en casa/Sentadillas (Squats).png",
+  "Sentadilla + salto": "img/ejercicios en casa/Sentadillas (Squats).png",
+  "Pistol squat asistido": "img/ejercicios en casa/Sentadillas (Squats).png",
+  "Sentadilla búlgara": "img/ejercicios en casa/Sentadillas (Squats).png",
+
+  "Flexiones de rodillas": "img/ejercicios en casa/Flexiones (Push-Ups).png",
+  "Flexiones completas": "img/ejercicios en casa/Flexiones (Push-Ups).png",
+  "Flexiones diamante": "img/ejercicios en casa/Flexiones (Push-Ups).png",
+  "Pike push-up": "img/ejercicios en casa/Flexiones (Push-Ups).png",
+
+  "Plancha abdominal": "img/ejercicios en casa/Plancha Abdominal (Plank).png",
+  "Plancha lateral": "img/ejercicios en casa/Plancha Abdominal (Plank).png",
+  "Plancha con toque de hombro": "img/ejercicios en casa/Plancha Abdominal (Plank).png",
+  "Plancha + remo": "img/ejercicios en casa/Plancha Abdominal (Plank).png",
+
+  "Zancadas alternas": "img/ejercicios en casa/Zancadas (Lunges).png",
+  "Reverse lunges": "img/ejercicios en casa/Zancadas (Lunges).png",
+
+  "Puente de glúteos": "img/ejercicios en casa/Puente de Glúteos (Glute Bridge).png",
+  "Hip thrust": "img/ejercicios en casa/Puente de Glúteos (Glute Bridge).png",
+
+  "Mountain climbers": "img/ejercicios en casa/Mountain Climbers.png",
+  "Tijeras de piernas": "img/ejercicios en casa/Mountain Climbers.png",
+  "Abdominales bicicleta": "img/ejercicios en casa/Mountain Climbers.png",
+
+  "Burpees": "img/ejercicios en casa/Burpees.png",
+  "Burpee modificado": "img/ejercicios en casa/Burpees.png",
+  "Burpee completo": "img/ejercicios en casa/Burpees.png",
+  "Circuito HIIT 20/10": "img/ejercicios en casa/Burpees.png"
+};
+
 const EXERCISE_GUIDES = {
   "Sentadillas": {
-    svg: `<svg viewBox="0 0 100 100" width="100" height="100">
-      <circle cx="50" cy="22" r="8" fill="#a78bfa"/>
-      <path d="M50 30 L50 55 M50 55 L38 82 M50 55 L62 82 M50 42 L32 52 M50 42 L68 52" stroke="#10b981" stroke-width="5" stroke-linecap="round" fill="none"/>
-      <line x1="20" y1="88" x2="80" y2="88" stroke="rgba(255,255,255,0.2)" stroke-width="3"/>
-    </svg>`,
     pasos: [
       "Coloca los pies al ancho de las caderas con las puntas ligeramente hacia afuera.",
       "Mantén el pecho erguido y el abdomen bien contraído.",
@@ -378,11 +406,6 @@ const EXERCISE_GUIDES = {
     tip: "Asegúrate de que tus rodillas sigan la dirección de tus pies sin meterse hacia adentro."
   },
   "Flexiones de rodillas": {
-    svg: `<svg viewBox="0 0 100 100" width="100" height="100">
-      <circle cx="25" cy="40" r="8" fill="#a78bfa"/>
-      <path d="M32 45 L65 55 L80 70 M45 49 L40 68 M48 50 L45 68" stroke="#10b981" stroke-width="5" stroke-linecap="round" fill="none"/>
-      <line x1="15" y1="72" x2="85" y2="72" stroke="rgba(255,255,255,0.2)" stroke-width="3"/>
-    </svg>`,
     pasos: [
       "Apoya las manos al ancho de los hombros y las rodillas apoyadas atrás.",
       "Mantén el cuerpo firme formando una línea recta desde cabeza a rodillas.",
@@ -393,11 +416,6 @@ const EXERCISE_GUIDES = {
     tip: "Mantén los codos en un ángulo de 45° con el cuerpo, evitando abrirlos demasiado."
   },
   "Flexiones completas": {
-    svg: `<svg viewBox="0 0 100 100" width="100" height="100">
-      <circle cx="22" cy="38" r="8" fill="#a78bfa"/>
-      <path d="M30 42 L80 52 M40 44 L38 65 M44 45 L42 65" stroke="#10b981" stroke-width="5" stroke-linecap="round" fill="none"/>
-      <line x1="15" y1="68" x2="85" y2="68" stroke="rgba(255,255,255,0.2)" stroke-width="3"/>
-    </svg>`,
     pasos: [
       "En posición de plancha alta con manos alineadas a hombros.",
       "Baja todo el cuerpo recto hasta rozar el suelo con el pecho.",
@@ -407,11 +425,6 @@ const EXERCISE_GUIDES = {
     tip: "No dejes caer la cadera; mantén los glúteos apretados durante toda la repetición."
   },
   "Plancha abdominal": {
-    svg: `<svg viewBox="0 0 100 100" width="100" height="100">
-      <circle cx="22" cy="48" r="8" fill="#a78bfa"/>
-      <path d="M30 52 L82 52 M35 52 L35 68 M80 52 L80 68" stroke="#10b981" stroke-width="5" stroke-linecap="round" fill="none"/>
-      <line x1="15" y1="70" x2="85" y2="70" stroke="rgba(255,255,255,0.2)" stroke-width="3"/>
-    </svg>`,
     pasos: [
       "Apoya los antebrazos y las puntas de los pies en el suelo.",
       "Coloca los codos justo debajo de los hombros y mantén la espalda plana.",
@@ -422,11 +435,6 @@ const EXERCISE_GUIDES = {
     tip: "Si sientes molestia en la zona lumbar, eleva un poco la cadera."
   },
   "Zancadas alternas": {
-    svg: `<svg viewBox="0 0 100 100" width="100" height="100">
-      <circle cx="50" cy="20" r="8" fill="#a78bfa"/>
-      <path d="M50 28 L50 50 M50 50 L35 50 L35 78 M50 50 L70 65 L70 78 M50 38 L35 45 M50 38 L65 45" stroke="#10b981" stroke-width="5" stroke-linecap="round" fill="none"/>
-      <line x1="15" y1="82" x2="85" y2="82" stroke="rgba(255,255,255,0.2)" stroke-width="3"/>
-    </svg>`,
     pasos: [
       "De pie, da un paso largo hacia adelante con una pierna.",
       "Baja el cuerpo perpendicularmente hasta que ambas rodillas queden en 90°.",
@@ -436,11 +444,6 @@ const EXERCISE_GUIDES = {
     tip: "Mantén el torso recto en todo momento sin inclinarte hacia adelante."
   },
   "Puente de glúteos": {
-    svg: `<svg viewBox="0 0 100 100" width="100" height="100">
-      <circle cx="22" cy="65" r="8" fill="#a78bfa"/>
-      <path d="M30 65 L55 45 L78 68 M78 68 L78 78 M30 65 L20 78" stroke="#10b981" stroke-width="5" stroke-linecap="round" fill="none"/>
-      <line x1="10" y1="80" x2="90" y2="80" stroke="rgba(255,255,255,0.2)" stroke-width="3"/>
-    </svg>`,
     pasos: [
       "Túmbate boca arriba con rodillas flexionadas y pies apoyados.",
       "Empuja con los talones y eleva las caderas apretando los glúteos arriba.",
@@ -457,10 +460,6 @@ function abrirModalEjercicio(dia, tipoEj, index) {
 
   const ej = datos.ejercicios[index];
   const guide = EXERCISE_GUIDES[ej.nombre] || {
-    svg: `<svg viewBox="0 0 100 100" width="100" height="100">
-      <circle cx="50" cy="30" r="10" fill="#a78bfa"/>
-      <path d="M50 40 L50 65 M50 65 L35 85 M50 65 L65 85 M50 50 L30 60 M50 50 L70 60" stroke="#10b981" stroke-width="5" stroke-linecap="round" fill="none"/>
-    </svg>`,
     pasos: [
       `Posiciona tu cuerpo en forma correcta para realizar ${ej.nombre.toLowerCase()}.`,
       `Ejecuta la fase concéntrica de forma fluida y manten el control del movimiento.`,
@@ -471,11 +470,19 @@ function abrirModalEjercicio(dia, tipoEj, index) {
     tip: ej.descripcion || "Mantén la técnica limpia y detén la repetición si sientes molestias."
   };
 
-  const svgContainer = document.getElementById('ex-modal-animation');
-  svgContainer.innerHTML = guide.svg;
-  svgContainer.style.display = 'block';
+  const imgGif = document.getElementById('ex-modal-gif');
+  const animEmoji = document.getElementById('ex-modal-animation');
+  const imagePath = EXERCISE_IMAGES[ej.nombre];
 
-  document.getElementById('ex-modal-gif').style.display = 'none';
+  if (imagePath) {
+    imgGif.src = imagePath;
+    imgGif.style.display = 'block';
+    animEmoji.style.display = 'none';
+  } else {
+    imgGif.style.display = 'none';
+    animEmoji.innerHTML = `<svg viewBox="0 0 100 100" width="80" height="80"><circle cx="50" cy="30" r="10" fill="#a78bfa"/><path d="M50 40 L50 65 M50 65 L35 85 M50 65 L65 85" stroke="#10b981" stroke-width="5" fill="none"/></svg>`;
+    animEmoji.style.display = 'block';
+  }
 
   document.getElementById('ex-modal-title').textContent = ej.nombre;
   document.getElementById('ex-modal-series-reps').textContent = `${ej.series} series × ${ej.reps}`;
