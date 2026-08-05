@@ -8,6 +8,14 @@ let plan30 = null;
 let planId = 'B';
 let swapTarget = null; // { dia, tipoComida }
 
+// ─── Premium config ───
+const FREE_DAYS  = 3;
+const PAYWALL_URL = 'https://miplanfit.lemonsqueezy.com/buy/placeholder';
+
+function isPremium() {
+  return localStorage.getItem('miplanfit_premium') === 'true';
+}
+
 document.addEventListener('DOMContentLoaded', async function () {
 
   // ─── 1. Verificar sesión ───
@@ -88,6 +96,13 @@ document.addEventListener('DOMContentLoaded', async function () {
   renderCalendario(estado, nombre);
   renderDia(diaAtual);
   renderLogros(estado);
+
+  // Mostrar CTA flotante si no es premium
+  if (!isPremium()) {
+    document.getElementById('floating-premium').style.display = 'flex';
+    // Ajustar padding do body para nao ficar atras do CTA
+    document.body.style.paddingBottom = '70px';
+  }
 });
 
 // ─── Primer día pendiente ───
@@ -124,8 +139,9 @@ function renderCalendario(estado, nombre) {
     const cell = document.createElement('div');
     const completado = estado.diasCompletados.includes(d);
     const esDiaActual = d === diaAtual;
+    const esBloqueado = d > FREE_DAYS && !isPremium();
 
-    cell.className = `day-cell ${completado ? 'completed' : ''} ${esDiaActual ? 'active' : ''}`;
+    cell.className = `day-cell ${completado ? 'completed' : ''} ${esDiaActual ? 'active' : ''} ${esBloqueado ? 'locked' : ''}`;
     cell.id = `day-cell-${d}`;
 
     const semanaIdx = Math.floor((d - 1) / 7);
@@ -133,7 +149,7 @@ function renderCalendario(estado, nombre) {
 
     cell.innerHTML = `
       <span class="day-num">${d}</span>
-      <span class="day-emoji">${completado ? '✅' : emojiSem}</span>
+      <span class="day-emoji">${completado ? '✅' : esBloqueado ? '🔒' : emojiSem}</span>
     `;
     cell.addEventListener('click', () => irDia(d));
     grid.appendChild(cell);
@@ -164,6 +180,18 @@ function changeDay(delta) {
 function renderDia(dia) {
   const diaPlan = plan30[dia - 1];
   if (!diaPlan) return;
+
+  // ─ Ocultar paywall / restaurar meals ─
+  document.getElementById('paywall-section').style.display = 'none';
+  const mealsEl = document.getElementById('meals-container');
+  mealsEl.classList.remove('meals-blurred');
+  mealsEl.style.pointerEvents = '';
+
+  // ─ Verificar si el día está bloqueado ─
+  if (dia > FREE_DAYS && !isPremium()) {
+    mostrarPaywall(dia, diaPlan);
+    return;
+  }
 
   const semanaNum = Math.ceil(dia / 7);
   const nombre = perfil.nombre || 'Usuario';
@@ -197,6 +225,7 @@ function renderDia(dia) {
   // Botón marcar día
   const btnMark = document.getElementById('btn-mark-day');
   const msgComp = document.getElementById('day-completed-msg');
+  document.getElementById('mark-day-section').style.display = 'block';
 
   if (completado) {
     btnMark.style.display = 'none';
@@ -207,6 +236,39 @@ function renderDia(dia) {
     btnMark.style.display = 'inline-flex';
     msgComp.style.display = 'none';
   }
+}
+
+// ─── Mostrar paywall para dia bloqueado ───
+function mostrarPaywall(dia, diaPlan) {
+  const semanaNum = Math.ceil(dia / 7);
+
+  // Atualizar cabeçalho do dia
+  document.getElementById('day-title').textContent = `Día ${dia} de 30`;
+  document.getElementById('day-emoji-title').textContent = '🔒';
+  document.getElementById('semana-badge').textContent = `Semana ${semanaNum}`;
+  document.getElementById('cal-total-badge').textContent = `~${diaPlan?.caloriasTotal || 1450} kcal este día`;
+  document.getElementById('btn-prev-day').disabled = dia <= 1;
+  document.getElementById('btn-next-day').disabled = dia >= 30;
+
+  // Renderizar comidas MAS borradas
+  if (diaPlan?.comidas) {
+    renderComidas(diaPlan.comidas, dia);
+    const mealsEl = document.getElementById('meals-container');
+    mealsEl.classList.add('meals-blurred');
+    mealsEl.style.pointerEvents = 'none';
+  }
+
+  // Esconder seccóes de acción
+  document.getElementById('exercise-section').style.display = 'none';
+  document.getElementById('mark-day-section').style.display = 'none';
+
+  // Mostrar paywall
+  document.getElementById('paywall-section').style.display = 'block';
+  document.getElementById('paywall-section').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  // Atualizar links de compra com URL correto
+  document.getElementById('btn-comprar-paywall').href = PAYWALL_URL;
+  document.getElementById('btn-comprar-float').href  = PAYWALL_URL;
 }
 
 // ─── Render comidas ───

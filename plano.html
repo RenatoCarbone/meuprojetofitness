@@ -538,6 +538,78 @@
       .logros-grid { grid-template-columns: repeat(2, 1fr); }
       .meal-cals { font-size: 0.75rem; }
     }
+
+    /* ── Premium / Paywall ── */
+    .day-cell.locked { opacity: 0.45; }
+    .day-cell.locked .day-emoji { filter: none; }
+
+    .meals-blurred {
+      filter: blur(7px);
+      user-select: none;
+      pointer-events: none;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .paywall-section {
+      display: none;
+      background: linear-gradient(135deg, rgba(124,58,237,0.13), rgba(245,158,11,0.08));
+      border: 1px solid rgba(124,58,237,0.35);
+      border-radius: var(--radius-xl);
+      padding: 40px 28px;
+      text-align: center;
+      margin: 20px 0 32px;
+      backdrop-filter: blur(16px);
+      animation: fadeInUp 0.4s ease;
+    }
+
+    .paywall-lock-icon {
+      font-size: 3.5rem;
+      display: block;
+      margin-bottom: 14px;
+      animation: bounce-gentle 2s infinite;
+    }
+
+    .paywall-features {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 20px auto;
+      max-width: 260px;
+      text-align: left;
+    }
+
+    .paywall-feature {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Floating bottom CTA */
+    .floating-premium {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: linear-gradient(90deg, rgba(7,7,17,0.97), rgba(20,10,40,0.97));
+      border-top: 1px solid rgba(124,58,237,0.4);
+      backdrop-filter: blur(20px);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      z-index: 200;
+      box-shadow: 0 -4px 30px rgba(0,0,0,0.6);
+    }
+    .floating-premium-text { font-size: 0.9rem; font-weight: 700; }
+    .floating-premium-sub  { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+
+    @media (max-width: 480px) {
+      .floating-premium { flex-direction: column; padding: 10px 16px; gap: 8px; text-align: center; }
+      .floating-premium-text { font-size: 0.85rem; }
+      .paywall-section { padding: 28px 16px; }
+    }
   </style>
 </head>
 <body>
@@ -643,6 +715,26 @@
     </div>
   </div>
 
+  <!-- ── Paywall (dias 4+) ── -->
+  <div class="paywall-section" id="paywall-section">
+    <span class="paywall-lock-icon">🔒</span>
+    <h2 style="margin-bottom:8px;">Desbloquea tu plan <span class="gradient-text-amber">completo</span></h2>
+    <p style="font-size:0.95rem;margin-bottom:4px;">Los días 4-30 están esperando por ti.</p>
+    <div class="paywall-features">
+      <div class="paywall-feature">✅ 27 días de menús detallados</div>
+      <div class="paywall-feature">✅ Recetas con ingredientes exactos</div>
+      <div class="paywall-feature">✅ Rutinas de ejercicio diarias</div>
+      <div class="paywall-feature">✅ Sistema de logros y racha</div>
+      <div class="paywall-feature">✅ Acceso de por vida</div>
+    </div>
+    <a href="https://miplanfit.lemonsqueezy.com/buy/placeholder" id="btn-comprar-paywall"
+      target="_blank" class="btn btn-amber btn-lg"
+      style="margin-top:8px;box-shadow:0 6px 30px rgba(245,158,11,0.5);">
+      ✨ Comprar ahora — €14,90
+    </a>
+    <p style="margin-top:14px;font-size:0.78rem;color:var(--text-muted);">🔒 Pago seguro &middot; Garantía 7 días</p>
+  </div>
+
   <!-- ── Ejercicios ── -->
   <div class="exercise-section" id="exercise-section" style="display:none;">
     <div class="exercise-header">
@@ -699,6 +791,19 @@
     <button class="btn btn-amber btn-lg" onclick="reiniciarPlan()">🔄 Repetir el plan</button>
     <a href="index.html" class="btn btn-outline">Crear nuevo perfil</a>
   </div>
+</div>
+
+<!-- ── Floating Premium CTA ── -->
+<div class="floating-premium" id="floating-premium" style="display:none;">
+  <div>
+    <div class="floating-premium-text">🔒 Días 4–30 bloqueados</div>
+    <div class="floating-premium-sub">Desbloquea todo por un pago único</div>
+  </div>
+  <a href="https://miplanfit.lemonsqueezy.com/buy/placeholder" id="btn-comprar-float"
+    target="_blank" class="btn btn-amber"
+    style="white-space:nowrap;font-size:0.9rem;padding:10px 20px;">
+    ✨ €14,90 — Ver plan completo
+  </a>
 </div>
 
 <script src="data/recipes.js"></script>
