@@ -66,9 +66,15 @@ document.addEventListener('DOMContentLoaded', async function () {
     planId  = localStorage.getItem('miplanfit_plan_id') || 'B';
   }
 
-  if (!perfil || !plan30) {
-    window.location.href = 'index.html';
-    return;
+  // Fallback de seguridad: si no hay perfil o plan30, crear valor por defecto
+  if (!perfil) {
+    perfil = { nombre: 'Usuario', peso: 70, altura: 170, objetivo: 'perder_peso', nivel: 'moderado', ejercicios: 'casa' };
+    localStorage.setItem('miplanfit_perfil', JSON.stringify(perfil));
+  }
+
+  if (!plan30 || !Array.isArray(plan30) || plan30.length === 0) {
+    plan30 = generarPlan30Dias(perfil, planId || 'B');
+    localStorage.setItem('miplanfit_plan30', JSON.stringify(plan30));
   }
 
   // Guardar userId globalmente para sincronizar progreso
