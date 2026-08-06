@@ -8,6 +8,10 @@ let currentStep = 1;
 function nextStep(from) {
   if (!validateStep(from)) return;
 
+  if (from === 2) {
+    actualizarOpcionesPaso3();
+  }
+
   const current = document.getElementById(`step-${from}`);
   const next = document.getElementById(`step-${from + 1}`);
   const dot = document.getElementById(`dot-${from}`);
@@ -24,6 +28,38 @@ function nextStep(from) {
 
   currentStep = from + 1;
   window.scrollTo({ top: document.getElementById('formulario').offsetTop - 80, behavior: 'smooth' });
+}
+
+function actualizarOpcionesPaso3() {
+  const pref = document.querySelector('input[name="preferencia"]:checked')?.value || 'omnivoro';
+
+  const meatIds = ['f-carne', 'f-pollo', 'f-pavo', 'f-pescado', 'f-salmon', 'f-atun', 'f-gambas'];
+  const dairyEggIds = ['f-huevo', 'f-lacteos', 'f-yogur', 'f-queso'];
+
+  // Mostrar todos los tags por defecto
+  document.querySelectorAll('.food-tag').forEach(tag => tag.style.display = 'inline-flex');
+
+  if (pref === 'vegetariano') {
+    // Ocultar carnes y pescados
+    meatIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.checked = false;
+        const tag = el.closest('.food-tag');
+        if (tag) tag.style.display = 'none';
+      }
+    });
+  } else if (pref === 'vegano') {
+    // Ocultar carnes, pescados, lácteos y huevos
+    [...meatIds, ...dairyEggIds].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.checked = false;
+        const tag = el.closest('.food-tag');
+        if (tag) tag.style.display = 'none';
+      }
+    });
+  }
 }
 
 function prevStep(from) {
