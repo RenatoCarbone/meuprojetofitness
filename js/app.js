@@ -105,9 +105,32 @@ function showError(msg) {
   setTimeout(() => toast.remove(), 3000);
 }
 
-// ─── Auto-detectar plan existente al cargar index.html ───
-document.addEventListener('DOMContentLoaded', function() {
-  const perfilGuardado = localStorage.getItem('miplanfit_perfil') || localStorage.getItem('fitjourney_perfil') || sessionStorage.getItem('fitjourney_perfil');
+// ─── Auto-detectar login / plan existente al cargar index.html ───
+document.addEventListener('DOMContentLoaded', async function() {
+  const hash = window.location.hash;
+  const isAuthCallback = hash.includes('access_token=') || window.location.search.includes('code=');
+
+  const client = getSupabase();
+  if (client) {
+    client.auth.onAuthStateChange(async (event, session) => {
+      if (session && (event === 'SIGNED_IN' || isAuthCallback)) {
+        const perfilGuardado = localStorage.getItem('miplanfit_perfil');
+        if (perfilGuardado) {
+          window.location.href = 'plano.html';
+          return;
+        }
+      }
+    });
+  }
+
+  const perfilGuardado = localStorage.getItem('miplanfit_perfil') || localStorage.getItem('fitjourney_perfil');
+
+  // Si regresa de autenticar con Google o hash auth, ir directo al plan
+  if (perfilGuardado && isAuthCallback) {
+    window.location.href = 'plano.html';
+    return;
+  }
+
   if (perfilGuardado) {
     try {
       const perfil = JSON.parse(perfilGuardado);
