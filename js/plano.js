@@ -193,6 +193,19 @@ function renderDia(dia) {
   mealsEl.classList.remove('meals-blurred');
   mealsEl.style.pointerEvents = '';
 
+  const nombre = perfil.nombre || 'Usuario';
+  const estadoActual = leerEstado(nombre);
+
+  // ─ Control de visibilidad de la barra inferior de compra ─
+  const floatBar = document.getElementById('floating-premium');
+  if (floatBar) {
+    if (!isPremium() && (estadoActual.diasCompletados.length > 0 || dia > FREE_DAYS)) {
+      floatBar.style.display = 'flex';
+    } else {
+      floatBar.style.display = 'none';
+    }
+  }
+
   // ─ Verificar si el día está bloqueado ─
   if (dia > FREE_DAYS && !isPremium()) {
     mostrarPaywall(dia, diaPlan);
@@ -592,6 +605,12 @@ function marcarDia() {
 
   // Actualizar streak panel
   renderStreak(resultado.estado, nombre);
+
+  // Mostrar barra de compra inferior al completar día
+  const floatBar = document.getElementById('floating-premium');
+  if (floatBar && !isPremium()) {
+    floatBar.style.display = 'flex';
+  }
 
   // Mostrar logros nuevos
   resultado.nuevosLogros?.forEach((logro, i) => {
