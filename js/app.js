@@ -166,7 +166,7 @@ document.getElementById('main-form').addEventListener('submit', async function(e
       perfil, plan30: plan30dias, planId: planRecomendado, imc, tmb, tdee
     });
 
-    setTimeout(() => { window.location.href = 'resultado.html'; }, 2800);
+    setTimeout(() => { window.location.href = 'plano.html'; }, 2800);
   } else {
     // No tiene sesión → mostrar modal de login con Google
     document.getElementById('login-modal').style.display = 'flex';

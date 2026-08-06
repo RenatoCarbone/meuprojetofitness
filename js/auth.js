@@ -9,7 +9,7 @@ async function loginComGoogle() {
 
   const { error } = await client.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: SITE_URL + '/resultado.html' }
+    options: { redirectTo: SITE_URL + '/plano.html' }
   });
 
   if (error) { console.error('Google login error:', error.message); return false; }
