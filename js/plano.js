@@ -18,11 +18,17 @@ function isPremium() {
 
 document.addEventListener('DOMContentLoaded', async function () {
 
-  // ─── 1. Verificar sesión ───
-  const usuario = await getUsuarioAtual();
+  // ─── 1. Verificar sesión (con fallback a usuario local) ───
+  let usuario = null;
+  try {
+    usuario = await getUsuarioAtual();
+  } catch (e) {
+    console.warn('Auth getSession error:', e);
+  }
+
   if (!usuario) {
-    window.location.href = 'index.html';
-    return;
+    const perfilLocal = JSON.parse(localStorage.getItem('miplanfit_perfil') || '{}');
+    usuario = { id: 'local_user', user_metadata: { full_name: perfilLocal.nombre || 'Usuario' } };
   }
 
   // ─── 2. Mostrar info del usuario en navbar ───
@@ -108,13 +114,6 @@ document.addEventListener('DOMContentLoaded', async function () {
   renderCalendario(estado, nombre);
   renderDia(diaAtual);
   renderLogros(estado);
-
-  // Mostrar CTA flotante si no es premium
-  if (!isPremium()) {
-    document.getElementById('floating-premium').style.display = 'flex';
-    // Ajustar padding do body para nao ficar atras do CTA
-    document.body.style.paddingBottom = '70px';
-  }
 });
 
 // ─── Primer día pendiente ───
