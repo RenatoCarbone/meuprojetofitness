@@ -1144,12 +1144,20 @@ const SHOPPING_DATA = {
 let currentShoppingWeek = 1;
 
 function abrirShoppingModal() {
-  document.getElementById('shopping-modal').classList.add('show');
+  const modal = document.getElementById('shopping-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.classList.add('show');
+  }
   switchShoppingTab(1);
 }
 
 function closeShoppingModal() {
-  document.getElementById('shopping-modal').classList.remove('show');
+  const modal = document.getElementById('shopping-modal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.remove('show');
+  }
 }
 
 function switchShoppingTab(weekNum) {
