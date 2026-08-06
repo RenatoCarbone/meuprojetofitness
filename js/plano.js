@@ -218,7 +218,6 @@ function renderDia(dia) {
   }
 
   const semanaNum = Math.ceil(dia / 7);
-  const nombre = perfil.nombre || 'Usuario';
   const completado = isDiaCompletado(nombre, dia);
 
   // Título
