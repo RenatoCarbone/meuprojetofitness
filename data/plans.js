@@ -161,11 +161,22 @@ function calcularIMC(peso, altura) {
 // ─────────────────────────────────────────
 function generarPlan30Dias(perfil, planId) {
   const plan = PLANES[planId];
-  const { alimentosExcluidos = [], esVegetariano = false, esDiabetico = false, refeicoesDia = 5 } = perfil;
+  const { alimentosExcluidos = [], esVegetariano = false, esVegano = false, esDiabetico = false, refeicoesDia = 5, preferencia } = perfil;
 
   // Filtros de tags a excluir
   const tagsExcluir = [];
-  if (esVegetariano) tagsExcluir.push('carne', 'jamon', 'serrano', 'chorizo', 'pavo', 'pollo', 'ternera', 'atun', 'salmon', 'merluza', 'bacalao', 'gambas', 'sardinas', 'sepia', 'mejillones', 'berberechos', 'almejas', 'boqueron', 'caballa', 'pez espada', 'dorada', 'lubina', 'rape', 'lenguado');
+
+  const isVeg = esVegetariano || preferencia === 'vegetariano';
+  const isVegan = esVegano || preferencia === 'vegano';
+
+  if (isVeg || isVegan) {
+    tagsExcluir.push('carne', 'jamon', 'serrano', 'chorizo', 'pavo', 'pollo', 'ternera', 'atun', 'salmon', 'merluza', 'bacalao', 'gambas', 'sardinas', 'sepia', 'mejillones', 'berberechos', 'almejas', 'boqueron', 'caballa', 'pez espada', 'dorada', 'lubina', 'rape', 'lenguado');
+  }
+
+  if (isVegan) {
+    tagsExcluir.push('queso', 'leche', 'yogur', 'huevo', 'huevos', 'tortilla', 'revuelto', 'requeson', 'cuajada', 'mantequilla', 'nata');
+  }
+
   if (esDiabetico) tagsExcluir.push('membrillo', 'miel', 'datiles', 'muesli', 'granola', 'platano', 'maiz');
 
   // Función que filtra recetas válidas para el plan
