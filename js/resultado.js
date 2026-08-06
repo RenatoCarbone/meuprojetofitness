@@ -4,13 +4,17 @@
 
 document.addEventListener('DOMContentLoaded', async function() {
 
-  // ─── 1. Verificar sesión ───
-  const usuario = await getUsuarioAtual();
+  // ─── 1. Verificar sesión (con fallback a local) ───
+  let usuario = null;
+  try {
+    usuario = await getUsuarioAtual();
+  } catch (e) {
+    console.warn('Auth getSession error in resultado.js:', e);
+  }
 
   if (!usuario) {
-    // Sin sesión → volver al inicio
-    window.location.href = 'index.html';
-    return;
+    const perfilLocal = JSON.parse(localStorage.getItem('miplanfit_perfil') || '{}');
+    usuario = { id: 'local_user', user_metadata: { full_name: perfilLocal.nombre || 'Usuario' } };
   }
 
   // ─── 2. Mostrar info del usuario en navbar ───
@@ -31,40 +35,47 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   const planNuvem = await carregarPlanoNaNuvem(usuario.id);
 
-  if (planNuvem && planNuvem.perfil && planNuvem.plan30) {
-    // ✅ Hay plan guardado en la nube
+  if (planNuvem && planNuvem.perfil) {
     perfil  = planNuvem.perfil;
     imc     = planNuvem.imc;
     tmb     = planNuvem.tmb;
     tdee    = planNuvem.tdee;
     planId  = planNuvem.plan_id || 'B';
-
-    // Sincronizar a localStorage para otras páginas
-    localStorage.setItem('miplanfit_perfil',  JSON.stringify(perfil));
-    localStorage.setItem('miplanfit_plan30',  JSON.stringify(planNuvem.plan30));
-    localStorage.setItem('miplanfit_plan_id', planId);
-    localStorage.setItem('miplanfit_imc',     JSON.stringify(imc));
-    localStorage.setItem('miplanfit_tmb',     String(tmb));
-    localStorage.setItem('miplanfit_tdee',    String(tdee));
-
   } else {
-    // ⚠️ No hay plan en la nube → cargar de localStorage y subir
     perfil = JSON.parse(localStorage.getItem('miplanfit_perfil') || 'null');
     imc    = JSON.parse(localStorage.getItem('miplanfit_imc')    || 'null');
     tmb    = localStorage.getItem('miplanfit_tmb');
     tdee   = localStorage.getItem('miplanfit_tdee');
     planId = localStorage.getItem('miplanfit_plan_id') || 'B';
-    const plan30 = JSON.parse(localStorage.getItem('miplanfit_plan30') || 'null');
+  }
 
-    if (!perfil) {
-      window.location.href = 'index.html';
-      return;
-    }
+  // Fallback de seguridad: si no hay perfil, crear valores por defecto
+  if (!perfil) {
+    perfil = { nombre: 'Usuario', edad: 30, peso: 70, altura: 170, sexo: 'hombre', objetivo: 'perder_peso', nivel: 'moderado' };
+    localStorage.setItem('miplanfit_perfil', JSON.stringify(perfil));
+  }
 
-    // Guardar en la nube en segundo plano
-    if (plan30) {
-      salvarPlanoNaNuvem(usuario.id, { perfil, plan30, planId, imc, tmb, tdee });
-    }
+  // Si faltan métricas, calcularlas sobre la marcha
+  if (!imc || !imc.valor) {
+    const p = parseFloat(perfil.peso || 70);
+    const a = parseFloat(perfil.altura || 170) / 100;
+    const v = (p / (a * a)).toFixed(1);
+    let clas = 'Peso normal';
+    if (v < 18.5) clas = 'Bajo peso';
+    else if (v >= 25 && v < 30) clas = 'Sobrepeso';
+    else if (v >= 30) clas = 'Obesidad';
+    imc = { valor: v, clasificacion: clas };
+  }
+
+  if (!tmb) {
+    const p = parseFloat(perfil.peso || 70);
+    const a = parseFloat(perfil.altura || 170);
+    const e = parseFloat(perfil.edad || 30);
+    tmb = Math.round(10 * p + 6.25 * a - 5 * e + (perfil.sexo === 'mujer' ? -161 : 5));
+  }
+
+  if (!tdee) {
+    tdee = Math.round(tmb * 1.55);
   }
 
   // ─── 4. Renderizar resultado ───
