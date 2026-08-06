@@ -1229,14 +1229,47 @@ function renderShoppingList(weekNum) {
   // Cargar estado de items marcados desde localStorage
   const savedState = JSON.parse(localStorage.getItem(`miplanfit_shop_week_${weekNum}`) || '{}');
 
+  const isVeg = perfil?.esVegetariano || perfil?.preferencia === 'vegetariano';
+  const isVegan = perfil?.esVegano || perfil?.preferencia === 'vegano';
+
+  let categoriesToRender = JSON.parse(JSON.stringify(data.categories));
+
+  if (isVegan) {
+    categoriesToRender.forEach(cat => {
+      if (cat.name.includes('Proteínas') || cat.name.includes('Pescados')) {
+        cat.name = "🌱 Proteínas 100% Vegetales (Veganas)";
+        cat.items = [
+          "Tofu firme o ahumado (400g)",
+          "Tempeh o Heura / Bocado vegetal (300g)",
+          "Seitán fresco en lonchas (300g)",
+          "Garbanzos y Lentejas cocidas (3 botes)",
+          "Yogur de soja o avena 0% azúcar (500g)"
+        ];
+      }
+    });
+  } else if (isVeg) {
+    categoriesToRender.forEach(cat => {
+      if (cat.name.includes('Proteínas') || cat.name.includes('Pescados')) {
+        cat.name = "🥦 Proteínas Vegetarianas";
+        cat.items = [
+          "Huevos camperos (12 unidades)",
+          "Tofu firme o Seitán (400g)",
+          "Queso fresco o Requesón (300g)",
+          "Yogur griego 0% (500g)",
+          "Garbanzos y Lentejas cocidas (3 botes)"
+        ];
+      }
+    });
+  }
+
   let html = `
     <div style="margin-bottom:14px;background:rgba(255,255,255,0.03);padding:10px 14px;border-radius:10px;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-      <span style="font-size:0.85rem;font-weight:700;color:var(--purple-light);">${data.title}</span>
+      <span style="font-size:0.85rem;font-weight:700;color:var(--purple-light);">${data.title} ${isVegan ? '🌱 (Vegano)' : isVeg ? '🥦 (Vegetariano)' : ''}</span>
       <span style="font-size:0.75rem;color:var(--text-muted);">Toca para tachar lo comprado</span>
     </div>
   `;
 
-  data.categories.forEach((cat, catIdx) => {
+  categoriesToRender.forEach((cat, catIdx) => {
     html += `
       <div style="margin-bottom:16px;">
         <div style="font-size:0.85rem;font-weight:700;color:var(--amber);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
