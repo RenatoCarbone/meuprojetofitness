@@ -204,7 +204,7 @@ function renderDia(dia) {
   // ─ Control de visibilidad de la barra inferior de compra ─
   const floatBar = document.getElementById('floating-premium');
   if (floatBar) {
-    if (!isPremium() && (estadoActual.diasCompletados.length > 0 || dia > FREE_DAYS)) {
+    if (!isPremium() && (estadoActual.diasCompletados.length >= 3 || dia > FREE_DAYS)) {
       floatBar.style.display = 'flex';
     } else {
       floatBar.style.display = 'none';
@@ -610,10 +610,12 @@ function marcarDia() {
   // Actualizar streak panel
   renderStreak(resultado.estado, nombre);
 
-  // Mostrar barra de compra inferior al completar día
+  // Mostrar barra de compra inferior solo a partir del 3º día completado o en días bloqueados
   const floatBar = document.getElementById('floating-premium');
-  if (floatBar && !isPremium()) {
+  if (floatBar && !isPremium() && (resultado.estado.diasCompletados.length >= 3 || diaAtual > FREE_DAYS)) {
     floatBar.style.display = 'flex';
+  } else if (floatBar) {
+    floatBar.style.display = 'none';
   }
 
   // Mostrar logros nuevos
