@@ -1248,8 +1248,3 @@ function toggleShoppingItem(weekNum, catIdx, itemIdx) {
   localStorage.setItem(key, JSON.stringify(savedState));
   renderShoppingList(weekNum);
 }
-  renderDia(1);
-  renderLogros(estado);
-
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
