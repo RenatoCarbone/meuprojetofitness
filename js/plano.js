@@ -1055,6 +1055,199 @@ function reiniciarPlan() {
   const estado = leerEstado(nombre);
   renderStreak(estado, nombre);
   renderCalendario(estado, nombre);
+  renderDia(1, estado);
+}
+
+// ============================================================
+// LISTA DE LA COMPRA SEMANAL
+// ============================================================
+
+const SHOPPING_DATA = {
+  1: {
+    title: "Semana 1 (Días 1 a 7)",
+    categories: [
+      {
+        name: "🥩 Proteínas y Pescados",
+        items: ["Pechugas de pollo o pavo (800g)", "Huevos frescos (12 unidades)", "Salmón o Pescado blanco (400g)", "Atún en lata al natural (4 latas)", "Yogur griego 0% o Queso fresco (500g)"]
+      },
+      {
+        name: "🥗 Verduras y Frutas",
+        items: ["Espinacas o Canónigos frescos (2 bolsas)", "Tomates frescos (1kg)", "Brócoli o Verduras variadas (1kg)", "Aguacates maduros (3 unidades)", "Plátanos o Manzanas (1kg)", "Limones frescos (4 unidades)"]
+      },
+      {
+        name: "🌾 Carbohidratos y Legumbres",
+        items: ["Avena en copos integrales (500g)", "Arroz integral o Quinoa (500g)", "Pan 100% integral (1 barra)", "Lentejas o Garbanzos cocidos (2 botes)"]
+      },
+      {
+        name: "🥑 Aceites y Grasas Saludables",
+        items: ["Aceite de oliva virgen extra (1L)", "Nueces peladas o Almendras (200g)", "Semillas de chía o lino (100g)"]
+      }
+    ]
+  },
+  2: {
+    title: "Semana 2 (Días 8 a 14)",
+    categories: [
+      {
+        name: "🥩 Proteínas y Pescados",
+        items: ["Lomo de pavo o Pechuga (800g)", "Huevos camperos (12 unidades)", "Lubina o Dorada fresca (400g)", "Sardinillas o Caballa en lata (4 latas)", "Queso fresco batido 0% (500g)"]
+      },
+      {
+        name: "🥗 Verduras y Frutas",
+        items: ["Calabacín y Berenjenas (1kg)", "Zanahorias (1 bolsa)", "Pimientos rojos y verdes (3 unidades)", "Fresas o Frutos rojos (1 tarrina)", "Naranjas o Mandarinas (1kg)"]
+      },
+      {
+        name: "🌾 Carbohidratos y Cereales",
+        items: ["Tortitas de arroz o maíz integral", "Pasta integral de trigo (500g)", "Boniato o Patatas nuevas (1kg)"]
+      },
+      {
+        name: "🥑 Frutos Secos y Semillas",
+        items: ["Almendras al natural (200g)", "Crema de cacahuete 100% fruto seco (1 bote)"]
+      }
+    ]
+  },
+  3: {
+    title: "Semana 3 (Días 15 a 21)",
+    categories: [
+      {
+        name: "🥩 Proteínas de Calidad",
+        items: ["Solomillo de pavo o Muslos desosados (800g)", "Huevos frescos (12 unidades)", "Bacalao o Merluza (400g)", "Pechuga de pavo en lonchas >90% (200g)"]
+      },
+      {
+        name: "🥗 Hortalizas y Frutas de Temporada",
+        items: ["Lechuga variada y Rúcula (2 bolsas)", "Espárragos verdes (1 manojo)", "Champignons o Setas (300g)", "Kiwis o Manzanas verdes (1kg)"]
+      },
+      {
+        name: "🌾 Carbohidratos Complejos",
+        items: ["Pan de centeno 100% integral", "Arroz salvaje o integral (500g)", "Copos de avena fina (500g)"]
+      }
+    ]
+  },
+  4: {
+    title: "Semana 4 (Días 22 a 30)",
+    categories: [
+      {
+        name: "🥩 Proteínas Magras",
+        items: ["Pechuga de pollo campero (1kg)", "Huevos frescos (12 unidades)", "Salmón o Trucha (500g)", "Kéfir o Yogur proteico 0% (4 botes)"]
+      },
+      {
+        name: "🥗 Verduras Detox y Frutas",
+        items: ["Calabaza o Calabacín (1kg)", "Espinacas baby (2 bolsas)", "Aguacates (4 unidades)", "Piña natural o Frutos rojos (1 unidad)"]
+      },
+      {
+        name: "🌾 Granos Integrales y Grasas",
+        items: ["Quinoa real (400g)", "Nueces de California (200g)", "Aceite de oliva virgen extra (1L)"]
+      }
+    ]
+  }
+};
+
+let currentShoppingWeek = 1;
+
+function abrirShoppingModal() {
+  document.getElementById('shopping-modal').classList.add('show');
+  switchShoppingTab(1);
+}
+
+function closeShoppingModal() {
+  document.getElementById('shopping-modal').classList.remove('show');
+}
+
+function switchShoppingTab(weekNum) {
+  currentShoppingWeek = weekNum;
+
+  // Actualizar botones de tabs
+  for (let w = 1; w <= 4; w++) {
+    const btn = document.getElementById(`shop-tab-${w}`);
+    if (btn) {
+      if (w === weekNum) {
+        btn.className = 'btn btn-primary btn-sm';
+      } else {
+        btn.className = 'btn btn-outline btn-sm';
+      }
+    }
+  }
+
+  renderShoppingList(weekNum);
+}
+
+function renderShoppingList(weekNum) {
+  const container = document.getElementById('shopping-content');
+  if (!container) return;
+
+  const data = SHOPPING_DATA[weekNum];
+  const esGated = weekNum > 1 && !isPremium();
+
+  if (esGated) {
+    container.innerHTML = `
+      <div style="background:rgba(124,58,237,0.08);border:1px dashed rgba(124,58,237,0.4);border-radius:16px;padding:24px 16px;text-align:center;margin:10px 0;">
+        <div style="font-size:2.5rem;margin-bottom:8px;">🔒</div>
+        <h4 style="font-size:1.05rem;color:var(--purple-light);margin-bottom:6px;">Lista de la ${data.title} Bloqueada</h4>
+        <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.5;max-width:340px;margin:0 auto 16px;">
+          Desbloquea el plan completo de 30 días para acceder a todas las listas de compras semanales organizadas por supermercado.
+        </p>
+        <a href="${PAYWALL_URL}" target="_blank" class="btn btn-primary" style="font-size:0.88rem;padding:12px 20px;box-shadow:0 4px 20px rgba(124,58,237,0.4);">
+          ⭐ Desbloquear por €14,90
+        </a>
+      </div>
+    `;
+    return;
+  }
+
+  // Cargar estado de items marcados desde localStorage
+  const savedState = JSON.parse(localStorage.getItem(`miplanfit_shop_week_${weekNum}`) || '{}');
+
+  let html = `
+    <div style="margin-bottom:14px;background:rgba(255,255,255,0.03);padding:10px 14px;border-radius:10px;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:0.85rem;font-weight:700;color:var(--purple-light);">${data.title}</span>
+      <span style="font-size:0.75rem;color:var(--text-muted);">Toca para tachar lo comprado</span>
+    </div>
+  `;
+
+  data.categories.forEach((cat, catIdx) => {
+    html += `
+      <div style="margin-bottom:16px;">
+        <div style="font-size:0.85rem;font-weight:700;color:var(--amber);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+          ${cat.name}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+    `;
+
+    cat.items.forEach((item, itemIdx) => {
+      const itemKey = `${catIdx}_${itemIdx}`;
+      const checked = savedState[itemKey] ? 'checked' : '';
+      const textStyle = checked ? 'text-decoration:line-through;opacity:0.45;color:var(--text-muted);' : 'color:var(--text-primary);';
+
+      html += `
+        <label onclick="toggleShoppingItem(${weekNum}, ${catIdx}, ${itemIdx})" style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:8px;cursor:pointer;user-select:none;transition:all 0.15s;">
+          <input type="checkbox" ${checked} style="width:16px;height:16px;accent-color:var(--purple);cursor:pointer;" onclick="event.stopPropagation();toggleShoppingItem(${weekNum}, ${catIdx}, ${itemIdx});">
+          <span style="font-size:0.85rem;line-height:1.4;${textStyle}">${item}</span>
+        </label>
+      `;
+    });
+
+    html += `
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+function toggleShoppingItem(weekNum, catIdx, itemIdx) {
+  const key = `miplanfit_shop_week_${weekNum}`;
+  const savedState = JSON.parse(localStorage.getItem(key) || '{}');
+  const itemKey = `${catIdx}_${itemIdx}`;
+
+  if (savedState[itemKey]) {
+    delete savedState[itemKey];
+  } else {
+    savedState[itemKey] = true;
+  }
+
+  localStorage.setItem(key, JSON.stringify(savedState));
+  renderShoppingList(weekNum);
+}
   renderDia(1);
   renderLogros(estado);
 

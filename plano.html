@@ -659,6 +659,9 @@
         <p id="header-objetivo">Cargando tu plan personalizado...</p>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <button onclick="abrirShoppingModal()" class="btn btn-primary btn-sm" style="gap:6px;box-shadow:0 4px 16px rgba(16,185,129,0.3);background:linear-gradient(135deg,#10b981,#059669);border:none;">
+          🛒 Lista de la Compra
+        </button>
         <button onclick="abrirEvolucion()" class="btn btn-primary btn-sm" style="gap:6px;box-shadow:0 4px 16px rgba(124,58,237,0.4);">
           📊 Mi Evolución
         </button>
@@ -977,6 +980,36 @@
 </div>
 
 <!-- ── Modal Guía de Ejercicio ── -->
+<!-- Modal Lista de la Compra -->
+<div class="swap-modal" id="shopping-modal" style="display:none;z-index:9998;">
+  <div class="swap-panel" style="max-width:540px;padding:24px;max-height:88vh;display:flex;flex-direction:column;">
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:12px;flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:1.8rem;">🛒</span>
+        <div>
+          <h3 style="font-size:1.15rem;margin:0;">Lista de la Compra</h3>
+          <span style="font-size:0.75rem;color:var(--text-muted);">Organizada por semanas para tu supermercado</span>
+        </div>
+      </div>
+      <button onclick="closeShoppingModal()" style="background:none;border:none;color:var(--text-muted);font-size:1.5rem;cursor:pointer;">✕</button>
+    </div>
+
+    <!-- Tabs Semanales -->
+    <div style="display:flex;gap:6px;background:rgba(255,255,255,0.04);padding:4px;border-radius:12px;margin-bottom:16px;flex-shrink:0;overflow-x:auto;">
+      <button id="shop-tab-1" onclick="switchShoppingTab(1)" class="btn btn-primary btn-sm" style="flex:1;font-size:0.78rem;padding:8px 6px;">Semana 1</button>
+      <button id="shop-tab-2" onclick="switchShoppingTab(2)" class="btn btn-outline btn-sm" style="flex:1;font-size:0.78rem;padding:8px 6px;">Semana 2 🔒</button>
+      <button id="shop-tab-3" onclick="switchShoppingTab(3)" class="btn btn-outline btn-sm" style="flex:1;font-size:0.78rem;padding:8px 6px;">Semana 3 🔒</button>
+      <button id="shop-tab-4" onclick="switchShoppingTab(4)" class="btn btn-outline btn-sm" style="flex:1;font-size:0.78rem;padding:8px 6px;">Semana 4 🔒</button>
+    </div>
+
+    <!-- Contenido dinámico con scroll -->
+    <div id="shopping-content" style="overflow-y:auto;flex:1;padding-right:4px;">
+      <!-- Generado dinámicamente por JS -->
+    </div>
+  </div>
+</div>
+
 <div class="swap-modal" id="exercise-modal" style="display:none;z-index:9999;">
   <div class="swap-panel" style="max-width:520px;padding:24px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:12px;">
