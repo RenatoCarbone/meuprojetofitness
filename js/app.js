@@ -213,22 +213,27 @@ document.getElementById('main-form').addEventListener('submit', async function(e
     }));
   }
 
-  // ─── Verificar si ya está logueado ───
+  // ─── Pantalla de análisis visual (3.8s) para alto valor percibido ───
+  const overlay = document.getElementById('analyzing-overlay');
+  if (overlay) {
+    overlay.classList.add('show');
+  }
+
   const usuario = await getUsuarioAtual();
 
   if (usuario) {
-    // Ya tiene sesión → guardar en la nube y redirigir directamente
-    const overlay = document.getElementById('analyzing-overlay');
-    overlay.classList.add('show');
-
     await salvarPlanoNaNuvem(usuario.id, {
       perfil, plan30: plan30dias, planId: planRecomendado, imc, tmb, tdee
     });
 
-    setTimeout(() => { window.location.href = 'plano.html'; }, 2800);
+    setTimeout(() => { window.location.href = 'plano.html'; }, 3800);
   } else {
-    // No tiene sesión → mostrar modal de login con Google
-    document.getElementById('login-modal').style.display = 'flex';
+    // Esperar 3.8s viendo la generación del plan antes de mostrar el modal
+    setTimeout(() => {
+      if (overlay) overlay.classList.remove('show');
+      const loginModal = document.getElementById('login-modal');
+      if (loginModal) loginModal.style.display = 'flex';
+    }, 3800);
   }
 });
 
