@@ -127,8 +127,15 @@ function renderPlan(planId) {
   badge.style.borderColor = plan.color;
   badge.style.background  = `${plan.color}20`;
 
+  const perfil = JSON.parse(localStorage.getItem('miplanfit_perfil') || '{}');
+  const numComidas = perfil.refeicoesDia || 5;
+
+  const caracteristicasAdaptadas = plan.caracteristicas.map(c =>
+    c.replace(/5 comidas/g, `${numComidas} comidas`)
+  );
+
   document.getElementById('plan-features').innerHTML =
-    plan.caracteristicas.map(c => `<li>${c}</li>`).join('');
+    caracteristicasAdaptadas.map(c => `<li>${c}</li>`).join('');
 
   document.getElementById('plan-showcase').style.setProperty('--plan-grad', plan.colorGrad);
 }
