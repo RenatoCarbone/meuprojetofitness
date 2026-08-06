@@ -77,6 +77,13 @@ document.addEventListener('DOMContentLoaded', async function() {
   document.getElementById('metric-tmb').textContent   = tmb  ? `${tmb} kcal`  : '—';
   document.getElementById('metric-tdee').textContent  = tdee ? `${tdee} kcal` : '—';
 
+  const pesoVal = parseFloat(perfil?.peso || 70);
+  const aguaLitros = ((pesoVal * 35) / 1000).toFixed(1);
+  const metricAgua = document.getElementById('metric-agua');
+  if (metricAgua) {
+    metricAgua.textContent = `${aguaLitros} L`;
+  }
+
   // Marcador IMC
   if (imc?.valor) {
     const imcVal = parseFloat(imc.valor);

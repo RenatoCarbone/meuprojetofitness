@@ -87,6 +87,12 @@ document.addEventListener('DOMContentLoaded', async function () {
   document.getElementById('nav-plan-badge').style.color       = plan.color;
   document.getElementById('nav-plan-badge').style.borderColor = `${plan.color}50`;
 
+  // Agua recomendada basada en peso (35ml / kg)
+  const pesoVal = parseFloat(perfil?.peso || 70);
+  const aguaLitros = ((pesoVal * 35) / 1000).toFixed(1);
+  const elAgua = document.getElementById('agua-recomendada');
+  if (elAgua) { elAgua.textContent = `💧 ${aguaLitros}L`; }
+
   // Determinar día activo: el primero no completado
   const estado             = leerEstado(nombre);
   const primerNoCompletado = encontrarPrimerDiaPendiente(estado.diasCompletados);
