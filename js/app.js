@@ -112,21 +112,24 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   const client = getSupabase();
   if (client) {
+    try {
+      const { data: { session } } = await client.auth.getSession();
+      if (session || isAuthCallback) {
+        window.location.href = 'plano.html';
+        return;
+      }
+    } catch(e) {}
+
     client.auth.onAuthStateChange(async (event, session) => {
       if (session && (event === 'SIGNED_IN' || isAuthCallback)) {
-        const perfilGuardado = localStorage.getItem('miplanfit_perfil');
-        if (perfilGuardado) {
-          window.location.href = 'plano.html';
-          return;
-        }
+        window.location.href = 'plano.html';
+        return;
       }
     });
   }
 
-  const perfilGuardado = localStorage.getItem('miplanfit_perfil') || localStorage.getItem('fitjourney_perfil');
-
   // Si regresa de autenticar con Google o hash auth, ir directo al plan
-  if (perfilGuardado && isAuthCallback) {
+  if (isAuthCallback) {
     window.location.href = 'plano.html';
     return;
   }
