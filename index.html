@@ -255,41 +255,87 @@
         </div>
       </div>
 
-      <!-- Lado Derecho: Visual App Showcase Mockup -->
-      <div class="anim-fadeInUp delay-2" style="position:relative;">
-        <div style="background:linear-gradient(135deg, rgba(124,58,237,0.2), rgba(16,185,129,0.15));border:1px solid rgba(124,58,237,0.4);border-radius:24px;padding:24px;box-shadow:0 20px 50px rgba(0,0,0,0.6);backdrop-filter:blur(16px);">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:12px;">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span style="font-size:1.4rem;">🥗</span>
-              <span style="font-weight:800;font-size:1rem;color:white;">MiPlanFit App</span>
-            </div>
-            <span class="badge badge-green" style="font-size:0.72rem;">🔥 DÍA 1 COMPLETADO</span>
+      <!-- Lado Derecho: Mockup Realista de Smartphone (iPhone 15 Pro style) -->
+      <div class="anim-fadeInUp delay-2" style="display:flex;justify-content:center;position:relative;">
+        
+        <!-- Smartphone Container -->
+        <div style="
+          width: 300px;
+          background: #090912;
+          border: 10px solid #1e1e2d;
+          border-radius: 42px;
+          box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 35px rgba(124,58,237,0.35);
+          padding: 12px 14px 20px;
+          position: relative;
+          font-family: 'Inter', sans-serif;
+        ">
+          <!-- Dynamic Island Notch -->
+          <div style="width:85px;height:18px;background:#000;border-radius:20px;margin:2px auto 10px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;">
+            <div style="width:7px;height:7px;border-radius:50%;background:#0a3a1d;border:1px solid #10b981;"></div>
           </div>
 
-          <!-- Preview do Gráfico e Plan -->
-          <div style="background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:14px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-              <span style="font-size:0.8rem;color:var(--text-muted);font-weight:600;">📈 TU PROGRESO</span>
-              <span style="font-size:0.85rem;font-weight:800;color:var(--green);">-3.2 kg este mes</span>
-            </div>
-            <div style="height:60px;background:linear-gradient(90deg, rgba(16,185,129,0.1), rgba(124,58,237,0.2));border-radius:10px;border-bottom:2px solid var(--green);display:flex;align-items:flex-end;padding:8px;gap:8px;justify-content:space-between;">
-              <span style="font-size:0.65rem;color:var(--text-muted);">Semana 1</span>
-              <span style="font-size:0.65rem;color:var(--text-muted);">Semana 2</span>
-              <span style="font-size:0.65rem;color:var(--text-muted);">Semana 3</span>
-              <span style="font-size:0.7rem;font-weight:800;color:var(--green);">Semana 4 🎯</span>
+          <!-- Phone Header Status Bar -->
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.72rem;color:var(--text-muted);margin-bottom:12px;padding:0 6px;">
+            <span>09:41</span>
+            <div style="display:flex;gap:4px;align-items:center;">
+              <span>📶</span> <span>⚡ 88%</span>
             </div>
           </div>
 
-          <!-- Mini Feature Pills -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-            <div style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;padding:10px;font-size:0.78rem;display:flex;align-items:center;gap:6px;">
-              <span>🔄</span> Cambia recetas con 1 clic
+          <!-- App Mobile View Screen -->
+          <div style="background:linear-gradient(180deg, rgba(124,58,237,0.12), rgba(7,7,17,0.95));border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:14px;box-shadow:inset 0 0 20px rgba(0,0,0,0.5);">
+            
+            <!-- Navbar Mobile Preview -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:8px;">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-size:1.1rem;">🥗</span>
+                <span style="font-weight:900;font-size:0.85rem;color:white;">MiPlanFit</span>
+              </div>
+              <span class="badge badge-green" style="font-size:0.65rem;padding:3px 8px;">🔥 5 DÍAS RACHA</span>
             </div>
-            <div style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;padding:10px;font-size:0.78rem;display:flex;align-items:center;gap:6px;">
-              <span>🛒</span> Lista de la Compra
+
+            <!-- Card Progreso / Gráfico -->
+            <div style="background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:10px;margin-bottom:10px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <span style="font-size:0.7rem;color:var(--text-muted);font-weight:600;">📈 EVOLUCIÓN PESO</span>
+                <span style="font-size:0.75rem;font-weight:800;color:var(--green);">-3.4 kg</span>
+              </div>
+              <div style="height:36px;background:linear-gradient(90deg, rgba(16,185,129,0.1), rgba(124,58,237,0.25));border-radius:8px;border-bottom:2px solid var(--green);display:flex;align-items:flex-end;padding:4px 6px;justify-content:space-between;">
+                <span style="font-size:0.58rem;color:var(--text-muted);">S1</span>
+                <span style="font-size:0.58rem;color:var(--text-muted);">S2</span>
+                <span style="font-size:0.58rem;color:var(--text-muted);">S3</span>
+                <span style="font-size:0.62rem;font-weight:800;color:var(--green);">🎯 Hoy</span>
+              </div>
             </div>
+
+            <!-- Card Comida del Día -->
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:14px;padding:10px;margin-bottom:10px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                <span style="font-size:0.68rem;color:var(--amber);font-weight:700;">🥗 ALMUERZO • DÍA 4</span>
+                <span style="font-size:0.65rem;background:rgba(124,58,237,0.2);color:var(--purple-light);padding:2px 6px;border-radius:6px;font-weight:600;">🔄 Cambiar</span>
+              </div>
+              <div style="font-size:0.8rem;font-weight:800;color:white;">Ensalada Mediterránea con Tofu</div>
+              <div style="font-size:0.68rem;color:var(--text-muted);margin-top:2px;">420 kcal • 32g Proteína</div>
+            </div>
+
+            <!-- Card Ejercicio + Botón Comprar -->
+            <div style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:14px;padding:10px;display:flex;align-items:center;justify-content:space-between;">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-size:1rem;">🏋️</span>
+                <div>
+                  <div style="font-size:0.72rem;font-weight:700;color:white;">Rutina de Casa</div>
+                  <div style="font-size:0.62rem;color:var(--text-muted);">15 min • Sin pesas</div>
+                </div>
+              </div>
+              <span style="font-size:0.68rem;font-weight:700;color:var(--green);">▶ Ver guía</span>
+            </div>
+
           </div>
+
+          <!-- Bottom Phone Home Bar -->
+          <div style="width:110px;height:4px;background:rgba(255,255,255,0.3);border-radius:4px;margin:12px auto 0;"></div>
         </div>
+
       </div>
 
     </div>
