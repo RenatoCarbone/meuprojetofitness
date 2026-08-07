@@ -257,98 +257,23 @@
         </div>
       </div>
 
-      <!-- Lado Derecho: Mockup 3D Perspectiva de Smartphone (iPhone 15 Pro style) -->
-      <div class="anim-fadeInUp delay-2" style="display:flex;justify-content:center;position:relative;perspective:1200px;padding:20px 0;">
+      <!-- Lado Derecho: Real Smartphone Mockup Image -->
+      <div class="anim-fadeInUp delay-2" style="display:flex;justify-content:center;position:relative;perspective:1000px;padding:10px 0;">
         
         <!-- Ambient Glowing Aura -->
-        <div style="position:absolute;width:240px;height:360px;background:radial-gradient(circle, rgba(124,58,237,0.45) 0%, rgba(16,185,129,0.2) 60%, transparent 80%);filter:blur(36px);z-index:0;top:20px;"></div>
+        <div style="position:absolute;width:280px;height:420px;background:radial-gradient(circle, rgba(124,58,237,0.5) 0%, rgba(16,185,129,0.25) 60%, transparent 80%);filter:blur(40px);z-index:0;top:10px;"></div>
 
-        <!-- 3D Smartphone Container -->
-        <div style="
+        <!-- Real Phone Mockup Image -->
+        <img src="img/hero-phone-mockup.png" alt="MiPlanFit App Mobile Preview" style="
           position: relative; z-index: 1;
-          width: 290px;
-          background: linear-gradient(145deg, #1f1f2e, #0a0a14);
-          border: 9px solid #2a2a3e;
-          border-radius: 44px;
-          box-shadow: 
-            -20px 20px 50px rgba(0, 0, 0, 0.9),
-            -5px 5px 15px rgba(0, 0, 0, 0.7),
-            0 0 40px rgba(124,58,237,0.4),
-            inset 0 0 2px rgba(255,255,255,0.2);
-          transform: rotateY(-14deg) rotateX(8deg) rotateZ(2deg);
+          max-width: 320px; width: 100%; height: auto;
+          filter: drop-shadow(-15px 20px 35px rgba(0,0,0,0.85)) drop-shadow(0 0 25px rgba(124,58,237,0.4));
+          transform: rotateY(-10deg) rotateX(5deg) rotateZ(1deg);
           transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-          padding: 12px 14px 18px;
-          font-family: 'Inter', sans-serif;
         "
-        onmouseover="this.style.transform='rotateY(-4deg) rotateX(2deg) rotateZ(0deg) scale(1.03)'"
-        onmouseout="this.style.transform='rotateY(-14deg) rotateX(8deg) rotateZ(2deg) scale(1)'"
-        >
-          <!-- Dynamic Island Notch -->
-          <div style="width:80px;height:16px;background:#000;border-radius:20px;margin:2px auto 10px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;box-shadow:0 1px 4px rgba(255,255,255,0.05);">
-            <div style="width:6px;height:6px;border-radius:50%;background:#0a3a1d;border:1px solid #10b981;"></div>
-          </div>
-
-          <!-- Phone Header Status Bar -->
-          <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.7rem;color:var(--text-muted);margin-bottom:10px;padding:0 6px;">
-            <span>09:41</span>
-            <div style="display:flex;gap:4px;align-items:center;">
-              <span>📶</span> <span>⚡ 92%</span>
-            </div>
-          </div>
-
-          <!-- App Screen inside Phone -->
-          <div style="background:linear-gradient(180deg, rgba(124,58,237,0.18), rgba(7,7,17,0.96));border:1px solid rgba(255,255,255,0.1);border-radius:26px;padding:14px;box-shadow:inset 0 0 15px rgba(0,0,0,0.6);overflow:hidden;">
-            
-            <!-- Navbar Mobile Preview -->
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:8px;">
-              <div style="display:flex;align-items:center;gap:6px;">
-                <span style="font-size:1.1rem;">🥗</span>
-                <span style="font-weight:900;font-size:0.85rem;color:white;">MiPlanFit</span>
-              </div>
-              <span class="badge badge-green" style="font-size:0.62rem;padding:3px 8px;box-shadow:0 2px 10px rgba(16,185,129,0.3);">🔥 5 DÍAS RACHA</span>
-            </div>
-
-            <!-- Card Progreso / Gráfico -->
-            <div style="background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.09);border-radius:14px;padding:10px;margin-bottom:10px;">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-                <span style="font-size:0.68rem;color:var(--text-muted);font-weight:600;">📈 EVOLUCIÓN DE PESO</span>
-                <span style="font-size:0.75rem;font-weight:800;color:var(--green);">-3.4 kg</span>
-              </div>
-              <div style="height:38px;background:linear-gradient(90deg, rgba(16,185,129,0.1), rgba(124,58,237,0.3));border-radius:8px;border-bottom:2px solid var(--green);display:flex;align-items:flex-end;padding:4px 6px;justify-content:space-between;">
-                <span style="font-size:0.58rem;color:var(--text-muted);">S1</span>
-                <span style="font-size:0.58rem;color:var(--text-muted);">S2</span>
-                <span style="font-size:0.58rem;color:var(--text-muted);">S3</span>
-                <span style="font-size:0.62rem;font-weight:800;color:var(--green);">🎯 Hoy</span>
-              </div>
-            </div>
-
-            <!-- Card Comida del Día -->
-            <div style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:14px;padding:10px;margin-bottom:10px;">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-                <span style="font-size:0.68rem;color:var(--amber);font-weight:700;">🥗 ALMUERZO • DÍA 4</span>
-                <span style="font-size:0.62rem;background:rgba(124,58,237,0.25);color:var(--purple-light);padding:2px 6px;border-radius:6px;font-weight:600;">🔄 Cambiar</span>
-              </div>
-              <div style="font-size:0.78rem;font-weight:800;color:white;">Ensalada Mediterránea con Tofu</div>
-              <div style="font-size:0.66rem;color:var(--text-muted);margin-top:2px;">420 kcal • 32g Proteína</div>
-            </div>
-
-            <!-- Card Ejercicio + Botón Comprar -->
-            <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);border-radius:14px;padding:10px;display:flex;align-items:center;justify-content:space-between;">
-              <div style="display:flex;align-items:center;gap:6px;">
-                <span style="font-size:1rem;">🏋️</span>
-                <div>
-                  <div style="font-size:0.72rem;font-weight:700;color:white;">Rutina de Casa</div>
-                  <div style="font-size:0.62rem;color:var(--text-muted);">15 min • Sin pesas</div>
-                </div>
-              </div>
-              <span style="font-size:0.68rem;font-weight:700;color:var(--green);">▶ Ver guía</span>
-            </div>
-
-          </div>
-
-          <!-- Bottom Phone Home Bar -->
-          <div style="width:100px;height:4px;background:rgba(255,255,255,0.35);border-radius:4px;margin:10px auto 0;"></div>
-        </div>
+        onmouseover="this.style.transform='rotateY(0deg) rotateX(0deg) scale(1.04)'"
+        onmouseout="this.style.transform='rotateY(-10deg) rotateX(5deg) rotateZ(1deg) scale(1)'"
+        />
 
       </div>
 
