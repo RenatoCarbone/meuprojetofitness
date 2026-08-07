@@ -126,18 +126,31 @@ document.addEventListener('DOMContentLoaded', async function() {
   if (client) {
     try {
       const { data: { session } } = await client.auth.getSession();
-      if (session || isAuthCallback) {
-        window.location.href = 'plano.html';
-        return;
-      }
-    } catch(e) {}
+      if (session) {
+        // Consultar a la base de datos Supabase si esta cuenta tiene un plan registrado
+        const { data: planData } = await client
+          .from('planos')
+          .select('user_id')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
 
-    client.auth.onAuthStateChange(async (event, session) => {
-      if (session && (event === 'SIGNED_IN' || isAuthCallback)) {
-        window.location.href = 'plano.html';
-        return;
+        if (planData && planData.user_id) {
+          // SI TIENE PLAN EN LA NUBE -> REDIRIGIR A PLANO.HTML
+          window.location.href = 'plano.html';
+          return;
+        } else {
+          // NO TIENE PLAN EN LA NUBE -> BLOQUEAR Y MOSTRAR ADVERTENCIA
+          showError('⚠️ No encontramos un plan registrado para esta cuenta de Google. Por favor, responde al cuestionario de 2 min.');
+          setTimeout(() => {
+            const form = document.getElementById('formulario');
+            if (form) form.scrollIntoView({ behavior: 'smooth' });
+          }, 500);
+          return;
+        }
       }
-    });
+    } catch(e) {
+      console.warn('Auth check error:', e);
+    }
   }
 
   // Si regresa de autenticar con Google o hash auth, ir directo al plan
