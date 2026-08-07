@@ -31,6 +31,22 @@ document.addEventListener('DOMContentLoaded', async function () {
     usuario = { id: 'local_user', user_metadata: { full_name: perfilLocal.nombre || 'Usuario' } };
   }
 
+  // ─── Detectar pago confirmado desde Lemon Squeezy (?paid=true o ?order_id=...) ───
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('paid') === 'true' || urlParams.get('success') === 'true' || urlParams.has('order_id')) {
+    localStorage.setItem('miplanfit_premium', 'true');
+    
+    // Guardar estado premium en Supabase si está logueado
+    if (usuario && usuario.id !== 'local_user') {
+      const client = getSupabase();
+      if (client) {
+        await client.from('planos').update({ is_premium: true }).eq('user_id', usuario.id);
+      }
+    }
+
+    mostrarNotificacionPagoExitoso();
+  }
+
   // ─── 2. Mostrar info del usuario en navbar ───
   const userInfo = document.getElementById('user-info');
   if (userInfo) {
@@ -50,6 +66,10 @@ document.addEventListener('DOMContentLoaded', async function () {
     perfil  = planNuvem.perfil;
     plan30  = planNuvem.plan30;
     planId  = planNuvem.plan_id || 'B';
+
+    if (planNuvem.is_premium === true) {
+      localStorage.setItem('miplanfit_premium', 'true');
+    }
 
     // Sincronizar progreso de la nube al localStorage
     const nombre    = perfil.nombre || 'Usuario';
@@ -1081,6 +1101,22 @@ function reiniciarPlan() {
   renderStreak(estado, nombre);
   renderCalendario(estado, nombre);
   renderDia(1, estado);
+}
+
+function mostrarNotificacionPagoExitoso() {
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.style.cssText = `
+    position: fixed; top: 20px; right: 20px; z-index: 99999;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white; padding: 16px 24px; border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(16,185,129,0.5); font-weight: 700;
+    font-size: 0.95rem; display: flex; align-items: center; gap: 12px;
+    animation: fadeInUp 0.4s ease;
+  `;
+  toast.innerHTML = `<span>🎉</span> <div><strong>¡Pago confirmado!</strong><br/><span style="font-size:0.8rem;font-weight:400;">Tu plan de 30 días está 100% desbloqueado.</span></div>`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 6000);
 }
 
 // ============================================================
