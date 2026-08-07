@@ -86,13 +86,20 @@ document.addEventListener('DOMContentLoaded', async function () {
     localStorage.setItem('miplanfit_plan30',  JSON.stringify(plan30));
     localStorage.setItem('miplanfit_plan_id', planId);
   } else {
-    // Fallback a localStorage
+    // Si el usuario está autenticado con Google pero NO tiene plan en Supabase
+    if (usuario && usuario.id !== 'local_user') {
+      // Redirigir a index.html informando que debe responder al cuestionario primero
+      window.location.href = 'index.html?error=no_plan_found';
+      return;
+    }
+
+    // Fallback a localStorage para usuarios sin sesión de Google
     perfil  = JSON.parse(localStorage.getItem('miplanfit_perfil') || 'null');
     plan30  = JSON.parse(localStorage.getItem('miplanfit_plan30') || 'null');
     planId  = localStorage.getItem('miplanfit_plan_id') || 'B';
   }
 
-  // Fallback de seguridad: si no hay perfil o plan30, crear valor por defecto
+  // Fallback de seguridad solo para usuarios locales no registrados
   if (!perfil) {
     perfil = { nombre: 'Usuario', peso: 70, altura: 170, objetivo: 'perder_peso', nivel: 'moderado', ejercicios: 'casa' };
     localStorage.setItem('miplanfit_perfil', JSON.stringify(perfil));

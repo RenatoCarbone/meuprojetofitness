@@ -107,6 +107,18 @@ function showError(msg) {
 
 // ─── Auto-detectar login / plan existente al cargar index.html ───
 document.addEventListener('DOMContentLoaded', async function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const hasNoPlanError = urlParams.get('error') === 'no_plan_found';
+
+  if (hasNoPlanError) {
+    showError('⚠️ No encontramos un plan activo para esta cuenta de Google. Por favor, responde al cuestionario de 2 min.');
+    setTimeout(() => {
+      const form = document.getElementById('formulario');
+      if (form) form.scrollIntoView({ behavior: 'smooth' });
+    }, 500);
+    return;
+  }
+
   const hash = window.location.hash;
   const isAuthCallback = hash.includes('access_token=') || window.location.search.includes('code=');
 
