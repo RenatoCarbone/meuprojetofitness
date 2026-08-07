@@ -1230,6 +1230,7 @@ function closeShoppingModal() {
 
 function switchShoppingTab(weekNum) {
   currentShoppingWeek = weekNum;
+  const userIsPremium = isPremium();
 
   // Actualizar botones de tabs
   for (let w = 1; w <= 4; w++) {
@@ -1239,6 +1240,13 @@ function switchShoppingTab(weekNum) {
         btn.className = 'btn btn-primary btn-sm';
       } else {
         btn.className = 'btn btn-outline btn-sm';
+      }
+
+      // Si es premium, quitar el icono del candado
+      if (userIsPremium || w === 1) {
+        btn.innerHTML = `Semana ${w}`;
+      } else {
+        btn.innerHTML = `Semana ${w} 🔒`;
       }
     }
   }
