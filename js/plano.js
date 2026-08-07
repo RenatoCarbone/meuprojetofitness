@@ -69,6 +69,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     if (planNuvem.is_premium === true) {
       localStorage.setItem('miplanfit_premium', 'true');
+    } else {
+      localStorage.removeItem('miplanfit_premium');
     }
 
     // Sincronizar progreso de la nube al localStorage
