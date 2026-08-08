@@ -42,16 +42,31 @@ async function salvarPlanoNaNuvem(userId, dados) {
   const client = getSupabase();
   if (!client) return false;
 
-  const { error } = await client.from('planos').upsert({
-    user_id  : userId,
-    perfil   : dados.perfil,
-    plan30   : dados.plan30,
-    plan_id  : dados.planId  || 'B',
-    imc      : dados.imc     || {},
-    tmb      : parseInt(dados.tmb)  || 0,
-    tdee     : parseInt(dados.tdee) || 0,
-    updated_at: new Date().toISOString()
-  }, { onConflict: 'user_id' });
+  let email = dados.perfil?.email || '';
+  let nombre = dados.perfil?.nombre || 'Usuario';
+
+  try {
+    const { data: { session } } = await client.auth.getSession();
+    if (session?.user) {
+      email = session.user.email || email;
+      nombre = session.user.user_metadata?.full_name || session.user.user_metadata?.name || nombre;
+    }
+  } catch(e) {}
+
+  const payload = {
+    user_id    : userId,
+    user_email : email,
+    user_name  : nombre,
+    perfil     : dados.perfil,
+    plan30     : dados.plan30,
+    plan_id    : dados.planId  || 'B',
+    imc        : dados.imc     || {},
+    tmb        : parseInt(dados.tmb)  || 0,
+    tdee       : parseInt(dados.tdee) || 0,
+    updated_at : new Date().toISOString()
+  };
+
+  const { error } = await client.from('planos').upsert(payload, { onConflict: 'user_id' });
 
   if (error) { console.error('Erro ao salvar plano:', error.message); return false; }
   console.log('✅ Plano salvo na nuvem');
