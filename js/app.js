@@ -105,8 +105,31 @@ function showError(msg) {
   setTimeout(() => toast.remove(), 3000);
 }
 
+// ─── Analytics Tracker (Métricas de Funil en Supabase) ───
+async function registrarEventoAnalytics(tipoEvento) {
+  try {
+    const countKey = `miplanfit_stat_${tipoEvento}`;
+    const cur = parseInt(localStorage.getItem(countKey) || '0');
+    localStorage.setItem(countKey, (cur + 1).toString());
+
+    const client = getSupabase();
+    if (client) {
+      await client.from('analytics_events').insert([{
+        evento: tipoEvento,
+        created_at: new Date().toISOString()
+      }]).catch(() => {});
+    }
+  } catch(e) {}
+}
+
 // ─── Auto-detectar errores o plan existente al cargar index.html ───
 document.addEventListener('DOMContentLoaded', async function() {
+  // Registrar visita única a la página de landing
+  if (!sessionStorage.getItem('miplanfit_visited_session')) {
+    sessionStorage.setItem('miplanfit_visited_session', 'true');
+    registrarEventoAnalytics('visita');
+  }
+
   const urlParams = new URLSearchParams(window.location.search);
   const hasNoPlanError = urlParams.get('error') === 'no_plan_found';
 
