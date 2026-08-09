@@ -126,6 +126,9 @@ document.addEventListener('DOMContentLoaded', async function () {
       plan30 = localPlan30;
       planId = localPlanId;
 
+      // Garantizar que la nueva cuenta empiece como GRATUITA (3 DÍAS)
+      localStorage.setItem('miplanfit_premium', 'false');
+
       // Si el usuario se autenticó con Google, asociar y guardar su plan en Supabase de inmediato
       if (usuario && usuario.id !== 'local_user') {
         await salvarPlanoNaNuvem(usuario.id, {

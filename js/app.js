@@ -218,7 +218,9 @@ document.getElementById('main-form').addEventListener('submit', async function(e
   const planRecomendado = recomendarPlan(perfil);
   const plan30dias = generarPlan30Dias(perfil, planRecomendado);
 
-  // Guardar en localStorage (persistente)
+  // Guardar en localStorage (persistente) y garantizar que la nueva cuenta inicie como Gratuito (3 días)
+  localStorage.removeItem('miplanfit_premium');
+  localStorage.setItem('miplanfit_premium', 'false');
   localStorage.setItem('miplanfit_perfil', JSON.stringify(perfil));
   localStorage.setItem('miplanfit_imc', JSON.stringify(imc));
   localStorage.setItem('miplanfit_tmb', tmb);
