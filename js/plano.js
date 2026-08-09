@@ -18,14 +18,33 @@ function isPremium() {
 
 document.addEventListener('DOMContentLoaded', async function () {
 
-  // ─── 1. Verificar sesión (con fallback a usuario local) ───
+  // ─── 1. Verificar sesión de OAuth de forma asíncrona garantizada ───
   let usuario = null;
-  try {
-    usuario = await getUsuarioAtual();
-  } catch (e) {
-    console.warn('Auth getSession error:', e);
+  const hash = window.location.hash;
+  const search = window.location.search;
+  const isAuthCallback = hash.includes('access_token=') || search.includes('code=');
+
+  const client = getSupabase();
+  if (client) {
+    try {
+      // Si venimos de un Callback de OAuth (Google), forzar resolución de sesión
+      const { data: { session } } = await client.auth.getSession();
+      if (session?.user) {
+        usuario = session.user;
+      }
+    } catch (e) {
+      console.warn('Error resolviendo sesión de Supabase:', e);
+    }
   }
 
+  // Fallback a getUsuarioAtual si aún no se había asignado
+  if (!usuario) {
+    try {
+      usuario = await getUsuarioAtual();
+    } catch(e) {}
+  }
+
+  // Si no hay sesión de Google activa, marcar como usuario local
   if (!usuario) {
     const perfilLocal = JSON.parse(localStorage.getItem('miplanfit_perfil') || '{}');
     usuario = { id: 'local_user', user_metadata: { full_name: perfilLocal.nombre || 'Usuario' } };
@@ -37,11 +56,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     localStorage.setItem('miplanfit_premium', 'true');
     
     // Guardar estado premium en Supabase si está logueado
-    if (usuario && usuario.id !== 'local_user') {
-      const client = getSupabase();
-      if (client) {
-        await client.from('planos').update({ is_premium: true }).eq('user_id', usuario.id);
-      }
+    if (usuario && usuario.id !== 'local_user' && client) {
+      await client.from('planos').update({ is_premium: true }).eq('user_id', usuario.id);
     }
 
     mostrarNotificacionPagoExitoso();
@@ -59,8 +75,11 @@ document.addEventListener('DOMContentLoaded', async function () {
     userInfo.style.display = 'flex';
   }
 
-  // ─── 3. Cargar datos: nuvem primero, localStorage como fallback ───
-  const planNuvem = await carregarPlanoNaNuvem(usuario.id);
+  // ─── 3. Cargar datos: Nube primero, localStorage como salvavidas ───
+  let planNuvem = null;
+  if (usuario && usuario.id !== 'local_user') {
+    planNuvem = await carregarPlanoNaNuvem(usuario.id);
+  }
 
   if (planNuvem && planNuvem.perfil && planNuvem.plan30) {
     perfil  = planNuvem.perfil;
@@ -88,28 +107,30 @@ document.addEventListener('DOMContentLoaded', async function () {
     localStorage.setItem('miplanfit_plan30',  JSON.stringify(plan30));
     localStorage.setItem('miplanfit_plan_id', planId);
   } else {
-    // Si no hay plan en Supabase, verificar si hay un plan recién creado en el localStorage del usuario
+    // Si no hay plan en Supabase, verificar si hay un plan en localStorage (creado por el usuario o en sesión previa)
     const localPerfil = JSON.parse(localStorage.getItem('miplanfit_perfil') || 'null');
     const localPlan30 = JSON.parse(localStorage.getItem('miplanfit_plan30') || 'null');
     const localPlanId = localStorage.getItem('miplanfit_plan_id') || 'B';
 
-    if (localPerfil && localPlan30 && usuario && usuario.id !== 'local_user') {
-      // USUARIO NUEVO: Acaba de responder al cuestionario y se autenticó por 1ª vez con Google.
-      // Guardar su plan local en Supabase inmediatamente para asociarlo a su cuenta
+    if (localPerfil && localPlan30) {
+      // TENEMOS DATOS DE PLAN EN EL NAVEGADOR:
       perfil = localPerfil;
       plan30 = localPlan30;
       planId = localPlanId;
 
-      await salvarPlanoNaNuvem(usuario.id, {
-        perfil,
-        plan30,
-        planId,
-        imc: JSON.parse(localStorage.getItem('miplanfit_imc') || '{}'),
-        tmb: parseInt(localStorage.getItem('miplanfit_tmb') || '0'),
-        tdee: parseInt(localStorage.getItem('miplanfit_tdee') || '0')
-      });
-    } else if (usuario && usuario.id !== 'local_user') {
-      // INVASOR O USUARIO SIN PLAN: Entró directamente desde "Ya tengo cuenta" sin responder al cuestionario
+      // Si el usuario se autenticó con Google, asociar y guardar su plan en Supabase de inmediato
+      if (usuario && usuario.id !== 'local_user') {
+        await salvarPlanoNaNuvem(usuario.id, {
+          perfil,
+          plan30,
+          planId,
+          imc: JSON.parse(localStorage.getItem('miplanfit_imc') || '{}'),
+          tmb: parseInt(localStorage.getItem('miplanfit_tmb') || '0'),
+          tdee: parseInt(localStorage.getItem('miplanfit_tdee') || '0')
+        });
+      }
+    } else if (usuario && usuario.id !== 'local_user' && isAuthCallback) {
+      // SI NO TIENE PLAN EN NUBE NI EN BROWSER (Intento de login sin cuestionario)
       window.location.href = 'index.html?error=no_plan_found';
       return;
     } else {

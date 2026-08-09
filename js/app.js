@@ -105,13 +105,13 @@ function showError(msg) {
   setTimeout(() => toast.remove(), 3000);
 }
 
-// ─── Auto-detectar login / plan existente al cargar index.html ───
+// ─── Auto-detectar errores o plan existente al cargar index.html ───
 document.addEventListener('DOMContentLoaded', async function() {
   const urlParams = new URLSearchParams(window.location.search);
   const hasNoPlanError = urlParams.get('error') === 'no_plan_found';
 
   if (hasNoPlanError) {
-    showError('⚠️ No encontramos un plan activo para esta cuenta de Google. Por favor, responde al cuestionario de 2 min.');
+    showError('⚠️ No encontramos un plan registrado para esta cuenta. Por favor, responde al cuestionario de 2 min.');
     setTimeout(() => {
       const form = document.getElementById('formulario');
       if (form) form.scrollIntoView({ behavior: 'smooth' });
@@ -119,70 +119,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     return;
   }
 
-  const hash = window.location.hash;
-  const isAuthCallback = hash.includes('access_token=') || window.location.search.includes('code=');
-
-  const client = getSupabase();
-  if (client) {
-    try {
-      const { data: { session } } = await client.auth.getSession();
-      if (session) {
-        // ¿Tiene un plan generado localmente en el navegador por responder al cuestionario?
-        const perfilLocal = localStorage.getItem('miplanfit_perfil');
-        const plan30Local = localStorage.getItem('miplanfit_plan30');
-
-        if (perfilLocal && plan30Local) {
-          // ES UN USUARIO NUEVO QUE ACABA DE COMPLETAR EL CUESTIONARIO:
-          // Guardar su plan local en Supabase inmediatamente y enviarlo a plano.html
-          try {
-            const perfilParsed = JSON.parse(perfilLocal);
-            const plan30Parsed = JSON.parse(plan30Local);
-            const planIdLocal  = localStorage.getItem('miplanfit_plan_id') || 'B';
-            await salvarPlanoNaNuvem(session.user.id, {
-              perfil: perfilParsed,
-              plan30: plan30Parsed,
-              planId: planIdLocal
-            });
-          } catch(err) {
-            console.error('Error guardando plan nuevo en nube:', err);
-          }
-          window.location.href = 'plano.html';
-          return;
-        }
-
-        // SI NO TIENE PLAN LOCAL (intentó entrar directamente desde "Ya tengo cuenta"):
-        // Consultar a la base de datos Supabase si esta cuenta ya tenía un plan guardado anteriormente
-        const { data: planData } = await client
-          .from('planos')
-          .select('user_id')
-          .eq('user_id', session.user.id)
-          .maybeSingle();
-
-        if (planData && planData.user_id) {
-          // SI TIENE PLAN PREVIO EN LA NUBE -> REDIRIGIR A PLANO.HTML
-          window.location.href = 'plano.html';
-          return;
-        } else {
-          // NO TIENE PLAN LOCAL NI EN LA NUBE -> BLOQUEAR Y MOSTRAR ADVERTENCIA
-          showError('⚠️ No encontramos un plan registrado para esta cuenta de Google. Por favor, responde al cuestionario de 2 min.');
-          setTimeout(() => {
-            const form = document.getElementById('formulario');
-            if (form) form.scrollIntoView({ behavior: 'smooth' });
-          }, 500);
-          return;
-        }
-      }
-    } catch(e) {
-      console.warn('Auth check error:', e);
-    }
-  }
-
-  // Si regresa de autenticar con Google o hash auth, ir directo al plan
-  if (isAuthCallback) {
-    window.location.href = 'plano.html';
-    return;
-  }
-
+  // Si tiene un plan guardado en localStorage, mostrar banner opcional
+  const perfilGuardado = localStorage.getItem('miplanfit_perfil');
   if (perfilGuardado) {
     try {
       const perfil = JSON.parse(perfilGuardado);
