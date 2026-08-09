@@ -119,7 +119,27 @@ document.addEventListener('DOMContentLoaded', async function() {
     return;
   }
 
-  // Si tiene un plan guardado en localStorage, mostrar banner opcional
+  // Detectar si el usuario está regresando de un login con Google (OAuth callback) o si ya tiene sesión activa
+  const hash = window.location.hash;
+  const search = window.location.search;
+  const isAuthCallback = hash.includes('access_token=') || search.includes('code=');
+
+  const client = getSupabase();
+  if (client) {
+    try {
+      const { data: { session } } = await client.auth.getSession();
+
+      if (session || isAuthCallback) {
+        // ¡SI EL USUARIO TIENE SESIÓN O VIENE DE GOOGLE, IR DIRECTO A PLANO.HTML!
+        window.location.href = 'plano.html';
+        return;
+      }
+    } catch(e) {
+      console.warn('Auth check error:', e);
+    }
+  }
+
+  // Si no hay sesión activa pero hay datos locales en el navegador, mostrar el banner de continuar
   const perfilGuardado = localStorage.getItem('miplanfit_perfil');
   if (perfilGuardado) {
     try {
