@@ -88,17 +88,35 @@ document.addEventListener('DOMContentLoaded', async function () {
     localStorage.setItem('miplanfit_plan30',  JSON.stringify(plan30));
     localStorage.setItem('miplanfit_plan_id', planId);
   } else {
-    // Si el usuario está autenticado con Google pero NO tiene plan en Supabase
-    if (usuario && usuario.id !== 'local_user') {
-      // Redirigir a index.html informando que debe responder al cuestionario primero
+    // Si no hay plan en Supabase, verificar si hay un plan recién creado en el localStorage del usuario
+    const localPerfil = JSON.parse(localStorage.getItem('miplanfit_perfil') || 'null');
+    const localPlan30 = JSON.parse(localStorage.getItem('miplanfit_plan30') || 'null');
+    const localPlanId = localStorage.getItem('miplanfit_plan_id') || 'B';
+
+    if (localPerfil && localPlan30 && usuario && usuario.id !== 'local_user') {
+      // USUARIO NUEVO: Acaba de responder al cuestionario y se autenticó por 1ª vez con Google.
+      // Guardar su plan local en Supabase inmediatamente para asociarlo a su cuenta
+      perfil = localPerfil;
+      plan30 = localPlan30;
+      planId = localPlanId;
+
+      await salvarPlanoNaNuvem(usuario.id, {
+        perfil,
+        plan30,
+        planId,
+        imc: JSON.parse(localStorage.getItem('miplanfit_imc') || '{}'),
+        tmb: parseInt(localStorage.getItem('miplanfit_tmb') || '0'),
+        tdee: parseInt(localStorage.getItem('miplanfit_tdee') || '0')
+      });
+    } else if (usuario && usuario.id !== 'local_user') {
+      // INVASOR O USUARIO SIN PLAN: Entró directamente desde "Ya tengo cuenta" sin responder al cuestionario
       window.location.href = 'index.html?error=no_plan_found';
       return;
+    } else {
+      perfil  = localPerfil;
+      plan30  = localPlan30;
+      planId  = localPlanId;
     }
-
-    // Fallback a localStorage para usuarios sin sesión de Google
-    perfil  = JSON.parse(localStorage.getItem('miplanfit_perfil') || 'null');
-    plan30  = JSON.parse(localStorage.getItem('miplanfit_plan30') || 'null');
-    planId  = localStorage.getItem('miplanfit_plan_id') || 'B';
   }
 
   // Fallback de seguridad solo para usuarios locales no registrados
