@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MiPlanFit — Central de Inteligencia de Negocios (Admin Master 3.0)</title>
+  <title>MiPlanFit — Central de Inteligência de Negócios (Admin Master 3.0)</title>
   <link rel="stylesheet" href="css/style.css"/>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <style>
@@ -314,32 +314,32 @@
 </head>
 <body>
 
-<!-- Pantalla de Bloqueo de Seguridad (Acceso Restringido) -->
+<!-- Tela de Bloqueio de Segurança (Acesso Restrito) -->
 <div id="admin-lock-screen">
   <div class="lock-box">
     <div style="font-size:3.5rem; margin-bottom:16px;">🔐</div>
-    <h2 style="font-size:1.6rem; font-weight:900; margin-bottom:10px;">Acceso Restringido</h2>
+    <h2 style="font-size:1.6rem; font-weight:900; margin-bottom:10px;">Acesso Restrito</h2>
     <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:20px; line-height:1.6;">
-      Esta página contiene la Central de Inteligencia del MiPlanFit. Entra con tu clave master o tu cuenta de Google.
+      Esta página contém a Central de Inteligência do MiPlanFit. Entre com a sua Chave Master ou conta do Google.
     </p>
 
-    <!-- Opción 1: Clave Master Directa -->
+    <!-- Opção 1: Chave Master Directa -->
     <div style="margin-bottom:16px;">
-      <input type="password" id="admin-pin-input" placeholder="Introduce tu Clave Master..." style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid var(--border); border-radius:12px; color:white; font-size:0.9rem; text-align:center; outline:none; margin-bottom:10px;"/>
+      <input type="password" id="admin-pin-input" placeholder="Digite a sua Chave Master..." style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid var(--border); border-radius:12px; color:white; font-size:0.9rem; text-align:center; outline:none; margin-bottom:10px;"/>
       <button onclick="loginAdminConPin()" class="btn btn-green btn-full" style="padding:12px; font-weight:800;">
-        🔑 Acceder con Clave Master
+        🔑 Entrar com Chave Master
       </button>
     </div>
 
     <div style="display:flex; align-items:center; gap:10px; margin:16px 0;">
       <div style="flex:1; height:1px; background:rgba(255,255,255,0.1);"></div>
-      <span style="font-size:0.75rem; color:var(--text-muted);">O TAMBIÉN</span>
+      <span style="font-size:0.75rem; color:var(--text-muted);">OU TAMBÉM</span>
       <div style="flex:1; height:1px; background:rgba(255,255,255,0.1);"></div>
     </div>
 
-    <!-- Opción 2: Google Login -->
+    <!-- Opção 2: Google Login -->
     <button id="btn-admin-login" onclick="loginAdminConGoogle()" class="btn btn-outline btn-full" style="padding:12px; font-size:0.88rem;">
-      Entrar con Google Admin
+      Entrar com Google Admin
     </button>
     <div id="lock-error-msg" style="color:#ef4444; font-size:0.8rem; margin-top:14px; display:none;"></div>
   </div>
@@ -353,12 +353,12 @@
         <span style="font-size:1.6rem;">👑</span>
         <div>
           <span style="font-weight:900; font-size:1.1rem; color:white;">MiPlanFit BI Master 3.0</span>
-          <span class="badge badge-purple" style="margin-left:8px; font-size:0.68rem;">CENTRAL DE COMANDO</span>
+          <span class="badge badge-purple" style="margin-left:8px; font-size:0.68rem;">CENTRO DE COMANDO</span>
         </div>
       </div>
       <div style="display:flex; align-items:center; gap:14px;">
         <span id="admin-user-email" style="font-size:0.82rem; color:var(--text-muted);"></span>
-        <button onclick="logoutAdmin()" class="btn btn-outline btn-sm" style="font-size:0.78rem;">🚪 Salir</button>
+        <button onclick="logoutAdmin()" class="btn btn-outline btn-sm" style="font-size:0.78rem;">🚪 Sair</button>
       </div>
     </div>
   </div>
@@ -372,99 +372,99 @@
     <div class="kpi-card">
       <div class="kpi-icon">👥</div>
       <div class="kpi-value" id="kpi-total-users">--</div>
-      <div class="kpi-label">Total Leads Registrados</div>
-      <div class="kpi-sub" id="kpi-users-sub">Base de datos activa</div>
+      <div class="kpi-label">Total de Leads Cadastrados</div>
+      <div class="kpi-sub" id="kpi-users-sub">Banco de dados ativo</div>
     </div>
 
     <div class="kpi-card">
       <div class="kpi-icon" style="background:rgba(16,185,129,0.15);">🚀</div>
       <div class="kpi-value" id="kpi-plans-today">--</div>
-      <div class="kpi-label">Nuevos Leads Hoy</div>
-      <div class="kpi-sub" style="color:var(--green);" id="kpi-today-sub">Capturados hoy</div>
+      <div class="kpi-label">Novos Leads Hoje</div>
+      <div class="kpi-sub" style="color:var(--green);" id="kpi-today-sub">Capturados hoje</div>
     </div>
 
     <div class="kpi-card">
       <div class="kpi-icon" style="background:rgba(245,158,11,0.15);">💎</div>
       <div class="kpi-value" id="kpi-premium-users">--</div>
-      <div class="kpi-label">Ventas (€14,90 Pago Único)</div>
-      <div class="kpi-sub" style="color:var(--amber);" id="kpi-conversion-rate">0% Conversión Global</div>
+      <div class="kpi-label">Vendas (€14,90 Pago Único)</div>
+      <div class="kpi-sub" style="color:var(--amber);" id="kpi-conversion-rate">0% Conversão Global</div>
     </div>
 
     <div class="kpi-card">
       <div class="kpi-icon" style="background:rgba(239,68,68,0.15);">💪</div>
       <div class="kpi-value" id="kpi-total-kg-lost">-- kg</div>
-      <div class="kpi-label">Impacto Social Colectivo</div>
-      <div class="kpi-sub" style="color:#f87171;">Kg totales perdidos</div>
+      <div class="kpi-label">Impacto Social Coletivo</div>
+      <div class="kpi-sub" style="color:#f87171;">Kg totais perdidos</div>
     </div>
   </div>
 
-  <!-- Bloque 1: El Funil de Conversión (Pipeline de Ventas) -->
+  <!-- Bloco 1: O Funil de Conversão (Pipeline de Vendas) -->
   <div class="bi-card">
     <div class="bi-title">
-      <span>📊 Funil de Conversión en Tiempo Real</span>
-      <span class="badge badge-green" style="font-size:0.7rem; font-weight:700;">SALUD DEL NEGOCIO</span>
+      <span>📊 Funil de Conversão em Tempo Real</span>
+      <span class="badge badge-green" style="font-size:0.7rem; font-weight:700;">SAÚDE DO NEGÓCIO</span>
     </div>
 
     <div class="funnel-grid">
       <div class="funnel-step">
-        <div class="funnel-step-label">1. Visitas Totales</div>
+        <div class="funnel-step-label">1. Visitas Totais</div>
         <div class="funnel-step-val" id="fnl-visitas">--</div>
-        <div class="funnel-step-pct">100% Tráfico</div>
+        <div class="funnel-step-pct">100% Tráfego</div>
       </div>
 
       <div class="funnel-step">
-        <div class="funnel-step-label">2. Inicios de Quiz</div>
+        <div class="funnel-step-label">2. Inícios de Quiz</div>
         <div class="funnel-step-val" id="fnl-quiz-starts">--</div>
-        <div class="funnel-step-pct" id="fnl-pct-quiz">--% del tráfico</div>
+        <div class="funnel-step-pct" id="fnl-pct-quiz">--% do tráfego</div>
       </div>
 
       <div class="funnel-step">
-        <div class="funnel-step-label">3. Leads Registrados</div>
+        <div class="funnel-step-label">3. Leads Cadastrados</div>
         <div class="funnel-step-val" id="fnl-leads">--</div>
-        <div class="funnel-step-pct" id="fnl-pct-leads">--% del quiz</div>
+        <div class="funnel-step-pct" id="fnl-pct-leads">--% do quiz</div>
       </div>
 
       <div class="funnel-step" style="border-color:rgba(16,185,129,0.5); background:rgba(16,185,129,0.06);">
-        <div class="funnel-step-label" style="color:var(--green);">4. Ventas (€14,90)</div>
+        <div class="funnel-step-label" style="color:var(--green);">4. Vendas (€14,90)</div>
         <div class="funnel-step-val" style="color:var(--green);" id="fnl-ventas">--</div>
-        <div class="funnel-step-pct" style="color:var(--green);" id="fnl-pct-ventas">--% Conversión</div>
+        <div class="funnel-step-pct" style="color:var(--green);" id="fnl-pct-ventas">--% Conversão</div>
       </div>
     </div>
 
-    <!-- Calculadora CPL y ROI de Anuncios -->
+    <!-- Calculadora CPL e ROI de Anúncios -->
     <div class="roi-box">
       <div>
-        <div style="font-weight:800; color:white; font-size:0.95rem;">💶 Calculadora de Retorno de Anuncios (ROI)</div>
-        <div style="font-size:0.8rem; color:var(--text-muted);">Calcula tu costo por lead y beneficio neto en tiempo real</div>
+        <div style="font-weight:800; color:white; font-size:0.95rem;">💶 Calculadora de Retorno de Anúncios (ROI)</div>
+        <div style="font-size:0.8rem; color:var(--text-muted);">Calcule seu custo por lead e lucro líquido em tempo real</div>
       </div>
 
       <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
         <div class="roi-input-group">
-          <label style="font-size:0.78rem; color:var(--text-muted);">Gasto Anuncios (€):</label>
+          <label style="font-size:0.78rem; color:var(--text-muted);">Gasto Anúncios (€):</label>
           <input type="number" id="roi-ad-spend" value="0" min="0" oninput="calcularROINegocio()"/>
         </div>
 
         <div style="font-size:0.85rem;">
-          <span style="color:var(--text-muted);">Costo p/ Lead:</span>
+          <span style="color:var(--text-muted);">Custo p/ Lead:</span>
           <strong id="roi-cpl" style="color:white; margin-left:4px;">€0.00</strong>
         </div>
 
         <div style="font-size:0.85rem;">
-          <span style="color:var(--text-muted);">Beneficio Neto:</span>
+          <span style="color:var(--text-muted);">Lucro Líquido:</span>
           <strong id="roi-net-profit" style="color:var(--green); margin-left:4px;">€0.00</strong>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Bloque 2: Alerta de "Leads en Día 3" (Oportunidades de Venta Directa) -->
+  <!-- Bloco 2: Alerta de "Leads em Dia 3" (Oportunidades de Venda Directa) -->
   <div class="bi-card" style="border-color:rgba(245,158,11,0.4);">
     <div class="bi-title" style="color:var(--amber);">
-      <span>🔥 Alerta de Oportunidad: Leads en Día 3 de Prueba</span>
-      <span class="badge badge-amber" style="font-size:0.7rem;">¡LISTOS PARA COMPRAR!</span>
+      <span>🔥 Alerta de Oportunidade: Leads no 3º Dia de Teste</span>
+      <span class="badge badge-amber" style="font-size:0.7rem;">PRONTOS PARA COMPRAR!</span>
     </div>
     <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:18px;">
-      Estos usuarios están completando su 3º día gratuito HOJE. Haz clic para hablar con ellos por WhatsApp y ofrecer la liberación del mes completo por €14,90.
+      Estes usuários estão completando o 3º dia gratuito HOJE. Clique para falar com eles no WhatsApp e oferecer a liberação do mês completo por €14,90.
     </p>
 
     <div class="hot-leads-grid" id="hot-leads-container">
@@ -472,19 +472,19 @@
     </div>
   </div>
 
-  <!-- Controles, Búsqueda y Filtros de Tabla -->
+  <!-- Controles, Busca e Filtros da Tabela -->
   <div class="admin-controls">
     <div class="admin-search">
       <span class="admin-search-icon">🔍</span>
-      <input type="text" id="admin-search-input" placeholder="Buscar usuario por nombre o e-mail..." oninput="filtrarTablaAdmin()"/>
+      <input type="text" id="admin-search-input" placeholder="Buscar usuário por nome ou e-mail..." oninput="filtrarTablaAdmin()"/>
     </div>
 
     <div style="display:flex; gap:12px; flex-wrap:wrap;">
       <select id="admin-filter-status" onchange="filtrarTablaAdmin()" style="background:rgba(0,0,0,0.4); border:1px solid var(--border); color:white; padding:10px 14px; border-radius:12px; font-size:0.85rem; outline:none;">
-        <option value="todos">Todos los Estados</option>
-        <option value="premium">Solo Premium (Pagos €14,90)</option>
-        <option value="free">Solo Gratuitos (3 Días)</option>
-        <option value="dia3">🔥 Solo Día 3 (Cerca del bloqueo)</option>
+        <option value="todos">Todos os Status</option>
+        <option value="premium">Apenas Premium (Pagos €14,90)</option>
+        <option value="free">Apenas Gratuitos (3 Dias)</option>
+        <option value="dia3">🔥 Apenas Dia 3 (Perto do bloqueio)</option>
       </select>
 
       <button onclick="exportarUsuariosCSV()" class="btn btn-outline btn-sm" style="font-size:0.82rem; gap:6px;">
@@ -492,29 +492,29 @@
       </button>
 
       <button onclick="cargarDatosAdmin()" class="btn btn-primary btn-sm" style="font-size:0.82rem; gap:6px;">
-        🔄 Actualizar
+        🔄 Atualizar
       </button>
     </div>
   </div>
 
-  <!-- Tabla Master de Usuarios -->
+  <!-- Tabela Master de Usuários -->
   <div class="table-container">
     <table class="admin-table">
       <thead>
         <tr>
-          <th>Usuario / Email</th>
-          <th>Fecha Registro</th>
+          <th>Usuário / Email</th>
+          <th>Data de Cadastro</th>
           <th>Objetivo / Peso</th>
           <th>Dieta</th>
-          <th>Progreso / Racha</th>
-          <th>Estado del Plan</th>
-          <th>Acción</th>
+          <th>Progresso / Racha</th>
+          <th>Status do Plano</th>
+          <th>Ação</th>
         </tr>
       </thead>
       <tbody id="admin-users-table-body">
         <tr>
           <td colspan="7" style="text-align:center; padding:40px; color:var(--text-muted);">
-            ⏳ Cargando datos de Inteligencia desde Supabase...
+            ⏳ Carregando dados de Inteligência do Supabase...
           </td>
         </tr>
       </tbody>
@@ -523,7 +523,7 @@
 
 </main>
 
-<!-- Drawer / Modal de Gestión de Cliente (Panel Lateral) -->
+<!-- Drawer / Modal de Gestão do Cliente (Painel Lateral) -->
 <div class="drawer-overlay" id="client-drawer">
   <div class="drawer-content">
     <div>
@@ -531,7 +531,7 @@
         <div style="display:flex; align-items:center; gap:10px;">
           <span style="font-size:1.6rem;">👤</span>
           <div>
-            <h3 style="font-size:1.1rem; margin:0;" id="drw-title-name">Gestión de Cliente</h3>
+            <h3 style="font-size:1.1rem; margin:0;" id="drw-title-name">Gestão do Cliente</h3>
             <span style="font-size:0.75rem; color:var(--text-muted);" id="drw-title-email">cliente@email.com</span>
           </div>
         </div>
@@ -541,12 +541,12 @@
       <input type="hidden" id="drw-user-id"/>
 
       <div class="drawer-form-group">
-        <label>Nombre Completo</label>
+        <label>Nome Completo</label>
         <input type="text" id="drw-input-nombre"/>
       </div>
 
       <div class="drawer-form-group">
-        <label>E-mail de Contacto</label>
+        <label>E-mail de Contato</label>
         <input type="email" id="drw-input-email"/>
       </div>
 
@@ -556,7 +556,7 @@
           <input type="number" id="drw-input-peso-init" step="0.1"/>
         </div>
         <div class="drawer-form-group">
-          <label>Peso Actual (kg)</label>
+          <label>Peso Atual (kg)</label>
           <input type="number" id="drw-input-peso-actual" step="0.1"/>
         </div>
       </div>
@@ -567,34 +567,34 @@
           <input type="number" id="drw-input-objetivo-kg"/>
         </div>
         <div class="drawer-form-group">
-          <label>Nivel Actividad</label>
+          <label>Nível de Atividade</label>
           <select id="drw-input-actividad">
-            <option value="sedentario">Sedentario</option>
+            <option value="sedentario">Sedentário</option>
             <option value="moderado">Moderado</option>
-            <option value="activo">Muy Activo</option>
+            <option value="activo">Muito Ativo</option>
           </select>
         </div>
       </div>
 
-      <!-- Info Preferencias y Alergias -->
+      <!-- Info Preferências e Alergias -->
       <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:14px; padding:14px; margin-top:10px;">
-        <div style="font-size:0.75rem; font-weight:700; color:var(--purple-light); margin-bottom:6px; text-transform:uppercase;">🚫 Alimentos Odiados / Excluidos:</div>
-        <div id="drw-info-excluidos" style="font-size:0.82rem; color:var(--text-secondary);">Ninguno</div>
+        <div style="font-size:0.75rem; font-weight:700; color:var(--purple-light); margin-bottom:6px; text-transform:uppercase;">🚫 Alimentos Odiados / Excluídos:</div>
+        <div id="drw-info-excluidos" style="font-size:0.82rem; color:var(--text-secondary);">Nenhum</div>
       </div>
     </div>
 
-    <!-- Botones de Acción -->
+    <!-- Botões de Ação -->
     <div style="display:flex; flex-direction:column; gap:10px; margin-top:24px; border-top:1px solid var(--border); padding-top:18px;">
       <button onclick="guardarCambiosCliente()" class="btn btn-primary btn-full" style="padding:12px;">
-        💾 Guardar Cambios en Supabase
+        💾 Salvar Alterações no Supabase
       </button>
       
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
         <button id="drw-btn-toggle-premium" onclick="togglePremiumDrawer()" class="btn btn-green btn-sm" style="padding:10px;">
-          ✨ Activar Premium
+          ✨ Ativar Premium
         </button>
         <button onclick="resetearPlanCliente()" class="btn btn-outline btn-sm" style="padding:10px; color:#f87171; border-color:rgba(239,68,68,0.4);">
-          🔄 Resetear a Día 1
+          🔄 Resetar para o Dia 1
         </button>
       </div>
     </div>

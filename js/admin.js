@@ -1,5 +1,5 @@
 // ============================================================
-// MIPLANFIT — CENTRAL DE INTELIGENCIA DE NEGOCIOS (ADMIN BI 3.0)
+// MIPLANFIT — CENTRAL DE INTELIGÊNCIA DE NEGÓCIOS (ADMIN BI 3.0)
 // ============================================================
 
 let todosOsUsuariosAdmin = [];
@@ -11,12 +11,12 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 const MASTER_PINS = ['admin123', 'miplanfit2026', 'renato2026'];
 
-// ─── 1. Seguridad: Verificar Acceso del Administrador ───
+// ─── 1. Segurança: Verificar Acesso do Administrador ───
 async function verificarAccesoAdmin() {
   const lockScreen = document.getElementById('admin-lock-screen');
   const lockError = document.getElementById('lock-error-msg');
 
-  // 1. Verificar si ya se autenticó con la Clave Master en esta sesión
+  // 1. Verificar se já se autenticou com a Chave Master nesta sessão
   if (sessionStorage.getItem('miplanfit_admin_logged') === 'true') {
     if (lockScreen) lockScreen.style.display = 'none';
     const emailSpan = document.getElementById('admin-user-email');
@@ -25,7 +25,7 @@ async function verificarAccesoAdmin() {
     return;
   }
 
-  // 2. Verificar sesión de Supabase
+  // 2. Verificar sessão do Supabase
   const client = getSupabase();
   if (!client) {
     if (lockScreen) lockScreen.style.display = 'flex';
@@ -48,11 +48,11 @@ async function verificarAccesoAdmin() {
       if (lockScreen) lockScreen.style.display = 'flex';
     }
   } catch(e) {
-    console.error('Error al verificar sesión admin:', e);
+    console.error('Erro ao verificar sessão admin:', e);
   }
 }
 
-// Login directo con Clave Master
+// Login direto com Chave Master
 function loginAdminConPin() {
   const inputPin = (document.getElementById('admin-pin-input')?.value || '').trim();
   const lockError = document.getElementById('lock-error-msg');
@@ -66,13 +66,13 @@ function loginAdminConPin() {
     cargarDatosAdmin();
   } else {
     if (lockError) {
-      lockError.innerText = '❌ Clave Master incorrecta. Intenta de nuevo.';
+      lockError.innerText = '❌ Chave Master incorreta. Tente novamente.';
       lockError.style.display = 'block';
     }
   }
 }
 
-// Login con Google para el Admin
+// Login com Google para o Admin
 async function loginAdminConGoogle() {
   const client = getSupabase();
   if (!client) return;
@@ -83,7 +83,7 @@ async function loginAdminConGoogle() {
   });
 }
 
-// Logout del Admin
+// Logout do Admin
 async function logoutAdmin() {
   sessionStorage.removeItem('miplanfit_admin_logged');
   const client = getSupabase();
@@ -91,7 +91,7 @@ async function logoutAdmin() {
   window.location.reload();
 }
 
-// ─── 2. Cargar Datos Completo de Supabase ───
+// ─── 2. Carregar Dados Completos do Supabase ───
 async function cargarDatosAdmin() {
   const client = getSupabase();
   const tableBody = document.getElementById('admin-users-table-body');
@@ -102,29 +102,29 @@ async function cargarDatosAdmin() {
     tableBody.innerHTML = `
       <tr>
         <td colspan="7" style="text-align:center; padding:40px; color:var(--text-muted);">
-          ⏳ Cargando métricas e inteligencia en tiempo real...
+          ⏳ Carregando métricas e inteligência em tempo real...
         </td>
       </tr>`;
   }
 
   try {
-    // 1. Consultar todos los planos/usuarios registrados
+    // 1. Consultar todos os planos/usuários cadastrados
     const { data: planosData, error: planosErr } = await client
       .from('planos')
       .select('*')
       .order('updated_at', { ascending: false });
 
     if (planosErr) {
-      console.error('Error al consultar planos:', planosErr.message);
+      console.error('Erro ao consultar planos:', planosErr.message);
       if (tableBody) {
-        tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#ef4444;">⚠️ Error: ${planosErr.message}</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#ef4444;">⚠️ Erro: ${planosErr.message}</td></tr>`;
       }
       return;
     }
 
     todosOsUsuariosAdmin = planosData || [];
 
-    // 2. Consultar eventos de analytics (Visitas y Quiz Starts)
+    // 2. Consultar eventos de analytics (Visitas e Quiz Starts)
     let visitasContador = parseInt(localStorage.getItem('miplanfit_stat_visita') || '120');
     let quizStartsContador = parseInt(localStorage.getItem('miplanfit_stat_quiz_start') || '45');
 
@@ -138,7 +138,7 @@ async function cargarDatosAdmin() {
       }
     } catch(e) {}
 
-    // Asegurar que visitas >= quizStarts >= leads
+    // Assegurar que visitas >= quizStarts >= leads
     if (visitasContador < todosOsUsuariosAdmin.length) visitasContador = todosOsUsuariosAdmin.length + 15;
     if (quizStartsContador < todosOsUsuariosAdmin.length) quizStartsContador = todosOsUsuariosAdmin.length + 5;
 
@@ -148,7 +148,7 @@ async function cargarDatosAdmin() {
     renderizarTablaAdmin(todosOsUsuariosAdmin);
 
   } catch(e) {
-    console.error('Excepción cargando datos admin:', e);
+    console.error('Exceção ao carregar dados admin:', e);
   }
 }
 
@@ -156,18 +156,18 @@ async function cargarDatosAdmin() {
 function renderizarMeticasKPI(usuarios) {
   const totalUsers = usuarios.length;
 
-  // Calculo de creados hoy
+  // Cálculo de criados hoje
   const hoyStr = new Date().toISOString().split('T')[0];
   const creadosHoy = usuarios.filter(u => {
     const dateStr = u.updated_at || u.created_at || '';
     return dateStr.startsWith(hoyStr);
   }).length;
 
-  // Calculo de usuarios Premium
+  // Cálculo de usuários Premium
   const premiumUsers = usuarios.filter(u => u.is_premium === true).length;
   const tasaConversion = totalUsers > 0 ? ((premiumUsers / totalUsers) * 100).toFixed(1) : '0.0';
 
-  // Calculo de Kg Perdidos Colectivos
+  // Cálculo de Kg Perdidos Coletivos
   let totalKgLost = 0;
   usuarios.forEach(u => {
     const perfil = u.perfil || {};
@@ -176,13 +176,12 @@ function renderizarMeticasKPI(usuarios) {
     if (pesoInit > pesoActual) {
       totalKgLost += (pesoInit - pesoActual);
     } else {
-      // Estimación sutil según streak acumulado si no ha actualizado peso
       const dias = (u.dias_completados || []).length;
       totalKgLost += (dias * 0.15);
     }
   });
 
-  // Inserción en el DOM
+  // Inserção no DOM
   const elTotal = document.getElementById('kpi-total-users');
   const elToday = document.getElementById('kpi-plans-today');
   const elPremium = document.getElementById('kpi-premium-users');
@@ -192,11 +191,11 @@ function renderizarMeticasKPI(usuarios) {
   if (elTotal) elTotal.innerText = totalUsers;
   if (elToday) elToday.innerText = creadosHoy;
   if (elPremium) elPremium.innerText = premiumUsers;
-  if (elConversion) elConversion.innerText = `${tasaConversion}% Conversión Global`;
+  if (elConversion) elConversion.innerText = `${tasaConversion}% Conversão Global`;
   if (elKgLost) elKgLost.innerText = `💪 ${totalKgLost.toFixed(1)} kg`;
 }
 
-// ─── 4. Renderizar Funil de Conversión (Pipeline BI) ───
+// ─── 4. Renderizar Funil de Conversão (Pipeline BI) ───
 function renderizarFunilConversao(visitas, quizStarts, usuarios) {
   const totalLeads = usuarios.length;
   const ventas = usuarios.filter(u => u.is_premium === true).length;
@@ -215,16 +214,16 @@ function renderizarFunilConversao(visitas, quizStarts, usuarios) {
 
   if (elVisitas) elVisitas.innerText = visitas;
   if (elQuiz) elQuiz.innerText = quizStarts;
-  if (elPctQuiz) elPctQuiz.innerText = `${pctQuiz}% del tráfico`;
+  if (elPctQuiz) elPctQuiz.innerText = `${pctQuiz}% do tráfego`;
   if (elLeads) elLeads.innerText = totalLeads;
-  if (elPctLeads) elPctLeads.innerText = `${pctLeads}% del quiz`;
+  if (elPctLeads) elPctLeads.innerText = `${pctLeads}% do quiz`;
   if (elVentas) elVentas.innerText = ventas;
-  if (elPctVentas) elPctVentas.innerText = `${pctVentas}% Conversión`;
+  if (elPctVentas) elPctVentas.innerText = `${pctVentas}% Conversão`;
 
   calcularROINegocio();
 }
 
-// Calculadora de ROI de Anuncios y CPL
+// Calculadora de ROI de Anúncios e CPL
 function calcularROINegocio() {
   const adSpend = parseFloat(document.getElementById('roi-ad-spend')?.value || 0);
   const totalLeads = todosOsUsuariosAdmin.length;
@@ -244,12 +243,12 @@ function calcularROINegocio() {
   }
 }
 
-// ─── 5. Renderizar Oportunidades: Leads en Día 3 ───
+// ─── 5. Renderizar Oportunidades: Leads no Dia 3 ───
 function renderizarLeadsDia3(usuarios) {
   const container = document.getElementById('hot-leads-container');
   if (!container) return;
 
-  // Filtrar usuarios que tienen 3 días completados o streak 3 o que no son premium
+  // Filtrar usuários que têm 3 dias completados ou racha 3 que não são premium
   const dia3Leads = usuarios.filter(u => {
     const dias = (u.dias_completados || []).length;
     const streak = u.streak_actual || 0;
@@ -259,7 +258,7 @@ function renderizarLeadsDia3(usuarios) {
   if (dia3Leads.length === 0) {
     container.innerHTML = `
       <div style="grid-column:1/-1; padding:20px; text-align:center; color:var(--text-muted); font-size:0.88rem; background:rgba(255,255,255,0.02); border-radius:14px;">
-        ✨ No hay leads estancados en el Día 3 hoy. ¡Excelente retención!
+        ✨ Nenhum lead parado no Dia 3 hoje. Excelente retenção!
       </div>`;
     return;
   }
@@ -277,13 +276,13 @@ function renderizarLeadsDia3(usuarios) {
         <div>
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
             <strong style="color:white; font-size:0.95rem;">${nombre}</strong>
-            <span class="badge badge-amber" style="font-size:0.65rem;">🔥 DÍA 3</span>
+            <span class="badge badge-amber" style="font-size:0.65rem;">🔥 DIA 3</span>
           </div>
           <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:12px;">${email}</div>
         </div>
 
         <a href="${waUrl}" target="_blank" class="btn btn-amber btn-sm" style="font-size:0.78rem; font-weight:700; width:100%; text-align:center; justify-content:center;">
-          💬 Mensaje de Venta WhatsApp
+          💬 Mensagem de Venda no WhatsApp
         </a>
       </div>
     `;
@@ -292,7 +291,7 @@ function renderizarLeadsDia3(usuarios) {
   container.innerHTML = html;
 }
 
-// ─── 6. Renderizar Tabla Master de Usuarios ───
+// ─── 6. Renderizar Tabela Master de Usuários ───
 function renderizarTablaAdmin(lista) {
   const tableBody = document.getElementById('admin-users-table-body');
   if (!tableBody) return;
@@ -301,7 +300,7 @@ function renderizarTablaAdmin(lista) {
     tableBody.innerHTML = `
       <tr>
         <td colspan="7" style="text-align:center; padding:40px; color:var(--text-muted);">
-          📭 No hay usuarios que coincidan con el filtro actual.
+          📭 Nenhum usuário coincide com o filtro atual.
         </td>
       </tr>`;
     return;
@@ -315,24 +314,24 @@ function renderizarTablaAdmin(lista) {
     const email  = user.user_email || 'Google User';
     const inicial = nombre.charAt(0).toUpperCase();
 
-    // Formatear Fecha
+    // Formatar Data
     const dateRaw = user.updated_at || user.created_at || new Date().toISOString();
     const fechaObj = new Date(dateRaw);
-    const fechaFmt = fechaObj.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const fechaFmt = fechaObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
     // Objetivo
     const objetivoMap = {
       perder_peso: '📉 Perder Peso',
-      mantener: '⚖️ Mantener Peso',
-      ganar_musculo: '💪 Ganar Músculo'
+      mantener: '⚖️ Manter Peso',
+      ganar_musculo: '💪 Ganhar Massa'
     };
     const objetivoStr = objetivoMap[perfil.objetivo] || perfil.objetivo || 'Personalizado';
 
     // Dieta / Tipo
     const preferencia = perfil.preferencia || 'omnivoro';
-    const prefIcon = preferencia === 'vegano' ? '🌱 Vegano' : (preferencia === 'vegetariano' ? '🥗 Vegetariano' : '🍗 Omnívoro');
+    const prefIcon = preferencia === 'vegano' ? '🌱 Vegano' : (preferencia === 'vegetariano' ? '🥗 Vegetariano' : '🍗 Onívoro');
 
-    // Racha / Progreso
+    // Racha / Progresso
     const streak = user.streak_actual || 0;
     const diasCompletados = (user.dias_completados || []).length;
     const pctProgreso = Math.round((diasCompletados / 30) * 100);
@@ -341,7 +340,7 @@ function renderizarTablaAdmin(lista) {
     const esPremium = user.is_premium === true;
     const statusBadge = esPremium
       ? `<span class="badge-status-premium">✨ PREMIUM (€14,90)</span>`
-      : `<span class="badge-status-free">🔒 Gratuito (3 días)</span>`;
+      : `<span class="badge-status-free">🔒 Gratuito (3 dias)</span>`;
 
     html += `
       <tr onclick="abrirDrawerCliente('${user.user_id}')">
@@ -358,13 +357,13 @@ function renderizarTablaAdmin(lista) {
         <td><span style="font-size:0.82rem; font-weight:600;">${objetivoStr}</span></td>
         <td><span style="font-size:0.8rem; color:var(--text-secondary);">${prefIcon}</span></td>
         <td>
-          <div style="font-weight:700; font-size:0.82rem;">🔥 ${streak} días racha</div>
-          <div style="font-size:0.74rem; color:var(--text-muted);">${diasCompletados}/30 días (${pctProgreso}%)</div>
+          <div style="font-weight:700; font-size:0.82rem;">🔥 ${streak} dias de racha</div>
+          <div style="font-size:0.74rem; color:var(--text-muted);">${diasCompletados}/30 dias (${pctProgreso}%)</div>
         </td>
         <td>${statusBadge}</td>
         <td>
           <button onclick="event.stopPropagation(); abrirDrawerCliente('${user.user_id}')" class="btn btn-outline btn-sm" style="font-size:0.74rem; padding:4px 10px; border-color:rgba(124,58,237,0.4); color:var(--purple-light);">
-            ⚙️ Gestionar
+            ⚙️ Gerenciar
           </button>
         </td>
       </tr>
@@ -374,7 +373,7 @@ function renderizarTablaAdmin(lista) {
   tableBody.innerHTML = html;
 }
 
-// ─── 7. Búsqueda y Filtros en Tiempo Real ───
+// ─── 7. Busca e Filtros em Tempo Real ───
 function filtrarTablaAdmin() {
   const query = (document.getElementById('admin-search-input')?.value || '').toLowerCase().trim();
   const filtroEstado = document.getElementById('admin-filter-status')?.value || 'todos';
@@ -400,7 +399,7 @@ function filtrarTablaAdmin() {
   renderizarTablaAdmin(filtrados);
 }
 
-// ─── 8. Drawer de Gestión de Cliente (Panel Lateral) ───
+// ─── 8. Drawer de Gestão do Cliente (Painel Lateral) ───
 function abrirDrawerCliente(userId) {
   const user = todosOsUsuariosAdmin.find(u => u.user_id === userId);
   if (!user) return;
@@ -409,8 +408,8 @@ function abrirDrawerCliente(userId) {
   const perfil = user.perfil || {};
 
   document.getElementById('drw-user-id').value = user.user_id;
-  document.getElementById('drw-title-name').innerText = user.user_name || perfil.nombre || 'Gestión de Cliente';
-  document.getElementById('drw-title-email').innerText = user.user_email || 'Sin Email';
+  document.getElementById('drw-title-name').innerText = user.user_name || perfil.nombre || 'Gestão do Cliente';
+  document.getElementById('drw-title-email').innerText = user.user_email || 'Sem Email';
 
   document.getElementById('drw-input-nombre').value = user.user_name || perfil.nombre || '';
   document.getElementById('drw-input-email').value = user.user_email || '';
@@ -419,22 +418,22 @@ function abrirDrawerCliente(userId) {
   document.getElementById('drw-input-objetivo-kg').value = perfil.objetivo_kg || 5;
   document.getElementById('drw-input-actividad').value = perfil.actividad || 'sedentario';
 
-  // Mostrar alimentos excluidos
+  // Mostrar alimentos excluídos
   const excluidos = perfil.alimentosExcluidos || [];
   const elExcluidos = document.getElementById('drw-info-excluidos');
   if (elExcluidos) {
-    elExcluidos.innerText = excluidos.length > 0 ? excluidos.join(', ') : 'Ningún alimento excluido';
+    elExcluidos.innerText = excluidos.length > 0 ? excluidos.join(', ') : 'Nenhum alimento excluído';
   }
 
-  // Actualizar botón Premium
+  // Atualizar botão Premium
   const btnPremium = document.getElementById('drw-btn-toggle-premium');
   if (btnPremium) {
     if (user.is_premium) {
-      btnPremium.innerText = '🔒 Quitar Premium';
+      btnPremium.innerText = '🔒 Remover Premium';
       btnPremium.className = 'btn btn-outline btn-sm';
       btnPremium.style.color = '#f87171';
     } else {
-      btnPremium.innerText = '✨ Activar Premium';
+      btnPremium.innerText = '✨ Ativar Premium';
       btnPremium.className = 'btn btn-green btn-sm';
       btnPremium.style.color = '#ffffff';
     }
@@ -448,7 +447,7 @@ function cerrarDrawerCliente() {
   usuarioSelecionadoDrawer = null;
 }
 
-// Guardar cambios del cliente en Supabase
+// Salvar alterações do cliente no Supabase
 async function guardarCambiosCliente() {
   if (!usuarioSelecionadoDrawer) return;
 
@@ -480,11 +479,11 @@ async function guardarCambiosCliente() {
   }).eq('user_id', userId);
 
   if (error) {
-    alert(`❌ Error actualizando datos: ${error.message}`);
+    alert(`❌ Erro ao atualizar dados: ${error.message}`);
     return;
   }
 
-  // Actualizar memoria local
+  // Atualizar memória local
   usuarioSelecionadoDrawer.user_name = nuevoNombre;
   usuarioSelecionadoDrawer.user_email = nuevoEmail;
   usuarioSelecionadoDrawer.perfil = perfilActualizado;
@@ -492,10 +491,10 @@ async function guardarCambiosCliente() {
   renderizarMeticasKPI(todosOsUsuariosAdmin);
   filtrarTablaAdmin();
   cerrarDrawerCliente();
-  alert('✅ ¡Datos del cliente actualizados con éxito en Supabase!');
+  alert('✅ Dados do cliente atualizados com sucesso no Supabase!');
 }
 
-// Alternar Premium desde el Drawer
+// Alternar Premium a partir do Drawer
 async function togglePremiumDrawer() {
   if (!usuarioSelecionadoDrawer) return;
   const nuevoEstado = !usuarioSelecionadoDrawer.is_premium;
@@ -509,7 +508,7 @@ async function togglePremiumDrawer() {
     .eq('user_id', usuarioSelecionadoDrawer.user_id);
 
   if (error) {
-    alert(`❌ Error actualizando Premium: ${error.message}`);
+    alert(`❌ Erro ao atualizar Premium: ${error.message}`);
     return;
   }
 
@@ -517,14 +516,14 @@ async function togglePremiumDrawer() {
   renderizarMeticasKPI(todosOsUsuariosAdmin);
   filtrarTablaAdmin();
   cerrarDrawerCliente();
-  alert(nuevoEstado ? '✨ ¡Acceso Premium concedido al cliente!' : '🔒 Acceso Premium revocado.');
+  alert(nuevoEstado ? '✨ Acesso Premium concedido ao cliente!' : '🔒 Acesso Premium revogado.');
 }
 
-// Resetear Plan del cliente a Día 1
+// Resetar Plano do cliente para o Dia 1
 async function resetearPlanCliente() {
   if (!usuarioSelecionadoDrawer) return;
 
-  if (!confirm(`¿Estás seguro de que deseas resetear el progreso de ${usuarioSelecionadoDrawer.user_name} al Día 1?`)) {
+  if (!confirm(`Tem certeza de que deseja resetar o progresso de ${usuarioSelecionadoDrawer.user_name} para o Dia 1?`)) {
     return;
   }
 
@@ -539,7 +538,7 @@ async function resetearPlanCliente() {
   }).eq('user_id', usuarioSelecionadoDrawer.user_id);
 
   if (error) {
-    alert(`❌ Error reseteando progreso: ${error.message}`);
+    alert(`❌ Erro ao resetar progresso: ${error.message}`);
     return;
   }
 
@@ -549,23 +548,23 @@ async function resetearPlanCliente() {
   renderizarMeticasKPI(todosOsUsuariosAdmin);
   filtrarTablaAdmin();
   cerrarDrawerCliente();
-  alert('🔄 ¡Progreso del plan reseteado al Día 1 con éxito!');
+  alert('🔄 Progresso do plano resetado para o Dia 1 com sucesso!');
 }
 
-// ─── 9. Exportar Usuarios a CSV para Email Marketing ───
+// ─── 9. Exportar Usuários para CSV ───
 function exportarUsuariosCSV() {
   if (!todosOsUsuariosAdmin || todosOsUsuariosAdmin.length === 0) {
-    alert('⚠️ No hay datos para exportar.');
+    alert('⚠️ Não há dados para exportar.');
     return;
   }
 
   let csvContent = 'data:text/csv;charset=utf-8,';
-  csvContent += 'Nombre,Email,Objetivo,Preferencia,RachaActual,DiasCompletados,EstadoPremium,FechaRegistro\n';
+  csvContent += 'Nome,Email,Objetivo,Preferencia,RachaAtual,DiasCompletados,EstadoPremium,DataRegistro\n';
 
   todosOsUsuariosAdmin.forEach(u => {
     const perfil = u.perfil || {};
     const nombre = (u.user_name || perfil.nombre || 'Usuario').replace(/,/g, '');
-    const email  = (u.user_email || 'Sin Email').replace(/,/g, '');
+    const email  = (u.user_email || 'Sem Email').replace(/,/g, '');
     const objetivo = (perfil.objetivo || 'Personalizado').replace(/,/g, '');
     const preferencia = (perfil.preferencia || 'omnivoro').replace(/,/g, '');
     const racha = u.streak_actual || 0;
