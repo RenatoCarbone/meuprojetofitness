@@ -127,7 +127,31 @@ document.addEventListener('DOMContentLoaded', async function() {
     try {
       const { data: { session } } = await client.auth.getSession();
       if (session) {
-        // Consultar a la base de datos Supabase si esta cuenta tiene un plan registrado
+        // ¿Tiene un plan generado localmente en el navegador por responder al cuestionario?
+        const perfilLocal = localStorage.getItem('miplanfit_perfil');
+        const plan30Local = localStorage.getItem('miplanfit_plan30');
+
+        if (perfilLocal && plan30Local) {
+          // ES UN USUARIO NUEVO QUE ACABA DE COMPLETAR EL CUESTIONARIO:
+          // Guardar su plan local en Supabase inmediatamente y enviarlo a plano.html
+          try {
+            const perfilParsed = JSON.parse(perfilLocal);
+            const plan30Parsed = JSON.parse(plan30Local);
+            const planIdLocal  = localStorage.getItem('miplanfit_plan_id') || 'B';
+            await salvarPlanoNaNuvem(session.user.id, {
+              perfil: perfilParsed,
+              plan30: plan30Parsed,
+              planId: planIdLocal
+            });
+          } catch(err) {
+            console.error('Error guardando plan nuevo en nube:', err);
+          }
+          window.location.href = 'plano.html';
+          return;
+        }
+
+        // SI NO TIENE PLAN LOCAL (intentó entrar directamente desde "Ya tengo cuenta"):
+        // Consultar a la base de datos Supabase si esta cuenta ya tenía un plan guardado anteriormente
         const { data: planData } = await client
           .from('planos')
           .select('user_id')
@@ -135,11 +159,11 @@ document.addEventListener('DOMContentLoaded', async function() {
           .maybeSingle();
 
         if (planData && planData.user_id) {
-          // SI TIENE PLAN EN LA NUBE -> REDIRIGIR A PLANO.HTML
+          // SI TIENE PLAN PREVIO EN LA NUBE -> REDIRIGIR A PLANO.HTML
           window.location.href = 'plano.html';
           return;
         } else {
-          // NO TIENE PLAN EN LA NUBE -> BLOQUEAR Y MOSTRAR ADVERTENCIA
+          // NO TIENE PLAN LOCAL NI EN LA NUBE -> BLOQUEAR Y MOSTRAR ADVERTENCIA
           showError('⚠️ No encontramos un plan registrado para esta cuenta de Google. Por favor, responde al cuestionario de 2 min.');
           setTimeout(() => {
             const form = document.getElementById('formulario');
