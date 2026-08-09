@@ -9,17 +9,26 @@ document.addEventListener('DOMContentLoaded', async function() {
   await verificarAccesoAdmin();
 });
 
+const MASTER_PINS = ['admin123', 'miplanfit2026', 'renato2026'];
+
 // ─── 1. Seguridad: Verificar Acceso del Administrador ───
 async function verificarAccesoAdmin() {
-  const client = getSupabase();
   const lockScreen = document.getElementById('admin-lock-screen');
   const lockError = document.getElementById('lock-error-msg');
 
+  // 1. Verificar si ya se autenticó con la Clave Master en esta sesión
+  if (sessionStorage.getItem('miplanfit_admin_logged') === 'true') {
+    if (lockScreen) lockScreen.style.display = 'none';
+    const emailSpan = document.getElementById('admin-user-email');
+    if (emailSpan) emailSpan.innerText = '👑 Administrador Master';
+    await cargarDatosAdmin();
+    return;
+  }
+
+  // 2. Verificar sesión de Supabase
+  const client = getSupabase();
   if (!client) {
-    if (lockError) {
-      lockError.innerText = '⚠️ Supabase no está configurado correctamente.';
-      lockError.style.display = 'block';
-    }
+    if (lockScreen) lockScreen.style.display = 'flex';
     return;
   }
 
@@ -29,7 +38,6 @@ async function verificarAccesoAdmin() {
     if (session && session.user) {
       const userEmail = (session.user.email || '').toLowerCase();
       
-      // Permitir acceso al fundador o administrador autenticado
       if (lockScreen) lockScreen.style.display = 'none';
       const emailSpan = document.getElementById('admin-user-email');
       if (emailSpan) emailSpan.innerText = userEmail;
@@ -44,22 +52,43 @@ async function verificarAccesoAdmin() {
   }
 }
 
+// Login directo con Clave Master
+function loginAdminConPin() {
+  const inputPin = (document.getElementById('admin-pin-input')?.value || '').trim();
+  const lockError = document.getElementById('lock-error-msg');
+
+  if (MASTER_PINS.includes(inputPin)) {
+    sessionStorage.setItem('miplanfit_admin_logged', 'true');
+    const lockScreen = document.getElementById('admin-lock-screen');
+    if (lockScreen) lockScreen.style.display = 'none';
+    const emailSpan = document.getElementById('admin-user-email');
+    if (emailSpan) emailSpan.innerText = '👑 Administrador Master';
+    cargarDatosAdmin();
+  } else {
+    if (lockError) {
+      lockError.innerText = '❌ Clave Master incorrecta. Intenta de nuevo.';
+      lockError.style.display = 'block';
+    }
+  }
+}
+
 // Login con Google para el Admin
 async function loginAdminConGoogle() {
   const client = getSupabase();
   if (!client) return;
-  const siteUrl = window.location.origin + window.location.pathname;
+  const adminUrl = window.location.origin + '/admin.html';
   await client.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: siteUrl }
+    options: { redirectTo: adminUrl }
   });
 }
 
 // Logout del Admin
 async function logoutAdmin() {
+  sessionStorage.removeItem('miplanfit_admin_logged');
   const client = getSupabase();
   if (client) await client.auth.signOut();
-  window.location.href = 'index.html';
+  window.location.reload();
 }
 
 // ─── 2. Cargar Datos Completo de Supabase ───
