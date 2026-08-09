@@ -92,6 +92,14 @@ document.addEventListener('DOMContentLoaded', async function () {
       localStorage.removeItem('miplanfit_premium');
     }
 
+    // Garantizar que el e-mail del usuario de Google esté siempre guardado en Supabase
+    if (usuario && usuario.email && client && (!planNuvem.user_email || planNuvem.user_email === '')) {
+      await client.from('planos').update({
+        user_email: usuario.email,
+        user_name: usuario.user_metadata?.full_name || usuario.user_metadata?.name || perfil.nombre || 'Usuario'
+      }).eq('user_id', usuario.id).catch(() => {});
+    }
+
     // Sincronizar progreso de la nube al localStorage
     const nombre    = perfil.nombre || 'Usuario';
     const streakKey = `miplanfit_streak_${nombre.replace(/\s/g,'_')}`;

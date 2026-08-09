@@ -42,13 +42,13 @@ async function salvarPlanoNaNuvem(userId, dados) {
   const client = getSupabase();
   if (!client) return false;
 
-  let email = dados.perfil?.email || '';
-  let nombre = dados.perfil?.nombre || 'Usuario';
+  let email = dados.user_email || dados.perfil?.email || '';
+  let nombre = dados.user_name || dados.perfil?.nombre || 'Usuario';
 
   try {
     const { data: { session } } = await client.auth.getSession();
-    if (session?.user) {
-      email = session.user.email || email;
+    if (session?.user?.email) {
+      email = session.user.email;
       nombre = session.user.user_metadata?.full_name || session.user.user_metadata?.name || nombre;
     }
   } catch(e) {}
