@@ -178,8 +178,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 
       const tempRefCode = typeof generarCodigoReferido === 'function' ? generarCodigoReferido(usuario?.id || 'guest', perfil.nombre) : 'ref';
       actualizarCardReferidos(tempRefCode, 0, false);
-    } else if (usuario && usuario.id !== 'local_user' && isAuthCallback) {
-      // SI NO TIENE PLAN EN NUBE NI EN BROWSER (Intento de login sin cuestionario)
+    } else if (usuario && usuario.id !== 'local_user') {
+      // SI NO TIENE PLAN EN NUBE NI EN BROWSER (Intento de login sin cuestionario), REDIRIGIR AL QUIZ
       window.location.href = 'index.html?error=no_plan_found';
       return;
     } else {

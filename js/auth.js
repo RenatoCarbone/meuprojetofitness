@@ -107,7 +107,6 @@ async function salvarPlanoNaNuvem(userId, dados) {
     user_email    : email,
     user_name     : nombre,
     referral_code : myRefCode,
-    perfil        : dados.perfil,
     plan30        : dados.plan30,
     plan_id       : dados.planId  || 'B',
     imc           : dados.imc     || {},
@@ -115,6 +114,11 @@ async function salvarPlanoNaNuvem(userId, dados) {
     tdee          : parseInt(dados.tdee) || 0,
     updated_at    : new Date().toISOString()
   };
+
+  // Solo incluir perfil en el payload si es un objeto válido con datos reales
+  if (dados.perfil && typeof dados.perfil === 'object' && Object.keys(dados.perfil).length > 0 && dados.perfil.peso) {
+    payload.perfil = dados.perfil;
+  }
 
   // Solo incluir referred_by si existe y el usuario no se está refiriendo a sí mismo
   if (referredByCode && referredByCode !== myRefCode) {
