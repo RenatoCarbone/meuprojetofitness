@@ -1131,6 +1131,31 @@
   </div>
 </div>
 
+<!-- Modal Popup: Bloqueo de Nuevo Ciclo para usuarios con menos de 30 días -->
+<div class="swap-modal" id="modal-bloqueo-ciclo" onclick="if(event.target===this) cerrarModalBloqueoCiclo()" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(7,7,17,0.85); backdrop-filter:blur(16px); align-items:center; justify-content:center;">
+  <div class="swap-panel" style="max-width:480px; width:calc(100% - 32px); padding:28px; border:1px solid rgba(245,158,11,0.4); border-radius:24px; position:relative; background:#0f0f1c; box-shadow:0 20px 60px rgba(0,0,0,0.8); text-align:center;">
+    <button onclick="cerrarModalBloqueoCiclo()" style="position:absolute; right:18px; top:18px; background:none; border:none; color:var(--text-muted); font-size:1.5rem; cursor:pointer;">✕</button>
+
+    <div style="font-size:3.2rem; margin-bottom:12px; animation: bounce-gentle 2s infinite;">🔒</div>
+    <h3 style="font-size:1.3rem; font-weight:900; color:white; margin-bottom:12px;">
+      Nuevo Ciclo Disponible al <span class="gradient-text">Completar 30 Días</span>
+    </h3>
+    <p style="font-size:0.9rem; color:var(--text-secondary); line-height:1.6; margin-bottom:20px;">
+      El botón <strong>'Nuevo Ciclo'</strong> está diseñado para recalcular tus calorías y menú al finalizar tus 30 días completos. Actualmente llevas <strong style="color:var(--amber);" id="cycle-lock-dias">0 de 30 días completados</strong>.
+    </p>
+
+    <!-- Opciones de Desbloqueo -->
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <a href="https://miplanfit.lemonsqueezy.com/checkout/buy/7dccfeb2-dbe0-45c3-bfa2-eda0d0aa36fe" target="_blank" class="btn btn-amber btn-full" style="padding:14px; font-weight:800; font-size:0.92rem; justify-content:center; box-shadow:0 4px 20px rgba(245,158,11,0.3);">
+        ✨ Desbloquear Plan Completo (€14,90)
+      </a>
+      <button onclick="cerrarModalBloqueoCiclo(); abrirModalReferidos();" class="btn btn-outline btn-full" style="padding:12px; font-size:0.85rem; justify-content:center; color:var(--green); border-color:rgba(16,185,129,0.4);">
+        📲 Recomendar a 3 Amigas (Desbloquear Gratis)
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal Popup: Iniciar Nuevo Ciclo (Mantener Racha & Recalcular Dieta) -->
 <div class="swap-modal" id="modal-nuevo-ciclo" onclick="if(event.target===this) cerrarModalNuevoCiclo()" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(7,7,17,0.85); backdrop-filter:blur(16px); align-items:center; justify-content:center;">
   <div class="swap-panel" style="max-width:480px; width:calc(100% - 32px); padding:28px; border:1px solid rgba(16,185,129,0.4); border-radius:24px; position:relative; background:#0f0f1c; box-shadow:0 20px 60px rgba(0,0,0,0.8);">
@@ -1176,9 +1201,9 @@
   </div>
 </footer>
 
-<script src="js/supabase-config.js?v=3.0"></script>
-<script src="js/auth.js?v=3.0"></script>
-<script src="js/streak.js?v=3.0"></script>
-<script src="js/plano.js?v=3.0"></script>
+<script src="js/supabase-config.js?v=3.1"></script>
+<script src="js/auth.js?v=3.1"></script>
+<script src="js/streak.js?v=3.1"></script>
+<script src="js/plano.js?v=3.1"></script>
 </body>
 </html>

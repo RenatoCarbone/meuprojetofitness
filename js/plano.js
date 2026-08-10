@@ -1516,18 +1516,42 @@ function copiarEnlaceReferido() {
 }
 
 // ─── 12. GESTIÓN DE NUEVOS CICLOS (MANTENER RACHA & RECALCULAR PESO) ───
-function abrirModalNuevoCiclo() {
-  const modal = document.getElementById('modal-nuevo-ciclo');
-  const inputPeso = document.getElementById('cycle-input-peso');
-  const elStreak = document.getElementById('cycle-modal-streak');
+function abrirModalBloqueoCiclo(streak, dias) {
+  const modal = document.getElementById('modal-bloqueo-ciclo');
+  const elDias = document.getElementById('cycle-lock-dias');
+  if (elDias) {
+    elDias.innerText = `${dias} de 30 días completados`;
+  }
+  if (modal) modal.style.display = 'flex';
+}
 
+function cerrarModalBloqueoCiclo() {
+  const modal = document.getElementById('modal-bloqueo-ciclo');
+  if (modal) modal.style.display = 'none';
+}
+
+function abrirModalNuevoCiclo() {
   const nombreUser = (perfil && perfil.nombre) ? perfil.nombre : 'Usuario';
-  let currentStreak = 30;
+  let currentStreak = 0;
+  let diasComp = 0;
 
   if (typeof leerEstado === 'function') {
     const st = leerEstado(nombreUser);
-    if (st && st.streakActual) currentStreak = st.streakActual;
+    if (st) {
+      currentStreak = st.streakActual || 0;
+      diasComp = (st.diasCompletados || []).length;
+    }
   }
+
+  // Si el usuario aún no ha completado los 30 días completos (o no tiene 30+ días de racha)
+  if (currentStreak < 30 && diasComp < 30) {
+    abrirModalBloqueoCiclo(currentStreak, diasComp);
+    return;
+  }
+
+  const modal = document.getElementById('modal-nuevo-ciclo');
+  const inputPeso = document.getElementById('cycle-input-peso');
+  const elStreak = document.getElementById('cycle-modal-streak');
 
   if (elStreak) {
     elStreak.innerText = `🔥 ${currentStreak} días en ofensiva`;
