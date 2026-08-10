@@ -134,10 +134,16 @@ document.addEventListener('DOMContentLoaded', async function() {
   
   // Capturar código de invitación (?ref=...) si el usuario viene recomendado por alguien
   const refCode = urlParams.get('ref');
+  const isReferralLink = !!refCode;
+
   if (refCode) {
     const cleanRef = refCode.trim().toLowerCase();
     localStorage.setItem('miplanfit_ref_by', cleanRef);
     sessionStorage.setItem('miplanfit_ref_by', cleanRef);
+    
+    // Si viene por un enlace de referido, limpiar datos locales anteriores para que el amigo cree su propio plan
+    ['miplanfit_perfil','miplanfit_plan30','miplanfit_plan_id',
+     'miplanfit_imc','miplanfit_tmb','miplanfit_tdee'].forEach(k => localStorage.removeItem(k));
   }
 
   const hasNoPlanError = urlParams.get('error') === 'no_plan_found';
@@ -156,18 +162,21 @@ document.addEventListener('DOMContentLoaded', async function() {
   const search = window.location.search;
   const isAuthCallback = hash.includes('access_token=') || search.includes('code=');
 
-  const client = getSupabase();
-  if (client) {
-    try {
-      const { data: { session } } = await client.auth.getSession();
+  // Si NO es un enlace de referido de invitación, ir directo a plano.html si ya hay sesión activa
+  if (!isReferralLink) {
+    const client = getSupabase();
+    if (client) {
+      try {
+        const { data: { session } } = await client.auth.getSession();
 
-      if (session || isAuthCallback) {
-        // ¡SI EL USUARIO TIENE SESIÓN O VIENE DE GOOGLE, IR DIRECTO A PLANO.HTML!
-        window.location.href = 'plano.html';
-        return;
+        if (session || isAuthCallback) {
+          // ¡SI EL USUARIO TIENE SESIÓN O VIENE DE GOOGLE, IR DIRECTO A PLANO.HTML!
+          window.location.href = 'plano.html';
+          return;
+        }
+      } catch(e) {
+        console.warn('Auth check error:', e);
       }
-    } catch(e) {
-      console.warn('Auth check error:', e);
     }
   }
 
