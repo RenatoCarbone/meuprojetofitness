@@ -182,7 +182,7 @@ function renderizarGraficosDemograficos(usuarios) {
 
   usuarios.forEach(u => {
     const perfil = u.perfil || {};
-    const tienePerfil = perfil && typeof perfil === 'object' && Object.keys(perfil).length > 0 && perfil.peso;
+    const tienePerfil = perfil && typeof perfil === 'object' && Object.keys(perfil).length > 0;
     if (!tienePerfil) return;
 
     // Gênero

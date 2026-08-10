@@ -116,7 +116,7 @@ async function salvarPlanoNaNuvem(userId, dados) {
   };
 
   // Solo incluir perfil en el payload si es un objeto válido con datos reales
-  if (dados.perfil && typeof dados.perfil === 'object' && Object.keys(dados.perfil).length > 0 && dados.perfil.peso) {
+  if (dados.perfil && typeof dados.perfil === 'object' && Object.keys(dados.perfil).length > 0) {
     payload.perfil = dados.perfil;
   }
 
