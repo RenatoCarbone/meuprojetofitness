@@ -195,10 +195,13 @@ async function loginComEmail(emailDigitado) {
         console.warn('Upsert direto no loginComEmail falhou:', res.error.message);
         const { data: existingRow } = await client.from('planos').select('user_id').eq('user_email', cleanEmail).maybeSingle();
         if (existingRow) {
-          await client.from('planos').update(payload).eq('user_email', cleanEmail);
+          const upRes = await client.from('planos').update(payload).eq('user_email', cleanEmail);
+          if (upRes.error) console.error('Update por email falhou:', upRes.error.message);
         } else {
           const insertRes = await client.from('planos').insert(payload);
-          if (insertRes.error) console.error('Insert em planos falhou:', insertRes.error.message);
+          if (insertRes.error) {
+            console.error('Insert em planos falhou:', insertRes.error.message);
+          }
         }
       } else {
         console.log('Plano salvo com sucesso no banco para:', cleanEmail);
