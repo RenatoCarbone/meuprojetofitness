@@ -1443,10 +1443,21 @@ function cerrarModalReferidos() {
 }
 
 function actualizarCardReferidos(refCode, refCount, esPremium) {
-  const currentRefCode = refCode || 'miplanfit';
-  const shareUrl = `${window.location.origin}/index.html?ref=${currentRefCode}`;
+  const compactBanner = document.getElementById('referral-banner-compact');
+  const userIsPremium = esPremium || (typeof isPremium === 'function' ? isPremium() : false);
 
-  // 1. Configurar enlace de WhatsApp con Copy Persuasivo
+  // Si el usuario ya es Premium (pagado o por referidos), OCULTAR completamente el banner de referidos
+  if (userIsPremium) {
+    if (compactBanner) compactBanner.style.display = 'none';
+    return;
+  } else {
+    if (compactBanner) compactBanner.style.display = 'flex';
+  }
+
+  // 1. Enlace de invitación
+  const baseUrl = window.location.origin + window.location.pathname.replace('plano.html', 'index.html');
+  const shareUrl = `${baseUrl}?ref=${refCode || 'guest'}`;
+
   const waMsg = `¡Hola! Estoy usando MiPlanFit para mi plan personalizado de nutrición y ejercicios de 30 días. 🥑🏋️‍♀️ Haz tu plan gratis de 2 min aquí: ${shareUrl}`;
   const btnWa = document.getElementById('btn-share-whatsapp');
   if (btnWa) {
