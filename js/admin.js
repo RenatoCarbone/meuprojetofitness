@@ -125,16 +125,6 @@ async function cargarDatosAdmin() {
     let visitasContador = parseInt(localStorage.getItem('miplanfit_stat_visita') || '0');
     let quizStartsContador = parseInt(localStorage.getItem('miplanfit_stat_quiz_start') || '0');
 
-    try {
-      const { data: analyticsData } = await client.from('analytics_events').select('evento');
-      if (analyticsData && analyticsData.length > 0) {
-        const vCount = analyticsData.filter(a => a.evento === 'visita').length;
-        const qCount = analyticsData.filter(a => a.evento === 'quiz_start').length;
-        if (vCount > 0) visitasContador = vCount;
-        if (qCount > 0) quizStartsContador = qCount;
-      }
-    } catch(e) {}
-
     // Asegurar que las visitas reflejen los datos reales
     if (visitasContador < todosOsUsuariosAdmin.length) visitasContador = todosOsUsuariosAdmin.length;
     if (quizStartsContador < todosOsUsuariosAdmin.length) quizStartsContador = todosOsUsuariosAdmin.length;
