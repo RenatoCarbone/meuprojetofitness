@@ -7,6 +7,12 @@ async function loginComGoogle() {
   const client = getSupabase();
   if (!client) return false;
 
+  // Preservar datos del perfil del quiz antes del redireccionamiento OAuth
+  const localPerfil = localStorage.getItem('miplanfit_perfil');
+  if (localPerfil) {
+    sessionStorage.setItem('miplanfit_perfil_backup', localPerfil);
+  }
+
   const { error } = await client.auth.signInWithOAuth({
     provider: 'google',
     options: { redirectTo: SITE_URL + '/plano.html' }
