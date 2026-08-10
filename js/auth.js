@@ -4,22 +4,20 @@
 
 // ─── Perfil pendente do quiz ───
 function perfilQuizValido(perfil) {
-  return !!(
-    perfil &&
-    typeof perfil === 'object' &&
-    !Array.isArray(perfil) &&
-    Object.keys(perfil).length > 0 &&
-    Number(perfil.peso) > 0 &&
-    Number(perfil.edad) > 0
-  );
+  if (!perfil || typeof perfil !== 'object' || Array.isArray(perfil)) return false;
+  const keys = Object.keys(perfil);
+  if (keys.length === 0) return false;
+  return !!(perfil.nombre || perfil.sexo || perfil.edad || perfil.peso || perfil.pesoActual || perfil.objetivo_kg || perfil.altura);
 }
 
 function normalizarPerfilQuiz(perfil) {
   if (!perfilQuizValido(perfil)) return null;
 
   const perfilNormalizado = { ...perfil };
-  if (!Number(perfilNormalizado.pesoActual) && Number(perfilNormalizado.peso) > 0) {
-    perfilNormalizado.pesoActual = Number(perfilNormalizado.peso);
+  const numPeso = Number(perfilNormalizado.pesoActual || perfilNormalizado.peso || 0);
+  if (numPeso > 0) {
+    perfilNormalizado.peso = numPeso;
+    perfilNormalizado.pesoActual = numPeso;
   }
   return perfilNormalizado;
 }
