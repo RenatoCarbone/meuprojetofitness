@@ -121,9 +121,9 @@ async function cargarDatosAdmin() {
 
     todosOsUsuariosAdmin = planosData || [];
 
-    // Consultar eventos de analytics
-    let visitasContador = parseInt(localStorage.getItem('miplanfit_stat_visita') || '120');
-    let quizStartsContador = parseInt(localStorage.getItem('miplanfit_stat_quiz_start') || '45');
+    // 2. Consultar eventos de analytics (Visitas e Quiz Starts)
+    let visitasContador = parseInt(localStorage.getItem('miplanfit_stat_visita') || '0');
+    let quizStartsContador = parseInt(localStorage.getItem('miplanfit_stat_quiz_start') || '0');
 
     try {
       const { data: analyticsData } = await client.from('analytics_events').select('evento');
@@ -135,8 +135,9 @@ async function cargarDatosAdmin() {
       }
     } catch(e) {}
 
-    if (visitasContador < todosOsUsuariosAdmin.length) visitasContador = todosOsUsuariosAdmin.length + 15;
-    if (quizStartsContador < todosOsUsuariosAdmin.length) quizStartsContador = todosOsUsuariosAdmin.length + 5;
+    // Asegurar que las visitas reflejen los datos reales
+    if (visitasContador < todosOsUsuariosAdmin.length) visitasContador = todosOsUsuariosAdmin.length;
+    if (quizStartsContador < todosOsUsuariosAdmin.length) quizStartsContador = todosOsUsuariosAdmin.length;
 
     renderizarMeticasKPI(todosOsUsuariosAdmin);
     renderizarGraficosDemograficos(todosOsUsuariosAdmin);
@@ -741,4 +742,22 @@ function exportarUsuariosCSV() {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+}
+
+// ─── 12. Zerar Métricas de Teste para Lançamento Oficial ───
+async function zerarMetricasTestes() {
+  if (!confirm('⚠️ Tem certeza de que deseja zerar os contadores de visitas e pesquisas de teste para iniciar a campanha oficial do zero?')) {
+    return;
+  }
+
+  localStorage.setItem('miplanfit_stat_visita', '0');
+  localStorage.setItem('miplanfit_stat_quiz_start', '0');
+
+  const client = getSupabase();
+  if (client) {
+    await client.from('analytics_events').delete().neq('id', 0).catch(() => {});
+  }
+
+  await cargarDatosAdmin();
+  alert('✨ Métricas de teste zeradas com sucesso! O seu painel está 100% pronto para registrar tráfego real.');
 }
