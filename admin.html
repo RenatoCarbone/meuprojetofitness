@@ -509,6 +509,17 @@
         </tr>
       </tbody>
     </table>
+  <!-- Painel de Diagnóstico do Supabase em Tempo Real -->
+  <div style="margin-top:40px; background:var(--card-bg); border:1px solid var(--border-color); border-radius:16px; padding:24px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+      <h3 style="font-size:1.1rem; color:var(--text-primary); margin:0; display:flex; align-items:center; gap:8px;">
+        🧪 Diagnóstico do Banco de Dados (Supabase Live Dump)
+      </h3>
+      <button onclick="cargarDatosAdmin()" style="background:var(--primary-color); color:white; border:none; border-radius:8px; font-size:0.8rem; padding:8px 16px; cursor:pointer; font-weight:bold;">🔄 Recarregar Dados do Supabase</button>
+    </div>
+    <div id="admin-raw-debug" style="background:#090d16; border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:16px; font-family:monospace; font-size:0.8rem; color:#38bdf8; max-height:300px; overflow-y:auto; white-space:pre-wrap; word-break:break-all;">
+      ⏳ Aguardando leitura do banco Supabase...
+    </div>
   </div>
 
 </main>
@@ -590,8 +601,8 @@
   </div>
 </div>
 
-<script src="js/supabase-config.js?v=3.5"></script>
-<script src="js/auth.js?v=3.5"></script>
-<script src="js/admin.js?v=3.5"></script>
+<script src="js/supabase-config.js?v=3.6"></script>
+<script src="js/auth.js?v=3.6"></script>
+<script src="js/admin.js?v=3.6"></script>
 </body>
 </html>

@@ -121,6 +121,11 @@ async function cargarDatosAdmin() {
 
     todosOsUsuariosAdmin = planosData || [];
 
+    const elDebug = document.getElementById('admin-raw-debug');
+    if (elDebug) {
+      elDebug.innerText = JSON.stringify(todosOsUsuariosAdmin, null, 2);
+    }
+
     // 2. Consultar eventos de analytics (Visitas e Quiz Starts)
     let visitasContador = parseInt(localStorage.getItem('miplanfit_stat_visita') || '0');
     let quizStartsContador = parseInt(localStorage.getItem('miplanfit_stat_quiz_start') || '0');
