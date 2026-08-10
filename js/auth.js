@@ -78,6 +78,15 @@ async function loginComGoogle() {
   if (!client) return false;
 
   const localPerfil = localStorage.getItem('miplanfit_perfil') || sessionStorage.getItem('miplanfit_perfil_backup');
+  
+  try {
+    // Save profile to both cookie and localStorage before redirect
+    const perfil = JSON.parse(localPerfil || '{}');
+    if (perfil.nombre) {
+      document.cookie = `miplanfit_perfil=${JSON.stringify(perfil)}; Path=/`;
+      localStorage.setItem('miplanfit_perfil', JSON.stringify(perfil));
+    }
+  } catch(e) {}
   const refCode = localStorage.getItem('miplanfit_ref_by') || sessionStorage.getItem('miplanfit_ref_by') || new URLSearchParams(window.location.search).get('ref');
 
   let redirectTarget = SITE_URL + '/plano.html';
