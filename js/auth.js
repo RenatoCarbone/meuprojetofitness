@@ -20,7 +20,9 @@ async function loginComGoogle() {
 
   if (localPerfil) {
     try {
-      params.set('pdata', localPerfil);
+      // Codificar en Base64 UTF-8 seguro para URL sin espacios ni sintaxis rota
+      const b64 = btoa(unescape(encodeURIComponent(localPerfil)));
+      params.set('pdata', b64);
     } catch(e) {}
   }
 

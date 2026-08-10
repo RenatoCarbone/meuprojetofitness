@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     let localPerfil = null;
     if (urlPdata) {
       try {
-        localPerfil = JSON.parse(urlPdata);
+        localPerfil = JSON.parse(decodeURIComponent(escape(atob(urlPdata.replace(/\s/g, '+')))));
       } catch(e) {
         try { localPerfil = JSON.parse(decodeURIComponent(urlPdata)); } catch(err) {}
       }
@@ -143,6 +143,18 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (!localPerfil) {
       const match = document.cookie.match(/miplanfit_perfil_ck=([^;]+)/);
       if (match) { try { localPerfil = JSON.parse(decodeURIComponent(match[1])); } catch(e) {} }
+    }
+
+    // SI TENEMOS UN PERFIL LOCAL VÁLIDO E O SUPABASE ESTÁ VAZIO OU INCOMPLETO, SALVAR NA NUVEM DE IMEDIATO
+    if (localPerfil && usuario && usuario.id !== 'local_user') {
+      const plan30Tmp = JSON.parse(localStorage.getItem('miplanfit_plan30') || 'null') || (typeof generarPlan30Dias === 'function' ? generarPlan30Dias(localPerfil, 'B') : []);
+      await client.from('planos').update({
+        perfil: localPerfil,
+        plan30: plan30Tmp,
+        user_email: usuario.email,
+        user_name: usuario.user_metadata?.full_name || localPerfil.nombre || 'Usuario',
+        updated_at: new Date().toISOString()
+      }).eq('user_id', usuario.id).catch(() => {});
     }
 
     let localPlan30 = JSON.parse(localStorage.getItem('miplanfit_plan30') || 'null');
