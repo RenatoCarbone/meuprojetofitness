@@ -705,49 +705,22 @@
         <span id="dias-restantes">30 días restantes</span>
       </div>
     </div>
-  <!-- ── Card de Referidos Viral (Consigue Premium Gratis) ── -->
-  <div id="referral-viral-card" class="referral-card" style="background:linear-gradient(135deg, rgba(124,58,237,0.12), rgba(16,185,129,0.12)); border:1px solid rgba(124,58,237,0.35); border-radius:var(--radius-xl); padding:24px; margin-bottom:32px; backdrop-filter:blur(12px); box-shadow:var(--shadow-card);">
-    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
-      <div style="flex:1; min-width:280px;">
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-          <span style="font-size:1.6rem;">🎁</span>
-          <h3 style="font-size:1.15rem; font-weight:800; color:white; margin:0;">
-            ¡Desbloquea el Plan Completo <span class="gradient-text">100% GRATIS</span>!
-          </h3>
+  <!-- ── Botón Compacto Elegante: Desbloquear Gratis ── -->
+  <div id="referral-banner-compact" onclick="abrirModalReferidos()" style="background:linear-gradient(135deg, rgba(124,58,237,0.15), rgba(16,185,129,0.15)); border:1px solid rgba(16,185,129,0.4); border-radius:18px; padding:14px 20px; margin-bottom:28px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:12px; transition:all 0.3s ease; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span style="font-size:1.5rem;">🎁</span>
+      <div>
+        <div style="font-weight:800; font-size:0.95rem; color:white;">
+          ¡Desbloquea el Plan Completo <span class="gradient-text">100% GRATIS</span>!
         </div>
-        <p style="font-size:0.88rem; color:var(--text-secondary); line-height:1.5; margin:0 0 16px 0;">
-          Invita a 3 amigas a crear su plan gratis. Cuando se unan con tu enlace, ¡tu plan completo de 30 días se desbloqueará de forma vitalicia sin pagar nada!
-        </p>
-
-        <!-- Barra de Progreso de Referidos -->
-        <div style="margin-bottom:16px;">
-          <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:700; color:white; margin-bottom:6px;">
-            <span>Progreso de Invitaciones:</span>
-            <span id="ref-progress-text" style="color:var(--green);">0 / 3 Amigas</span>
-          </div>
-          <div class="progress-bar-container" style="height:10px; background:rgba(0,0,0,0.4);">
-            <div id="ref-progress-bar" class="progress-bar-fill" style="width:0%; background:linear-gradient(90deg, var(--purple), var(--green));"></div>
-          </div>
+        <div style="font-size:0.78rem; color:var(--green); font-weight:600;" id="ref-compact-sub">
+          Invita a 3 amigas y accede sin pagar (€0)
         </div>
-
-        <!-- Botones de Acción -->
-        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
-          <a id="btn-share-whatsapp" href="#" target="_blank" class="btn btn-green btn-sm" style="padding:10px 18px; font-weight:800; gap:8px; box-shadow:0 4px 15px rgba(16,185,129,0.3);">
-            📲 Compartir en WhatsApp
-          </a>
-          <button onclick="copiarEnlaceReferido()" class="btn btn-outline btn-sm" style="padding:10px 16px; font-size:0.85rem; gap:6px;">
-            📋 Copiar Enlace
-          </button>
-        </div>
-      </div>
-
-      <!-- Badge de Estado de la Recompensa -->
-      <div id="ref-reward-badge" style="background:rgba(0,0,0,0.4); border:1px solid var(--border); border-radius:16px; padding:16px 20px; text-align:center; min-width:160px;">
-        <div style="font-size:2rem; margin-bottom:4px;" id="ref-reward-icon">🎁</div>
-        <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Tu Recompensa</div>
-        <div id="ref-reward-status" style="font-size:0.85rem; font-weight:800; color:var(--amber); margin-top:4px;">3 Amigas = GRATIS</div>
       </div>
     </div>
+    <span class="btn btn-green btn-sm" style="padding:6px 14px; font-size:0.8rem; font-weight:800; gap:4px; flex-shrink:0;">
+      Ver cómo ▶
+    </span>
   </div>
 
   <!-- ── Calendario ── -->
@@ -1109,6 +1082,47 @@
 <script src="data/recipes.js"></script>
 <script src="data/exercises.js"></script>
 <script src="data/plans.js"></script>
+<!-- Modal Popup: Conseguir Premium Gratis por Referidos -->
+<div class="swap-modal" id="modal-referidos" onclick="if(event.target===this) cerrarModalReferidos()" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(7,7,17,0.85); backdrop-filter:blur(16px); align-items:center; justify-content:center;">
+  <div class="swap-panel" style="max-width:480px; width:calc(100% - 32px); padding:28px; border:1px solid var(--border); border-radius:24px; position:relative; background:#0f0f1c;">
+    <button onclick="cerrarModalReferidos()" style="position:absolute; right:18px; top:18px; background:none; border:none; color:var(--text-muted); font-size:1.5rem; cursor:pointer;">✕</button>
+
+    <div style="text-align:center; margin-bottom:20px;">
+      <div style="font-size:3rem; margin-bottom:8px;">🎁</div>
+      <h3 style="font-size:1.3rem; font-weight:900; color:white; margin-bottom:8px;">
+        ¡Plan Completo <span class="gradient-text">100% GRATIS</span>!
+      </h3>
+      <p style="font-size:0.88rem; color:var(--text-secondary); line-height:1.5; margin:0;">
+        Invita a 3 amigas a crear su plan gratis. Cuando se unan con tu enlace exclusivo, tu plan de 30 días se desbloqueará de forma vitalicia sin pagar nada (€0).
+      </p>
+    </div>
+
+    <!-- Progreso de Referidos -->
+    <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:16px; padding:16px; margin-bottom:20px;">
+      <div style="display:flex; justify-content:space-between; font-size:0.82rem; font-weight:700; color:white; margin-bottom:8px;">
+        <span>Progreso de Invitaciones:</span>
+        <span id="ref-progress-text" style="color:var(--green);">0 / 3 Amigas</span>
+      </div>
+      <div class="progress-bar-container" style="height:10px; background:rgba(0,0,0,0.4);">
+        <div id="ref-progress-bar" class="progress-bar-fill" style="width:0%; background:linear-gradient(90deg, var(--purple), var(--green));"></div>
+      </div>
+      <div id="ref-reward-status" style="font-size:0.78rem; text-align:center; margin-top:8px; font-weight:700; color:var(--amber);">
+        Faltan 3 amigas para desbloquear
+      </div>
+    </div>
+
+    <!-- Botones de Acción -->
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <a id="btn-share-whatsapp" href="#" target="_blank" class="btn btn-green btn-full" style="padding:14px; font-weight:800; font-size:0.95rem; gap:8px; justify-content:center; box-shadow:0 4px 20px rgba(16,185,129,0.3);">
+        📲 Compartir en WhatsApp
+      </a>
+      <button onclick="copiarEnlaceReferido()" class="btn btn-outline btn-full" style="padding:12px; font-size:0.88rem; gap:6px; justify-content:center;">
+        📋 Copiar Mi Enlace de Invitación
+      </button>
+    </div>
+  </div>
+</div>
+
 <script src="js/supabase-config.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/streak.js"></script>

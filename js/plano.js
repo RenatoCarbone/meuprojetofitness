@@ -1427,11 +1427,18 @@ function toggleShoppingItem(weekNum, catIdx, itemIdx) {
   renderShoppingList(weekNum);
 }
 
-// ─── Actualizar Card de Referidos y Enlace de Invitación ───
-function actualizarCardReferidos(refCode, refCount, esPremium) {
-  const card = document.getElementById('referral-viral-card');
-  if (!card) return;
+// ─── Modal Popup y Banner Compacto de Referidos ───
+function abrirModalReferidos() {
+  const modal = document.getElementById('modal-referidos');
+  if (modal) modal.style.display = 'flex';
+}
 
+function cerrarModalReferidos() {
+  const modal = document.getElementById('modal-referidos');
+  if (modal) modal.style.display = 'none';
+}
+
+function actualizarCardReferidos(refCode, refCount, esPremium) {
   const currentRefCode = refCode || 'miplanfit';
   const shareUrl = `${window.location.origin}/index.html?ref=${currentRefCode}`;
 
@@ -1451,23 +1458,30 @@ function actualizarCardReferidos(refCode, refCount, esPremium) {
 
   const elText = document.getElementById('ref-progress-text');
   const elBar = document.getElementById('ref-progress-bar');
-  const elIcon = document.getElementById('ref-reward-icon');
   const elStatus = document.getElementById('ref-reward-status');
+  const elSub = document.getElementById('ref-compact-sub');
 
   if (elText) elText.innerText = `${count} / 3 Amigas recomendadas`;
   if (elBar) elBar.style.width = `${pct}%`;
 
   if (esPremium || count >= 3) {
-    if (elIcon) elIcon.innerText = '🎉';
     if (elStatus) {
-      elStatus.innerText = '✨ ¡DESBLOQUEADO!';
+      elStatus.innerText = '✨ ¡DESBLOQUEADO DE FORMA VITALICIA!';
       elStatus.style.color = 'var(--green)';
     }
+    if (elSub) {
+      elSub.innerText = '✨ ¡Felicidades! Tu plan completo está 100% Desbloqueado';
+      elSub.style.color = 'var(--green)';
+    }
   } else {
-    if (elIcon) elIcon.innerText = '🎁';
+    const faltan = 3 - count;
     if (elStatus) {
-      elStatus.innerText = `Faltan ${3 - count} amiga${(3 - count) > 1 ? 's' : ''}`;
+      elStatus.innerText = `Faltan ${faltan} amiga${faltan > 1 ? 's' : ''} para desbloquear`;
       elStatus.style.color = 'var(--amber)';
+    }
+    if (elSub) {
+      elSub.innerText = `Invita a 3 amigas (${count}/3) y accede gratis sin pagar (€0)`;
+      elSub.style.color = 'var(--green)';
     }
   }
 }
