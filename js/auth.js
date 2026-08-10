@@ -20,8 +20,7 @@ async function loginComGoogle() {
 
   if (localPerfil) {
     try {
-      // Usar encodeURIComponent seguro para URL que viaja intacto en OAuth
-      params.set('pdata', encodeURIComponent(localPerfil));
+      params.set('pdata', localPerfil);
     } catch(e) {}
   }
 
