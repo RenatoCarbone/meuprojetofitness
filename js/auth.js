@@ -20,9 +20,8 @@ async function loginComGoogle() {
 
   if (localPerfil) {
     try {
-      // Codificar el perfil en base64 para que viaje intacto en la URL incluso en modo Incógnito
-      const encodedPerfil = btoa(encodeURIComponent(localPerfil));
-      params.set('pdata', encodedPerfil);
+      // Usar encodeURIComponent seguro para URL que viaja intacto en OAuth
+      params.set('pdata', encodeURIComponent(localPerfil));
     } catch(e) {}
   }
 

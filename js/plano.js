@@ -129,7 +129,10 @@ document.addEventListener('DOMContentLoaded', async function () {
     const urlPdata = new URLSearchParams(window.location.search).get('pdata');
     let localPerfil = null;
     if (urlPdata) {
-      try { localPerfil = JSON.parse(decodeURIComponent(atob(urlPdata))); } catch(e) {}
+      try {
+        const rawStr = decodeURIComponent(urlPdata);
+        localPerfil = JSON.parse(rawStr.startsWith('%') ? decodeURIComponent(rawStr) : rawStr);
+      } catch(e) {}
     }
     if (!localPerfil || !localPerfil.peso) {
       try { localPerfil = JSON.parse(localStorage.getItem('miplanfit_perfil') || 'null'); } catch(e) {}
