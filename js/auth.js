@@ -8,17 +8,26 @@ async function loginComGoogle() {
   if (!client) return false;
 
   // Preservar datos del perfil del quiz antes del redireccionamiento OAuth
-  const localPerfil = localStorage.getItem('miplanfit_perfil');
-  if (localPerfil) {
-    sessionStorage.setItem('miplanfit_perfil_backup', localPerfil);
-    localStorage.setItem('miplanfit_perfil_backup', localPerfil);
+  const localPerfil = localStorage.getItem('miplanfit_perfil') || sessionStorage.getItem('miplanfit_perfil_backup');
+  const refCode = localStorage.getItem('miplanfit_ref_by') || sessionStorage.getItem('miplanfit_ref_by') || new URLSearchParams(window.location.search).get('ref');
+
+  let redirectTarget = SITE_URL + '/plano.html';
+  const params = new URLSearchParams();
+
+  if (refCode) {
+    params.set('ref', refCode.trim().toLowerCase());
   }
 
-  // Preservar código de referido en la URL de redirección de OAuth para que nunca se pierda
-  const refCode = localStorage.getItem('miplanfit_ref_by') || sessionStorage.getItem('miplanfit_ref_by') || new URLSearchParams(window.location.search).get('ref');
-  let redirectTarget = SITE_URL + '/plano.html';
-  if (refCode) {
-    redirectTarget += `?ref=${encodeURIComponent(refCode.trim().toLowerCase())}`;
+  if (localPerfil) {
+    try {
+      // Codificar el perfil en base64 para que viaje intacto en la URL incluso en modo Incógnito
+      const encodedPerfil = btoa(encodeURIComponent(localPerfil));
+      params.set('pdata', encodedPerfil);
+    } catch(e) {}
+  }
+
+  if ([...params].length > 0) {
+    redirectTarget += `?${params.toString()}`;
   }
 
   const { error } = await client.auth.signInWithOAuth({

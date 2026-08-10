@@ -125,8 +125,15 @@ document.addEventListener('DOMContentLoaded', async function () {
     actualizarCardReferidos(userRefCode, userRefCount, planNuvem.is_premium === true);
 
   } else {
-    // Si no hay plan en Supabase, verificar si hay un plan en localStorage, backup de sesión o cookies
-    let localPerfil = JSON.parse(localStorage.getItem('miplanfit_perfil') || 'null');
+    // Si no hay plan en Supabase, verificar si hay un plan en la URL (OAuth pdata), localStorage, backup de sesión o cookies
+    const urlPdata = new URLSearchParams(window.location.search).get('pdata');
+    let localPerfil = null;
+    if (urlPdata) {
+      try { localPerfil = JSON.parse(decodeURIComponent(atob(urlPdata))); } catch(e) {}
+    }
+    if (!localPerfil || !localPerfil.peso) {
+      try { localPerfil = JSON.parse(localStorage.getItem('miplanfit_perfil') || 'null'); } catch(e) {}
+    }
     if (!localPerfil || !localPerfil.peso) {
       try { localPerfil = JSON.parse(sessionStorage.getItem('miplanfit_perfil_backup') || localStorage.getItem('miplanfit_perfil_backup') || 'null'); } catch(e) {}
     }
