@@ -1445,6 +1445,18 @@ function cerrarModalReferidos() {
   if (modal) modal.style.display = 'none';
 }
 
+// Helper para obtener el enlace de referido único del usuario actual
+function obtenerEnlaceReferidoActual() {
+  const nombreUser = (perfil && perfil.nombre) ? perfil.nombre : 'user';
+  const userId = window._userId || 'ref';
+  const refCode = (typeof generarCodigoReferido === 'function') 
+    ? generarCodigoReferido(userId, nombreUser) 
+    : `${nombreUser.toLowerCase().replace(/[^a-z0-9]/g, '')}_ref`;
+
+  const origin = window.location.origin || 'https://miplanfit.pages.dev';
+  return `${origin}/index.html?ref=${refCode}`;
+}
+
 function actualizarCardReferidos(refCode, refCount, esPremium) {
   const compactBanner = document.getElementById('referral-banner-compact');
   const userIsPremium = esPremium || (typeof isPremium === 'function' ? isPremium() : false);
@@ -1458,8 +1470,9 @@ function actualizarCardReferidos(refCode, refCount, esPremium) {
   }
 
   // 1. Enlace de invitación
-  const baseUrl = window.location.origin + window.location.pathname.replace('plano.html', 'index.html');
-  const shareUrl = `${baseUrl}?ref=${refCode || 'guest'}`;
+  const nombreUser = (perfil && perfil.nombre) ? perfil.nombre : 'user';
+  const actualRefCode = refCode || (typeof generarCodigoReferido === 'function' ? generarCodigoReferido(window._userId, nombreUser) : 'ref');
+  const shareUrl = `${window.location.origin}/index.html?ref=${actualRefCode}`;
 
   const waMsg = `¡Hola! Estoy usando MiPlanFit para mi plan personalizado de nutrición y ejercicios de 30 días. 🥑🏋️‍♀️ Haz tu plan gratis de 2 min aquí: ${shareUrl}`;
   const btnWa = document.getElementById('btn-share-whatsapp');
@@ -1506,10 +1519,10 @@ function actualizarCardReferidos(refCode, refCount, esPremium) {
 
 // Copiar enlace al portapapeles
 function copiarEnlaceReferido() {
-  const url = window.currentReferralUrl || window.location.href;
+  const url = window.currentReferralUrl || obtenerEnlaceReferidoActual();
   if (navigator.clipboard) {
     navigator.clipboard.writeText(url).then(() => {
-      alert('📋 ¡Enlace de invitación copiado al portapapeles! Compártelo con tus amigas.');
+      alert(`📋 ¡Enlace de invitación copiado al portapapeles!\n\n${url}\n\nCompártelo con tus amigas.`);
     }).catch(() => {
       prompt('Copia tu enlace de invitación:', url);
     });
