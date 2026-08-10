@@ -131,6 +131,15 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 
   const urlParams = new URLSearchParams(window.location.search);
+  
+  // Capturar código de invitación (?ref=...) si el usuario viene recomendado por alguien
+  const refCode = urlParams.get('ref');
+  if (refCode) {
+    const cleanRef = refCode.trim().toLowerCase();
+    localStorage.setItem('miplanfit_ref_by', cleanRef);
+    sessionStorage.setItem('miplanfit_ref_by', cleanRef);
+  }
+
   const hasNoPlanError = urlParams.get('error') === 'no_plan_found';
 
   if (hasNoPlanError) {

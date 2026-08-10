@@ -342,6 +342,12 @@ function renderizarTablaAdmin(lista) {
       ? `<span class="badge-status-premium">✨ PREMIUM (€14,90)</span>`
       : `<span class="badge-status-free">🔒 Gratuito (3 dias)</span>`;
 
+    // Indicações
+    const numRef = user.referrals_count || 0;
+    const refBadge = numRef >= 3
+      ? `<span class="badge badge-green" style="font-size:0.75rem;">🎁 ${numRef} (Ganhou Premium)</span>`
+      : `<span style="font-size:0.82rem; color:var(--text-secondary);">🎁 ${numRef} amiga${numRef === 1 ? '' : 's'}</span>`;
+
     html += `
       <tr onclick="abrirDrawerCliente('${user.user_id}')">
         <td>
@@ -360,6 +366,7 @@ function renderizarTablaAdmin(lista) {
           <div style="font-weight:700; font-size:0.82rem;">🔥 ${streak} dias de racha</div>
           <div style="font-size:0.74rem; color:var(--text-muted);">${diasCompletados}/30 dias (${pctProgreso}%)</div>
         </td>
+        <td>${refBadge}</td>
         <td>${statusBadge}</td>
         <td>
           <button onclick="event.stopPropagation(); abrirDrawerCliente('${user.user_id}')" class="btn btn-outline btn-sm" style="font-size:0.74rem; padding:4px 10px; border-color:rgba(124,58,237,0.4); color:var(--purple-light);">

@@ -114,6 +114,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     localStorage.setItem('miplanfit_perfil',  JSON.stringify(perfil));
     localStorage.setItem('miplanfit_plan30',  JSON.stringify(plan30));
     localStorage.setItem('miplanfit_plan_id', planId);
+
+    // Actualizar Card de Referidos en la interfaz
+    const userRefCode = planNuvem.referral_code || (typeof generarCodigoReferido === 'function' ? generarCodigoReferido(usuario.id, perfil.nombre) : 'ref');
+    const userRefCount = planNuvem.referrals_count || 0;
+    actualizarCardReferidos(userRefCode, userRefCount, planNuvem.is_premium === true);
+
   } else {
     // Si no hay plan en Supabase, verificar si hay un plan en localStorage (creado por el usuario o en sesión previa)
     const localPerfil = JSON.parse(localStorage.getItem('miplanfit_perfil') || 'null');
@@ -140,6 +146,9 @@ document.addEventListener('DOMContentLoaded', async function () {
           tdee: parseInt(localStorage.getItem('miplanfit_tdee') || '0')
         });
       }
+
+      const tempRefCode = typeof generarCodigoReferido === 'function' ? generarCodigoReferido(usuario?.id || 'guest', perfil.nombre) : 'ref';
+      actualizarCardReferidos(tempRefCode, 0, false);
     } else if (usuario && usuario.id !== 'local_user' && isAuthCallback) {
       // SI NO TIENE PLAN EN NUBE NI EN BROWSER (Intento de login sin cuestionario)
       window.location.href = 'index.html?error=no_plan_found';
@@ -1416,4 +1425,63 @@ function toggleShoppingItem(weekNum, catIdx, itemIdx) {
 
   localStorage.setItem(key, JSON.stringify(savedState));
   renderShoppingList(weekNum);
+}
+
+// ─── Actualizar Card de Referidos y Enlace de Invitación ───
+function actualizarCardReferidos(refCode, refCount, esPremium) {
+  const card = document.getElementById('referral-viral-card');
+  if (!card) return;
+
+  const currentRefCode = refCode || 'miplanfit';
+  const shareUrl = `${window.location.origin}/index.html?ref=${currentRefCode}`;
+
+  // 1. Configurar enlace de WhatsApp con Copy Persuasivo
+  const waMsg = `¡Hola! Estoy usando MiPlanFit para mi plan personalizado de nutrición y ejercicios de 30 días. 🥑🏋️‍♀️ Haz tu plan gratis de 2 min aquí: ${shareUrl}`;
+  const btnWa = document.getElementById('btn-share-whatsapp');
+  if (btnWa) {
+    btnWa.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(waMsg)}`;
+  }
+
+  // Guardar link en global para botón copiar
+  window.currentReferralUrl = shareUrl;
+
+  // 2. Progreso de referidos
+  const count = Math.min(refCount || 0, 3);
+  const pct = Math.round((count / 3) * 100);
+
+  const elText = document.getElementById('ref-progress-text');
+  const elBar = document.getElementById('ref-progress-bar');
+  const elIcon = document.getElementById('ref-reward-icon');
+  const elStatus = document.getElementById('ref-reward-status');
+
+  if (elText) elText.innerText = `${count} / 3 Amigas recomendadas`;
+  if (elBar) elBar.style.width = `${pct}%`;
+
+  if (esPremium || count >= 3) {
+    if (elIcon) elIcon.innerText = '🎉';
+    if (elStatus) {
+      elStatus.innerText = '✨ ¡DESBLOQUEADO!';
+      elStatus.style.color = 'var(--green)';
+    }
+  } else {
+    if (elIcon) elIcon.innerText = '🎁';
+    if (elStatus) {
+      elStatus.innerText = `Faltan ${3 - count} amiga${(3 - count) > 1 ? 's' : ''}`;
+      elStatus.style.color = 'var(--amber)';
+    }
+  }
+}
+
+// Copiar enlace al portapapeles
+function copiarEnlaceReferido() {
+  const url = window.currentReferralUrl || window.location.href;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => {
+      alert('📋 ¡Enlace de invitación copiado al portapapeles! Compártelo con tus amigas.');
+    }).catch(() => {
+      prompt('Copia tu enlace de invitación:', url);
+    });
+  } else {
+    prompt('Copia tu enlace de invitación:', url);
+  }
 }

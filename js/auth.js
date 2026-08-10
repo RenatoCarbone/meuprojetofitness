@@ -37,6 +37,13 @@ async function logout() {
   window.location.href = 'index.html';
 }
 
+// Helper: Generar código de referido único y limpio para un usuario
+function generarCodigoReferido(userId, nombre) {
+  const nameClean = (nombre || 'user').toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 8);
+  const shortId = (userId || '').replace(/[^a-z0-9]/gi, '').substring(0, 4);
+  return `${nameClean}_${shortId || 'ref'}`;
+}
+
 // ─── Salvar plano na nuvem ───
 async function salvarPlanoNaNuvem(userId, dados) {
   const client = getSupabase();
@@ -53,24 +60,96 @@ async function salvarPlanoNaNuvem(userId, dados) {
     }
   } catch(e) {}
 
+  // Código de referido del usuario actual
+  const myRefCode = dados.referral_code || generarCodigoReferido(userId, nombre);
+
+  // Código del patrocinador (quien lo invitó)
+  const referredByCode = dados.referred_by || localStorage.getItem('miplanfit_ref_by') || null;
+
   const payload = {
-    user_id    : userId,
-    user_email : email,
-    user_name  : nombre,
-    perfil     : dados.perfil,
-    plan30     : dados.plan30,
-    plan_id    : dados.planId  || 'B',
-    imc        : dados.imc     || {},
-    tmb        : parseInt(dados.tmb)  || 0,
-    tdee       : parseInt(dados.tdee) || 0,
-    updated_at : new Date().toISOString()
+    user_id       : userId,
+    user_email    : email,
+    user_name     : nombre,
+    referral_code : myRefCode,
+    perfil        : dados.perfil,
+    plan30        : dados.plan30,
+    plan_id       : dados.planId  || 'B',
+    imc           : dados.imc     || {},
+    tmb           : parseInt(dados.tmb)  || 0,
+    tdee          : parseInt(dados.tdee) || 0,
+    updated_at    : new Date().toISOString()
   };
+
+  // Solo incluir referred_by si existe y el usuario no se está refiriendo a sí mismo
+  if (referredByCode && referredByCode !== myRefCode) {
+    payload.referred_by = referredByCode;
+  }
 
   const { error } = await client.from('planos').upsert(payload, { onConflict: 'user_id' });
 
-  if (error) { console.error('Erro ao salvar plano:', error.message); return false; }
-  console.log('✅ Plano salvo na nuvem');
+  if (error) { 
+    console.error('Erro ao salvar plano:', error.message); 
+    return false; 
+  }
+
+  console.log('✅ Plano salvo na nuvem con código de referido:', myRefCode);
+
+  // Se o usuário foi indicado por alguém, processar o crédito da indicação
+  if (referredByCode && referredByCode !== myRefCode && !sessionStorage.getItem('miplanfit_ref_credited')) {
+    sessionStorage.setItem('miplanfit_ref_credited', 'true');
+    await processarIndicacaoNaNuvem(referredByCode, userId);
+  }
+
   return true;
+}
+
+// ─── Incrementar contador del patrocinador y dar Premium al llegar a 3 ───
+async function processarIndicacaoNaNuvem(referrerCode, newUserId) {
+  const client = getSupabase();
+  if (!client) return;
+
+  try {
+    // Buscar al usuario patrocinador por su código de referido
+    const { data: referrer, error: searchErr } = await client
+      .from('planos')
+      .select('*')
+      .eq('referral_code', referrerCode)
+      .maybeSingle();
+
+    if (searchErr || !referrer) {
+      console.log('Patrocinador no encontrado para el código:', referrerCode);
+      return;
+    }
+
+    // Evitar que el patrocinador sea la misma persona
+    if (referrer.user_id === newUserId) return;
+
+    let list = referrer.referrals_list || [];
+    if (!Array.isArray(list)) list = [];
+
+    // Si este nuevo usuario aún no ha sido contado para este patrocinador
+    if (!list.includes(newUserId)) {
+      list.push(newUserId);
+      const newCount = (referrer.referrals_count || 0) + 1;
+
+      // Si llega a 3 referidos y no era Premium, ¡DESBLOQUEAR PREMIUM AUTOMÁTICAMENTE!
+      const shouldBePremium = referrer.is_premium || newCount >= 3;
+
+      await client.from('planos').update({
+        referrals_count: newCount,
+        referrals_list : list,
+        is_premium     : shouldBePremium,
+        updated_at     : new Date().toISOString()
+      }).eq('user_id', referrer.user_id);
+
+      console.log(`🎉 ¡Indicación procesada! ${referrer.user_name} ahora tiene ${newCount} referidos. Premium: ${shouldBePremium}`);
+    }
+
+    // Limpiar localStorage de invitación
+    localStorage.removeItem('miplanfit_ref_by');
+  } catch(e) {
+    console.error('Error al procesar indicación:', e);
+  }
 }
 
 // ─── Carregar plano da nuvem ───
