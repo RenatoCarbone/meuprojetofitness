@@ -1447,14 +1447,16 @@ function cerrarModalReferidos() {
 
 // Helper para obtener el enlace de referido único del usuario actual
 function obtenerEnlaceReferidoActual() {
-  const nombreUser = (perfil && perfil.nombre) ? perfil.nombre : 'user';
-  const userId = window._userId || 'ref';
+  const usuario = window._currentUser || null;
+  const nombreUser = (usuario?.user_metadata?.full_name || usuario?.user_metadata?.name || perfil?.nombre || usuario?.email?.split('@')[0] || 'user');
+  const userId = window._userId || usuario?.id || 'ref';
+  
   const refCode = (typeof generarCodigoReferido === 'function') 
     ? generarCodigoReferido(userId, nombreUser) 
-    : `${nombreUser.toLowerCase().replace(/[^a-z0-9]/g, '')}_ref`;
+    : `${nombreUser.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0,8)}_${(userId||'').substring(0,4)}`;
 
-  const origin = window.location.origin || 'https://miplanfit.pages.dev';
-  return `${origin}/index.html?ref=${refCode}`;
+  const canonicalDomain = 'https://miplanfit.pages.dev';
+  return `${canonicalDomain}/index.html?ref=${refCode}`;
 }
 
 function actualizarCardReferidos(refCode, refCount, esPremium) {
@@ -1470,9 +1472,12 @@ function actualizarCardReferidos(refCode, refCount, esPremium) {
   }
 
   // 1. Enlace de invitación
-  const nombreUser = (perfil && perfil.nombre) ? perfil.nombre : 'user';
-  const actualRefCode = refCode || (typeof generarCodigoReferido === 'function' ? generarCodigoReferido(window._userId, nombreUser) : 'ref');
-  const shareUrl = `${window.location.origin}/index.html?ref=${actualRefCode}`;
+  const canonicalDomain = 'https://miplanfit.pages.dev';
+  const usuario = window._currentUser || null;
+  const nombreUser = (usuario?.user_metadata?.full_name || usuario?.user_metadata?.name || perfil?.nombre || usuario?.email?.split('@')[0] || 'user');
+  const actualRefCode = refCode || (typeof generarCodigoReferido === 'function' ? generarCodigoReferido(window._userId || usuario?.id, nombreUser) : 'ref');
+  
+  const shareUrl = `${canonicalDomain}/index.html?ref=${actualRefCode}`;
 
   const waMsg = `¡Hola! Estoy usando MiPlanFit para mi plan personalizado de nutrición y ejercicios de 30 días. 🥑🏋️‍♀️ Haz tu plan gratis de 2 min aquí: ${shareUrl}`;
   const btnWa = document.getElementById('btn-share-whatsapp');
