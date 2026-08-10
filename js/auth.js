@@ -121,16 +121,12 @@ async function logout() {
   window.location.href = 'index.html';
 }
 
-// ─── Generar código único de referido ───
+// Helper: Generar código de referido único, limpio y consistente usando el primer nombre
 function generarCodigoReferido(userId, nombre) {
-  const cleanName = (nombre || 'user')
-    .toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]/g, '')
-    .slice(0, 10);
-
-  const shortId = (userId || Math.random().toString(36)).replace(/[^a-z0-9]/gi, '').slice(0, 4);
-  return `${cleanName || 'usuario'}_${shortId}`;
+  const firstName = (nombre || 'user').trim().split(/\s+/)[0];
+  const nameClean = firstName.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 8) || 'user';
+  const shortId = (userId || '').replace(/[^a-z0-9]/gi, '').substring(0, 4);
+  return `${nameClean}_${shortId || 'ref'}`;
 }
 
 // ─── Salvar plano na nuvem ───
@@ -285,10 +281,13 @@ async function salvarProgressoNaNuvem(userId, progresso) {
     dias_completados: progresso.diasCompletados || [],
     streak_actual   : progresso.streakActual    || 0,
     max_streak      : progresso.maxStreak       || 0,
-    racha_acumulada : progresso.rachaAcumulada   || 0,
     logros          : progresso.logros          || [],
     updated_at      : new Date().toISOString()
   }).eq('user_id', userId);
 
-  return !error;
+  if (error) {
+    console.error('Erro ao salvar progresso:', error.message);
+    return false;
+  }
+  return true;
 }

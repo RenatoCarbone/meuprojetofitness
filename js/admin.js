@@ -761,7 +761,7 @@ function exportarUsuariosCSV() {
     const email  = (u.user_email || 'Sem Email').replace(/,/g, '');
     const sexo   = (perfil.sexo || 'Mujer').replace(/,/g, '');
     const edad   = perfil.edad || 30;
-    const objetivo = (perfil.objetivo || 'Personalizado').replace(/,/g, '');
+    const objetivo = textoObjetivo(perfil).replace(/,/g, '');
     const preferencia = (perfil.preferencia || 'omnivoro').replace(/,/g, '');
     const refCount = u.referrals_count || 0;
     const premium = u.is_premium ? 'PREMIUM' : 'GRATUITO';

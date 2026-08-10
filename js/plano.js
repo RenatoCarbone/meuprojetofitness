@@ -159,7 +159,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     window.location.href = 'index.html?error=no_plan_found';
     return;
   }
-  }
 
   // Fallback de seguridad solo para usuarios locales no registrados
   if (!perfil) {
