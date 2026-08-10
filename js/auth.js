@@ -127,16 +127,42 @@ async function loginComEmail(emailDigitado) {
   const tmb = parseInt(localStorage.getItem('miplanfit_tmb') || '0', 10);
   const tdee = parseInt(localStorage.getItem('miplanfit_tdee') || '0', 10);
 
-  // Gerar um UUID válido e determinístico para o Postgres
-  const hashStr = cleanEmail.split('').reduce((acc, char) => (acc * 31 + char.charCodeAt(0)) >>> 0, 0).toString(16).padStart(12, '0');
-  const pseudoUserId = `e0000000-0000-4000-8000-${hashStr.slice(-12)}`;
+  let userId = null;
 
   if (client) {
+    const password = 'MiPlanFitUserPass123!';
+    try {
+      let { data: authData, error: authErr } = await client.auth.signInWithPassword({
+        email: cleanEmail,
+        password: password
+      });
+
+      if (authErr || !authData?.user) {
+        const { data: signUpData } = await client.auth.signUp({
+          email: cleanEmail,
+          password: password,
+          options: {
+            data: { full_name: perfil?.nombre || cleanEmail.split('@')[0] }
+          }
+        });
+        if (signUpData?.user) userId = signUpData.user.id;
+      } else {
+        userId = authData.user.id;
+      }
+    } catch(e) {}
+  }
+
+  if (!userId) {
+    const hashStr = cleanEmail.split('').reduce((acc, char) => (acc * 31 + char.charCodeAt(0)) >>> 0, 0).toString(16).padStart(12, '0');
+    userId = `e0000000-0000-4000-8000-${hashStr.slice(-12)}`;
+  }
+
+  if (client && userId) {
     const payload = {
-      user_id: pseudoUserId,
+      user_id: userId,
       user_email: cleanEmail,
       user_name: perfil?.nombre || cleanEmail.split('@')[0],
-      referral_code: typeof generarCodigoReferido === 'function' ? generarCodigoReferido(pseudoUserId, cleanEmail.split('@')[0]) : 'ref',
+      referral_code: typeof generarCodigoReferido === 'function' ? generarCodigoReferido(userId, cleanEmail.split('@')[0]) : 'ref',
       perfil: perfil || { nombre: cleanEmail.split('@')[0] },
       plan30: localPlan30 || [],
       plan_id: localPlanId,
@@ -146,19 +172,23 @@ async function loginComEmail(emailDigitado) {
       updated_at: new Date().toISOString()
     };
 
-    let { error } = await client.from('planos').upsert(payload, { onConflict: 'user_id' });
-    if (error) {
-      const { data: existingRow } = await client.from('planos').select('user_id').eq('user_email', cleanEmail).maybeSingle();
-      if (existingRow) {
-        await client.from('planos').update(payload).eq('user_email', cleanEmail);
-      } else {
-        await client.from('planos').insert(payload).catch(() => {});
+    try {
+      let { error } = await client.from('planos').upsert(payload, { onConflict: 'user_id' });
+      if (error) {
+        const { data: existingRow } = await client.from('planos').select('user_id').eq('user_email', cleanEmail).maybeSingle();
+        if (existingRow) {
+          await client.from('planos').update(payload).eq('user_email', cleanEmail);
+        } else {
+          await client.from('planos').insert(payload);
+        }
       }
+    } catch(e) {
+      console.warn('Erro ao salvar plano por e-mail:', e);
     }
   }
 
   localStorage.setItem('miplanfit_active_email', cleanEmail);
-  localStorage.setItem('miplanfit_active_userid', pseudoUserId);
+  localStorage.setItem('miplanfit_active_userid', userId);
   localStorage.removeItem('miplanfit_quiz_pending_sync');
 
   window.location.href = 'plano.html';
