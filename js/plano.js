@@ -1502,3 +1502,89 @@ function copiarEnlaceReferido() {
     prompt('Copia tu enlace de invitación:', url);
   }
 }
+
+// ─── 12. GESTIÓN DE NUEVOS CICLOS (MANTENER RACHA & RECALCULAR PESO) ───
+function abrirModalNuevoCiclo() {
+  const modal = document.getElementById('modal-nuevo-ciclo');
+  const inputPeso = document.getElementById('cycle-input-peso');
+  const elStreak = document.getElementById('cycle-modal-streak');
+
+  if (elStreak) {
+    const streakVal = (typeof streakActualData !== 'undefined' && streakActualData && streakActualData.streakActual) ? streakActualData.streakActual : (streakData ? streakData.streakActual : 30);
+    elStreak.innerText = `🔥 ${streakVal} días en ofensiva`;
+  }
+
+  if (inputPeso && perfil) {
+    inputPeso.value = perfil.pesoActual || perfil.peso || 70;
+  }
+
+  if (modal) modal.style.display = 'flex';
+}
+
+function cerrarModalNuevoCiclo() {
+  const modal = document.getElementById('modal-nuevo-ciclo');
+  if (modal) modal.style.display = 'none';
+}
+
+async function confirmarNuevoCiclo() {
+  const inputPeso = document.getElementById('cycle-input-peso');
+  const nuevoPeso = parseFloat(inputPeso?.value || (perfil ? perfil.peso : 70));
+
+  if (!nuevoPeso || nuevoPeso <= 30 || nuevoPeso >= 250) {
+    alert('⚠️ Por favor ingresa un peso válido (en kg).');
+    return;
+  }
+
+  // 1. Actualizar perfil local con el nuevo peso registrado por el usuario
+  perfil = perfil || {};
+  perfil.pesoActual = nuevoPeso;
+
+  // Recalcular TMB y TDEE para el nuevo peso
+  const imc = typeof calcularIMC === 'function' ? calcularIMC(nuevoPeso, perfil.altura || 170) : {};
+  const tmb = typeof calcularTMB === 'function' ? calcularTMB(perfil) : 1500;
+  const tdee = typeof calcularTDEE === 'function' ? calcularTDEE(perfil) : 2000;
+  const nuevoPlanId = typeof recomendarPlan === 'function' ? recomendarPlan(perfil) : (planId || 'B');
+  const nuevoPlan30 = typeof generarPlan30Dias === 'function' ? generarPlan30Dias(perfil, nuevoPlanId) : plan30;
+
+  // 2. Renovar el plan30 local manteniendo la racha acumulada
+  plan30 = nuevoPlan30;
+  planId = nuevoPlanId;
+
+  // Limpiar solo los días completados del ciclo anterior, conservando streakActual y maxStreak
+  const nombre = perfil.nombre || 'Usuario';
+  const streakKey = `miplanfit_streak_${nombre.replace(/\s/g,'_')}`;
+  let estadoStreak = JSON.parse(localStorage.getItem(streakKey) || '{}');
+  
+  estadoStreak.diasCompletados = []; // Reinicia las casillas del calendario para el nuevo mes
+  estadoStreak.fechaInicio = new Date().toISOString();
+  
+  localStorage.setItem(streakKey, JSON.stringify(estadoStreak));
+  localStorage.setItem('miplanfit_perfil', JSON.stringify(perfil));
+  localStorage.setItem('miplanfit_plan30', JSON.stringify(plan30));
+  localStorage.setItem('miplanfit_plan_id', planId);
+
+  // 3. Sincronizar en Supabase si el usuario está autenticado
+  const usuario = typeof getUsuarioAtual === 'function' ? await getUsuarioAtual() : null;
+  if (usuario && usuario.id !== 'local_user') {
+    await salvarPlanoNaNuvem(usuario.id, {
+      perfil,
+      plan30,
+      planId,
+      imc,
+      tmb,
+      tdee
+    });
+
+    const client = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (client) {
+      await client.from('planos').update({
+        dias_completados: [],
+        updated_at: new Date().toISOString()
+      }).eq('user_id', usuario.id).catch(() => {});
+    }
+  }
+
+  cerrarModalNuevoCiclo();
+  alert(`🏆 ¡Felicidades! Has iniciado tu Nuevo Ciclo con tu peso actualizado de ${nuevoPeso} kg. Tu menú ha sido recalculado y tu racha de días en ofensiva continúa activa.`);
+  window.location.reload();
+}
