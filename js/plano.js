@@ -1543,7 +1543,7 @@ async function confirmarNuevoCiclo() {
     return;
   }
 
-  // 1. Preservar estado Premium si el usuario ya era Premium
+  // 1. Preservar estado Premium e racha acumulada
   const wasPremium = (typeof isPremium === 'function' ? isPremium() : false) || (localStorage.getItem('miplanfit_premium') === 'true');
 
   // 2. Actualizar perfil local con el nuevo peso registrado por el usuario
@@ -1573,6 +1573,9 @@ async function confirmarNuevoCiclo() {
   estadoStreak.maxStreak = Math.max(estadoStreak.maxStreak || 0, estadoStreak.rachaAcumulada);
   estadoStreak.diasCompletados = []; // Reinicia las casillas del calendario para el nuevo mes
   estadoStreak.fechaInicio = new Date().toISOString();
+
+  // Guardar rachaAcumulada dentro del perfil para persistencia total
+  perfil.rachaAcumulada = estadoStreak.rachaAcumulada;
   
   localStorage.setItem(streakKey, JSON.stringify(estadoStreak));
   localStorage.setItem('miplanfit_perfil', JSON.stringify(perfil));
@@ -1602,7 +1605,6 @@ async function confirmarNuevoCiclo() {
         await client.from('planos').update({
           dias_completados: [],
           streak_actual   : estadoStreak.rachaAcumulada,
-          racha_acumulada : estadoStreak.rachaAcumulada,
           max_streak      : estadoStreak.maxStreak,
           is_premium      : wasPremium,
           updated_at      : new Date().toISOString()
