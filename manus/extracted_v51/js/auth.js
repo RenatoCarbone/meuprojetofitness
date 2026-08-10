@@ -4,20 +4,22 @@
 
 // ─── Perfil pendente do quiz ───
 function perfilQuizValido(perfil) {
-  if (!perfil || typeof perfil !== 'object' || Array.isArray(perfil)) return false;
-  const keys = Object.keys(perfil);
-  if (keys.length === 0) return false;
-  return !!(perfil.nombre || perfil.sexo || perfil.edad || perfil.peso || perfil.pesoActual || perfil.objetivo_kg || perfil.altura);
+  return !!(
+    perfil &&
+    typeof perfil === 'object' &&
+    !Array.isArray(perfil) &&
+    Object.keys(perfil).length > 0 &&
+    Number(perfil.peso) > 0 &&
+    Number(perfil.edad) > 0
+  );
 }
 
 function normalizarPerfilQuiz(perfil) {
   if (!perfilQuizValido(perfil)) return null;
 
   const perfilNormalizado = { ...perfil };
-  const numPeso = Number(perfilNormalizado.pesoActual || perfilNormalizado.peso || 0);
-  if (numPeso > 0) {
-    perfilNormalizado.peso = numPeso;
-    perfilNormalizado.pesoActual = numPeso;
+  if (!Number(perfilNormalizado.pesoActual) && Number(perfilNormalizado.peso) > 0) {
+    perfilNormalizado.pesoActual = Number(perfilNormalizado.peso);
   }
   return perfilNormalizado;
 }
@@ -77,25 +79,13 @@ async function loginComGoogle() {
   const client = getSupabase();
   if (!client) return false;
 
-  const localPerfil = localStorage.getItem('miplanfit_perfil') || sessionStorage.getItem('miplanfit_perfil_backup');
+  // O localStorage/sessionStorage do mesmo domínio permanece disponível após OAuth.
+  // Não enviar dados de saúde do usuário na URL de redirecionamento.
   const refCode = localStorage.getItem('miplanfit_ref_by') || sessionStorage.getItem('miplanfit_ref_by') || new URLSearchParams(window.location.search).get('ref');
-
   let redirectTarget = SITE_URL + '/plano.html';
-  const params = new URLSearchParams();
 
   if (refCode) {
-    params.set('ref', refCode.trim().toLowerCase());
-  }
-
-  if (localPerfil) {
-    try {
-      const b64 = btoa(unescape(encodeURIComponent(localPerfil)));
-      params.set('pdata', b64);
-    } catch(e) {}
-  }
-
-  if ([...params].length > 0) {
-    redirectTarget += `?${params.toString()}`;
+    redirectTarget += `?ref=${encodeURIComponent(refCode.trim().toLowerCase())}`;
   }
 
   const { error } = await client.auth.signInWithOAuth({
@@ -110,122 +100,24 @@ async function loginComGoogle() {
   return true;
 }
 
-// ─── Login Direto com E-mail ───
-async function loginComEmail(emailDigitado) {
-  const client = getSupabase();
-  const cleanEmail = (emailDigitado || '').trim().toLowerCase();
-
-  if (!cleanEmail || !cleanEmail.includes('@')) {
-    alert('Por favor, introduce un e-mail válido.');
-    return false;
-  }
-
-  const perfil = typeof recuperarPerfilQuiz === 'function' ? recuperarPerfilQuiz() : null;
-  const localPlan30 = JSON.parse(localStorage.getItem('miplanfit_plan30') || 'null');
-  const localPlanId = localStorage.getItem('miplanfit_plan_id') || 'B';
-  const imc = JSON.parse(localStorage.getItem('miplanfit_imc') || '{}');
-  const tmb = parseInt(localStorage.getItem('miplanfit_tmb') || '0', 10);
-  const tdee = parseInt(localStorage.getItem('miplanfit_tdee') || '0', 10);
-
-  let userId = null;
-
-  if (client) {
-    const password = 'MiPlanFitUserPass123!';
-    try {
-      let { data: authData, error: authErr } = await client.auth.signInWithPassword({
-        email: cleanEmail,
-        password: password
-      });
-
-      if (authErr || !authData?.user) {
-        const { data: signUpData } = await client.auth.signUp({
-          email: cleanEmail,
-          password: password,
-          options: {
-            data: { full_name: perfil?.nombre || cleanEmail.split('@')[0] }
-          }
-        });
-        if (signUpData?.user) userId = signUpData.user.id;
-      } else {
-        userId = authData.user.id;
-      }
-    } catch(e) {}
-  }
-
-  if (!userId) {
-    const hashStr = cleanEmail.split('').reduce((acc, char) => (acc * 31 + char.charCodeAt(0)) >>> 0, 0).toString(16).padStart(12, '0');
-    userId = `e0000000-0000-4000-8000-${hashStr.slice(-12)}`;
-  }
-
-  if (client && userId) {
-    const payload = {
-      user_id: userId,
-      user_email: cleanEmail,
-      user_name: perfil?.nombre || cleanEmail.split('@')[0],
-      referral_code: typeof generarCodigoReferido === 'function' ? generarCodigoReferido(userId, cleanEmail.split('@')[0]) : 'ref',
-      perfil: perfil || { nombre: cleanEmail.split('@')[0] },
-      plan30: localPlan30 || [],
-      plan_id: localPlanId,
-      imc,
-      tmb,
-      tdee,
-      updated_at: new Date().toISOString()
-    };
-
-    try {
-      let { error } = await client.from('planos').upsert(payload, { onConflict: 'user_id' });
-      if (error) {
-        const { data: existingRow } = await client.from('planos').select('user_id').eq('user_email', cleanEmail).maybeSingle();
-        if (existingRow) {
-          await client.from('planos').update(payload).eq('user_email', cleanEmail);
-        } else {
-          await client.from('planos').insert(payload);
-        }
-      }
-    } catch(e) {
-      console.warn('Erro ao salvar plano por e-mail:', e);
-    }
-  }
-
-  localStorage.setItem('miplanfit_active_email', cleanEmail);
-  localStorage.setItem('miplanfit_active_userid', userId);
-  localStorage.removeItem('miplanfit_quiz_pending_sync');
-
-  window.location.href = 'plano.html';
-  return true;
-}
-
 // ─── Obter usuário atual ───
 async function getUsuarioAtual() {
   const client = getSupabase();
-  if (client) {
-    try {
-      const { data: { session } } = await client.auth.getSession();
-      if (session?.user) return session.user;
-    } catch (e) {}
+  if (!client) return null;
+  try {
+    const { data: { session } } = await client.auth.getSession();
+    return session?.user || null;
+  } catch (e) {
+    return null;
   }
-
-  // Fallback para sessão direta de e-mail
-  const activeEmail = localStorage.getItem('miplanfit_active_email');
-  const activeUserId = localStorage.getItem('miplanfit_active_userid');
-  if (activeEmail && activeUserId) {
-    return {
-      id: activeUserId,
-      email: activeEmail,
-      user_metadata: { full_name: activeEmail.split('@')[0] }
-    };
-  }
-
-  return null;
 }
 
 // ─── Logout ───
 async function logout() {
   const client = getSupabase();
-  if (client) await client.auth.signOut().catch(() => {});
+  if (client) await client.auth.signOut();
   ['miplanfit_perfil','miplanfit_plan30','miplanfit_plan_id',
-   'miplanfit_imc','miplanfit_tmb','miplanfit_tdee',
-   'miplanfit_active_email','miplanfit_active_userid'].forEach(k => localStorage.removeItem(k));
+   'miplanfit_imc','miplanfit_tmb','miplanfit_tdee'].forEach(k => localStorage.removeItem(k));
   window.location.href = 'index.html';
 }
 
@@ -280,23 +172,9 @@ async function salvarPlanoNaNuvem(userId, dados = {}) {
   if (Array.isArray(dados.plan30)) payload.plan30 = dados.plan30;
   if (referredByCode && referredByCode !== myRefCode) payload.referred_by = referredByCode;
 
-  // 1. Tentar upsert primeiro
-  let { error } = await client
+  const { error } = await client
     .from('planos')
     .upsert(payload, { onConflict: 'user_id' });
-
-  // 2. Se o upsert falhar por ausência de índice único em user_id ou erro PostgREST, usar fallback atômico de update/insert
-  if (error) {
-    console.warn('Upsert direto falhou, usando fallback de update/insert:', error.message);
-    const { data: existingRow } = await client.from('planos').select('user_id').eq('user_id', userId).maybeSingle();
-    if (existingRow) {
-      const res = await client.from('planos').update(payload).eq('user_id', userId);
-      error = res.error;
-    } else {
-      const res = await client.from('planos').insert(payload);
-      error = res.error;
-    }
-  }
 
   if (error) {
     console.error('Erro ao salvar plano e perfil no Supabase:', error.message, error);

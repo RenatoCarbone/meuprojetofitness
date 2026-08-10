@@ -1,0 +1,4 @@
+# Diretrizes de Segurança e Robustez
+- Sempre verificar sanitização de inputs do usuário para prevenir XSS.
+- Garantir que chaves privadas (service_role keys) nunca sejam expostas no código front-end.
+- Validar que todas as chamadas ao Supabase respeitem a verificação de sessão e `user_id`.

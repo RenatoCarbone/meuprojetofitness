@@ -1,0 +1,652 @@
+[1mdiff --git a/admin.html b/admin.html[m
+[1mindex f8c2abe..8afd705 100644[m
+[1m--- a/admin.html[m
+[1m+++ b/admin.html[m
+[36m@@ -602,7 +602,7 @@[m
+ </div>[m
+ [m
+ <script src="js/supabase-config.js?v=3.9"></script>[m
+[31m-<script src="js/auth.js?v=3.9"></script>[m
+[31m-<script src="js/admin.js?v=3.9"></script>[m
+[32m+[m[32m<script src="js/auth.js?v=5.0"></script>[m
+[32m+[m[32m<script src="js/admin.js?v=5.0"></script>[m
+ </body>[m
+ </html>[m
+[1mdiff --git a/index.html b/index.html[m
+[1mindex d523149..2b1f2cd 100644[m
+[1m--- a/index.html[m
+[1m+++ b/index.html[m
+[36m@@ -785,8 +785,8 @@[m
+ <script src="data/exercises.js?v=4.9"></script>[m
+ <script src="data/plans.js?v=4.9"></script>[m
+ <script src="js/supabase-config.js?v=4.9"></script>[m
+[31m-<script src="js/auth.js?v=4.9"></script>[m
+[31m-<script src="js/app.js?v=4.9"></script>[m
+[32m+[m[32m<script src="js/auth.js?v=5.0"></script>[m
+[32m+[m[32m<script src="js/app.js?v=5.0"></script>[m
+ <script>[m
+   function abrirDirectLoginModal() {[m
+     document.getElementById('direct-login-modal').style.display = 'flex';[m
+[1mdiff --git a/js/admin.js b/js/admin.js[m
+[1mindex 88d21f1..b321af1 100644[m
+[1m--- a/js/admin.js[m
+[1m+++ b/js/admin.js[m
+[36m@@ -11,6 +11,30 @@[m [mlet chartAgeInstance = null;[m
+ let chartGoalInstance = null;[m
+ let chartDietInstance = null;[m
+ [m
+[32m+[m[32mfunction categoriaObjetivo(perfil = {}) {[m
+[32m+[m[32m  const objetivoKg = Number(perfil.objetivo_kg);[m
+[32m+[m[32m  if (Number.isFinite(objetivoKg)) return objetivoKg <= 0 ? 'mantener' : 'perder';[m
+[32m+[m
+[32m+[m[32m  const objetivo = String(perfil.objetivo || '').toLowerCase();[m
+[32m+[m[32m  if (objetivo.includes('mantener')) return 'mantener';[m
+[32m+[m[32m  if (objetivo.includes('musculo') || objetivo.includes('massa')) return 'musculo';[m
+[32m+[m[32m  return 'perder';[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mfunction textoObjetivo(perfil = {}) {[m
+[32m+[m[32m  const objetivoKg = Number(perfil.objetivo_kg);[m
+[32m+[m[32m  if (Number.isFinite(objetivoKg)) {[m
+[32m+[m[32m    return objetivoKg <= 0 ? '⚖️ Manter peso' : `📉 Perder ${objetivoKg} kg`;[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  const objetivoMap = {[m
+[32m+[m[32m    perder_peso: '📉 Perder Peso',[m
+[32m+[m[32m    mantener: '⚖️ Manter Peso',[m
+[32m+[m[32m    ganar_musculo: '💪 Ganhar Massa'[m
+[32m+[m[32m  };[m
+[32m+[m[32m  return objetivoMap[perfil.objetivo] || perfil.objetivo || 'Personalizado';[m
+[32m+[m[32m}[m
+[32m+[m
+ document.addEventListener('DOMContentLoaded', async function() {[m
+   await verificarAccesoAdmin();[m
+ });[m
+[36m@@ -204,9 +228,9 @@[m [mfunction renderizarGraficosDemograficos(usuarios) {[m
+     else edadGroup['55+']++;[m
+ [m
+     // Objetivo[m
+[31m-    const obj = (perfil.objetivo || 'perder_peso').toLowerCase();[m
+[31m-    if (obj.includes('perder')) objetivos.perder++;[m
+[31m-    else if (obj.includes('mantener')) objetivos.mantener++;[m
+[32m+[m[32m    const categoria = categoriaObjetivo(perfil);[m
+[32m+[m[32m    if (categoria === 'perder') objetivos.perder++;[m
+[32m+[m[32m    else if (categoria === 'mantener') objetivos.mantener++;[m
+     else objetivos.musculo++;[m
+ [m
+     // Dieta[m
+[36m@@ -336,7 +360,7 @@[m [mfunction renderizarResumoPersona(usuarios) {[m
+     const perfil = u.perfil || {};[m
+     if ((perfil.sexo || 'mujer').toLowerCase() === 'mujer') mulheres++;[m
+     somaIdades += parseInt(perfil.edad || 30);[m
+[31m-    if ((perfil.objetivo || 'perder').toLowerCase().includes('perder')) perderPesoCount++;[m
+[32m+[m[32m    if (categoriaObjetivo(perfil) === 'perder') perderPesoCount++;[m
+     if ((perfil.ejercicios || 'casa').toLowerCase().includes('casa')) treinoCasaCount++;[m
+   });[m
+ [m
+[36m@@ -477,13 +501,7 @@[m [mfunction renderizarTablaAdmin(lista) {[m
+     const edadStr = tienePerfil && perfil.edad ? `${perfil.edad} anos` : '';[m
+ [m
+     // Objetivo[m
+[31m-    const objetivoMap = {[m
+[31m-      perder_peso: '📉 Perder Peso',[m
+[31m-      mantener: '⚖️ Manter Peso',[m
+[31m-      ganar_musculo: '💪 Ganhar Massa'[m
+[31m-    };[m
+[31m-    const objVal = perfil.objetivo_kg ? `Perder ${perfil.objetivo_kg} kg` : (objetivoMap[perfil.objetivo] || perfil.objetivo || 'Personalizado');[m
+[31m-    const objetivoStr = tienePerfil ? objVal : '⚠️ Quiz Pendente';[m
+[32m+[m[32m    const objetivoStr = tienePerfil ? textoObjetivo(perfil) : '⚠️ Quiz Pendente';[m
+ [m
+     // Racha / Progresso[m
+     const streak = user.streak_actual || 0;[m
+[36m@@ -743,7 +761,7 @@[m [mfunction exportarUsuariosCSV() {[m
+     const email  = (u.user_email || 'Sem Email').replace(/,/g, '');[m
+     const sexo   = (perfil.sexo || 'Mujer').replace(/,/g, '');[m
+     const edad   = perfil.edad || 30;[m
+[31m-    const objetivo = (perfil.objetivo || 'Personalizado').replace(/,/g, '');[m
+[32m+[m[32m    const objetivo = textoObjetivo(perfil).replace(/,/g, '');[m
+     const preferencia = (perfil.preferencia || 'omnivoro').replace(/,/g, '');[m
+     const refCount = u.referrals_count || 0;[m
+     const premium = u.is_premium ? 'PREMIUM' : 'GRATUITO';[m
+[1mdiff --git a/js/app.js b/js/app.js[m
+[1mindex 9d1d6d1..9ae25fd 100644[m
+[1m--- a/js/app.js[m
+[1m+++ b/js/app.js[m
+[36m@@ -226,6 +226,7 @@[m [mdocument.getElementById('main-form').addEventListener('submit', async function(e[m
+   localStorage.setItem('miplanfit_premium', 'false');[m
+   localStorage.setItem('miplanfit_perfil', perfilStr);[m
+   localStorage.setItem('miplanfit_perfil_backup', perfilStr);[m
+[32m+[m[32m  localStorage.setItem('miplanfit_quiz_pending_sync', 'true');[m
+   sessionStorage.setItem('miplanfit_perfil', perfilStr);[m
+   sessionStorage.setItem('miplanfit_perfil_backup', perfilStr);[m
+   document.cookie = `miplanfit_perfil_ck=${encodeURIComponent(perfilStr)}; path=/; max-age=86400; SameSite=Lax`;[m
+[1mdiff --git a/js/auth.js b/js/auth.js[m
+[1mindex c11f23b..42fed97 100644[m
+[1m--- a/js/auth.js[m
+[1m+++ b/js/auth.js[m
+[36m@@ -2,32 +2,90 @@[m
+ // AUTH.JS — Autenticação Google via Supabase[m
+ // ============================================================[m
+ [m
+[32m+[m[32m// ─── Perfil pendente do quiz ───[m
+[32m+[m[32mfunction perfilQuizValido(perfil) {[m
+[32m+[m[32m  return !!([m
+[32m+[m[32m    perfil &&[m
+[32m+[m[32m    typeof perfil === 'object' &&[m
+[32m+[m[32m    !Array.isArray(perfil) &&[m
+[32m+[m[32m    Object.keys(perfil).length > 0 &&[m
+[32m+[m[32m    Number(perfil.peso) > 0 &&[m
+[32m+[m[32m    Number(perfil.edad) > 0[m
+[32m+[m[32m  );[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mfunction normalizarPerfilQuiz(perfil) {[m
+[32m+[m[32m  if (!perfilQuizValido(perfil)) return null;[m
+[32m+[m
+[32m+[m[32m  const perfilNormalizado = { ...perfil };[m
+[32m+[m[32m  if (!Number(perfilNormalizado.pesoActual) && Number(perfilNormalizado.peso) > 0) {[m
+[32m+[m[32m    perfilNormalizado.pesoActual = Number(perfilNormalizado.peso);[m
+[32m+[m[32m  }[m
+[32m+[m[32m  return perfilNormalizado;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mfunction parsePerfilQuiz(raw) {[m
+[32m+[m[32m  if (!raw || typeof raw !== 'string') return null;[m
+[32m+[m[32m  try {[m
+[32m+[m[32m    return normalizarPerfilQuiz(JSON.parse(raw));[m
+[32m+[m[32m  } catch (e) {[m
+[32m+[m[32m    return null;[m
+[32m+[m[32m  }[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mfunction recuperarPerfilQuiz() {[m
+[32m+[m[32m  const fontes = [[m
+[32m+[m[32m    localStorage.getItem('miplanfit_perfil'),[m
+[32m+[m[32m    sessionStorage.getItem('miplanfit_perfil'),[m
+[32m+[m[32m    sessionStorage.getItem('miplanfit_perfil_backup'),[m
+[32m+[m[32m    localStorage.getItem('miplanfit_perfil_backup')[m
+[32m+[m[32m  ];[m
+[32m+[m
+[32m+[m[32m  for (const fonte of fontes) {[m
+[32m+[m[32m    const perfil = parsePerfilQuiz(fonte);[m
+[32m+[m[32m    if (perfil) return perfil;[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  const cookieMatch = document.cookie.match(/(?:^|; )miplanfit_perfil_ck=([^;]+)/);[m
+[32m+[m[32m  if (cookieMatch) {[m
+[32m+[m[32m    try {[m
+[32m+[m[32m      const perfil = normalizarPerfilQuiz(JSON.parse(decodeURIComponent(cookieMatch[1])));[m
+[32m+[m[32m      if (perfil) return perfil;[m
+[32m+[m[32m    } catch (e) {}[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  // Compatibilidade temporária com links OAuth criados por versões antigas.[m
+[32m+[m[32m  const url = new URL(window.location.href);[m
+[32m+[m[32m  const legacyPdata = url.searchParams.get('pdata');[m
+[32m+[m[32m  if (legacyPdata) {[m
+[32m+[m[32m    try {[m
+[32m+[m[32m      const perfil = normalizarPerfilQuiz(JSON.parse(decodeURIComponent(escape(atob(legacyPdata.replace(/\s/g, '+'))))));[m
+[32m+[m[32m      if (perfil) return perfil;[m
+[32m+[m[32m    } catch (e) {}[m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  return null;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mfunction removerPdataLegadoDaUrl() {[m
+[32m+[m[32m  const url = new URL(window.location.href);[m
+[32m+[m[32m  if (!url.searchParams.has('pdata')) return;[m
+[32m+[m[32m  url.searchParams.delete('pdata');[m
+[32m+[m[32m  window.history.replaceState({}, document.title, url.pathname + (url.search ? url.search : '') + url.hash);[m
+[32m+[m[32m}[m
+[32m+[m
+ // ─── Login com Google ───[m
+ async function loginComGoogle() {[m
+   const client = getSupabase();[m
+   if (!client) return false;[m
+ [m
+[31m-  // Preservar datos del perfil del quiz antes del redireccionamiento OAuth[m
+[31m-  const localPerfil = localStorage.getItem('miplanfit_perfil') || sessionStorage.getItem('miplanfit_perfil_backup');[m
+[32m+[m[32m  // O localStorage/sessionStorage do mesmo domínio permanece disponível após OAuth.[m
+[32m+[m[32m  // Não enviar dados de saúde do usuário na URL de redirecionamento.[m
+   const refCode = localStorage.getItem('miplanfit_ref_by') || sessionStorage.getItem('miplanfit_ref_by') || new URLSearchParams(window.location.search).get('ref');[m
+[31m-[m
+   let redirectTarget = SITE_URL + '/plano.html';[m
+[31m-  const params = new URLSearchParams();[m
+ [m
+   if (refCode) {[m
+[31m-    params.set('ref', refCode.trim().toLowerCase());[m
+[31m-  }[m
+[31m-[m
+[31m-  if (localPerfil) {[m
+[31m-    try {[m
+[31m-      // Codificar en Base64 UTF-8 seguro para URL sin espacios ni sintaxis rota[m
+[31m-      const b64 = btoa(unescape(encodeURIComponent(localPerfil)));[m
+[31m-      params.set('pdata', b64);[m
+[31m-    } catch(e) {}[m
+[31m-  }[m
+[31m-[m
+[31m-  if ([...params].length > 0) {[m
+[31m-    redirectTarget += `?${params.toString()}`;[m
+[32m+[m[32m    redirectTarget += `?ref=${encodeURIComponent(refCode.trim().toLowerCase())}`;[m
+   }[m
+ [m
+   const { error } = await client.auth.signInWithOAuth({[m
+[36m@@ -35,7 +93,10 @@[m [masync function loginComGoogle() {[m
+     options: { redirectTo: redirectTarget }[m
+   });[m
+ [m
+[31m-  if (error) { console.error('Google login error:', error.message); return false; }[m
+[32m+[m[32m  if (error) {[m
+[32m+[m[32m    console.error('Google login error:', error.message);[m
+[32m+[m[32m    return false;[m
+[32m+[m[32m  }[m
+   return true;[m
+ }[m
+ [m
+[36m@@ -69,84 +130,59 @@[m [mfunction generarCodigoReferido(userId, nombre) {[m
+ }[m
+ [m
+ // ─── Salvar plano na nuvem ───[m
+[31m-async function salvarPlanoNaNuvem(userId, dados) {[m
+[32m+[m[32masync function salvarPlanoNaNuvem(userId, dados = {}) {[m
+   const client = getSupabase();[m
+[31m-  if (!client) return false;[m
+[32m+[m[32m  if (!client || !userId) return false;[m
+[32m+[m
+[32m+[m[32m  const perfil = normalizarPerfilQuiz(dados.perfil);[m
+[32m+[m[32m  if (!perfil) {[m
+[32m+[m[32m    console.error('Perfil inválido: o plano não foi salvo para evitar gravar perfil vazio.', dados.perfil);[m
+[32m+[m[32m    return false;[m
+[32m+[m[32m  }[m
+ [m
+[31m-  let email = dados.user_email || dados.perfil?.email || '';[m
+[31m-  let nombre = dados.user_name || dados.perfil?.nombre || 'Usuario';[m
+[32m+[m[32m  let email = dados.user_email || perfil.email || '';[m
+[32m+[m[32m  let nombre = dados.user_name || perfil.nombre || 'Usuario';[m
+ [m
+   try {[m
+     const { data: { session } } = await client.auth.getSession();[m
+     if (session?.user?.email) {[m
+       email = session.user.email;[m
+       const gName = session.user.user_metadata?.full_name || session.user.user_metadata?.name;[m
+[31m-      if (gName && gName.trim() !== '' && gName.toLowerCase() !== 'usuario') {[m
+[32m+[m[32m      if (gName && gName.trim() && gName.toLowerCase() !== 'usuario') {[m
+         nombre = gName;[m
+[31m-      } else if (dados.perfil?.nombre && dados.perfil.nombre.trim() !== '' && dados.perfil.nombre.toLowerCase() !== 'usuario') {[m
+[31m-        nombre = dados.perfil.nombre;[m
+[31m-      } else {[m
+[31m-        nombre = session.user.email.split('@')[0];[m
+       }[m
+     }[m
+[31m-  } catch(e) {}[m
+[32m+[m[32m  } catch (e) {[m
+[32m+[m[32m    console.warn('Não foi possível obter a sessão ao salvar o plano.', e);[m
+[32m+[m[32m  }[m
+ [m
+[31m-  // Código de referido del usuario actual[m
+   const myRefCode = dados.referral_code || generarCodigoReferido(userId, nombre);[m
+[31m-[m
+[31m-  // Código del patrocinador (quien lo invitó)[m
+   const urlRef = new URLSearchParams(window.location.search).get('ref');[m
+   const referredByCode = dados.referred_by || localStorage.getItem('miplanfit_ref_by') || sessionStorage.getItem('miplanfit_ref_by') || urlRef || null;[m
+ [m
+[31m-  // Garantizar que el perfil contenga pesoActual si tiene peso[m
+[31m-  if (dados.perfil && dados.perfil.peso && !dados.perfil.pesoActual) {[m
+[31m-    dados.perfil.pesoActual = dados.perfil.peso;[m
+[31m-  }[m
+[31m-[m
+   const payload = {[m
+[31m-    user_id       : userId,[m
+[31m-    user_email    : email,[m
+[31m-    user_name     : nombre,[m
+[31m-    referral_code : myRefCode,[m
+[31m-    plan30        : dados.plan30,[m
+[31m-    plan_id       : dados.planId  || 'B',[m
+[31m-    imc           : dados.imc     || {},[m
+[31m-    tmb           : parseInt(dados.tmb)  || 0,[m
+[31m-    tdee          : parseInt(dados.tdee) || 0,[m
+[31m-    updated_at    : new Date().toISOString()[m
+[32m+[m[32m    user_id: userId,[m
+[32m+[m[32m    user_email: email,[m
+[32m+[m[32m    user_name: nombre,[m
+[32m+[m[32m    referral_code: myRefCode,[m
+[32m+[m[32m    perfil,[m
+[32m+[m[32m    updated_at: new Date().toISOString()[m
+   };[m
+ [m
+[31m-  // Solo incluir perfil en el payload si es un objeto válido con datos reales[m
+[31m-  if (dados.perfil && typeof dados.perfil === 'object' && Object.keys(dados.perfil).length > 0) {[m
+[31m-    payload.perfil = dados.perfil;[m
+[31m-  }[m
+[31m-[m
+[31m-  // Solo incluir referred_by si existe y el usuario no se está refiriendo a sí mismo[m
+[31m-  if (referredByCode && referredByCode !== myRefCode) {[m
+[31m-    payload.referred_by = referredByCode;[m
+[31m-  }[m
+[32m+[m[32m  if (Array.isArray(dados.plan30)) payload.plan30 = dados.plan30;[m
+[32m+[m[32m  if (referredByCode && referredByCode !== myRefCode) payload.referred_by = referredByCode;[m
+ [m
+[31m-  // 1. Verificar se a linha já existe no Supabase para evitar erro 400 Bad Request no onConflict[m
+[31m-  const { data: existingRow } = await client[m
+[32m+[m[32m  const { error } = await client[m
+     .from('planos')[m
+[31m-    .select('user_id')[m
+[31m-    .eq('user_id', userId)[m
+[31m-    .maybeSingle();[m
+[31m-[m
+[31m-  if (existingRow) {[m
+[31m-    const { error: updateErr } = await client.from('planos').update(payload).eq('user_id', userId);[m
+[31m-    if (updateErr) console.warn('Erro ao atualizar plano no Supabase:', updateErr.message);[m
+[31m-  } else {[m
+[31m-    const { error: insertErr } = await client.from('planos').insert(payload);[m
+[31m-    if (insertErr) {[m
+[31m-      console.warn('Erro ao inserir plano no Supabase, tentando update:', insertErr.message);[m
+[31m-      await client.from('planos').update(payload).eq('user_id', userId);[m
+[31m-    }[m
+[32m+[m[32m    .upsert(payload, { onConflict: 'user_id' });[m
+[32m+[m
+[32m+[m[32m  if (error) {[m
+[32m+[m[32m    console.error('Erro ao salvar plano e perfil no Supabase:', error.message, error);[m
+[32m+[m[32m    return false;[m
+   }[m
+ [m
+[31m-  console.log('✅ Plano e perfil salvos com sucesso na nuvem:', myRefCode);[m
+[32m+[m[32m  console.log('Plano e perfil salvos com sucesso na nuvem:', myRefCode);[m
+ [m
+[31m-  // Se o usuário foi indicado por alguém, processar o crédito da indicação[m
+   if (referredByCode && referredByCode !== myRefCode && !sessionStorage.getItem(`miplanfit_ref_credited_${userId}`)) {[m
+     sessionStorage.setItem(`miplanfit_ref_credited_${userId}`, 'true');[m
+     await processarIndicacaoNaNuvem(referredByCode, userId);[m
+[36m@@ -227,13 +263,13 @@[m [masync function carregarPlanoNaNuvem(userId) {[m
+   if (!client) return null;[m
+ [m
+   const { data, error } = await client[m
+[31m-    .from('planos').select('*').eq('user_id', userId).single();[m
+[32m+[m[32m    .from('planos').select('*').eq('user_id', userId).maybeSingle();[m
+ [m
+   if (error) {[m
+[31m-    if (error.code !== 'PGRST116') console.error('Erro ao carregar plano:', error.message);[m
+[32m+[m[32m    console.error('Erro ao carregar plano:', error.message);[m
+     return null;[m
+   }[m
+[31m-  return data;[m
+[32m+[m[32m  return data || null;[m
+ }[m
+ [m
+ // ─── Salvar progresso na nuvem ───[m
+[1mdiff --git a/js/plano.js b/js/plano.js[m
+[1mindex d139435..a79f174 100644[m
+[1m--- a/js/plano.js[m
+[1m+++ b/js/plano.js[m
+[36m@@ -75,131 +75,89 @@[m [mdocument.addEventListener('DOMContentLoaded', async function () {[m
+     userInfo.style.display = 'flex';[m
+   }[m
+ [m
+[31m-  // ─── 3. Cargar datos: Nube primero, localStorage como salvavidas ───[m
+[32m+[m[32m  // ─── 3. Resolver perfil do quiz e sincronizar com a nuvem ───[m
+[32m+[m[32m  // O perfil recém-enviado tem prioridade. Caso contrário, a nuvem é a fonte principal.[m
+[32m+[m[32m  const quizPendingSync = localStorage.getItem('miplanfit_quiz_pending_sync') === 'true';[m
+[32m+[m[32m  const perfilLocal = typeof recuperarPerfilQuiz === 'function' ? recuperarPerfilQuiz() : null;[m
+[32m+[m[32m  if (typeof removerPdataLegadoDaUrl === 'function') removerPdataLegadoDaUrl();[m
+[32m+[m
+   let planNuvem = null;[m
+   if (usuario && usuario.id !== 'local_user') {[m
+     planNuvem = await carregarPlanoNaNuvem(usuario.id);[m
+   }[m
+ [m
+[31m-  const cloudHasValidPerfil = planNuvem && planNuvem.perfil && typeof planNuvem.perfil === 'object' && Object.keys(planNuvem.perfil).length > 0 && planNuvem.perfil.peso;[m
+[31m-  const cloudHasValidPlan = planNuvem && planNuvem.plan30 && Array.isArray(planNuvem.plan30) && planNuvem.plan30.length > 0;[m
+[31m-[m
+[31m-  if (cloudHasValidPerfil && cloudHasValidPlan) {[m
+[31m-    perfil  = planNuvem.perfil;[m
+[31m-    plan30  = planNuvem.plan30;[m
+[31m-    planId  = planNuvem.plan_id || 'B';[m
+[31m-[m
+[31m-    if (planNuvem.is_premium === true) {[m
+[31m-      localStorage.setItem('miplanfit_premium', 'true');[m
+[31m-    } else {[m
+[31m-      localStorage.removeItem('miplanfit_premium');[m
+[31m-    }[m
+[31m-[m
+[31m-    // Garantizar que el e-mail del usuario de Google esté siempre guardado en Supabase[m
+[31m-    if (usuario && usuario.email && client && (!planNuvem.user_email || planNuvem.user_email === '')) {[m
+[31m-      await client.from('planos').update({[m
+[31m-        user_email: usuario.email,[m
+[31m-        user_name: usuario.user_metadata?.full_name || usuario.user_metadata?.name || perfil.nombre || 'Usuario'[m
+[31m-      }).eq('user_id', usuario.id).catch(() => {});[m
+[32m+[m[32m  const cloudHasValidPerfil = !!([m
+[32m+[m[32m    planNuvem &&[m
+[32m+[m[32m    typeof perfilQuizValido === 'function' &&[m
+[32m+[m[32m    perfilQuizValido(planNuvem.perfil)[m
+[32m+[m[32m  );[m
+[32m+[m[32m  const cloudHasValidPlan = !!([m
+[32m+[m[32m    planNuvem &&[m
+[32m+[m[32m    Array.isArray(planNuvem.plan30) &&[m
+[32m+[m[32m    planNuvem.plan30.length > 0[m
+[32m+[m[32m  );[m
+[32m+[m
+[32m+[m[32m  // Se houve quiz nesta navegação, nunca deixe um perfil vazio da nuvem vencê-lo.[m
+[32m+[m[32m  if (quizPendingSync && perfilLocal) {[m
+[32m+[m[32m    perfil = perfilLocal;[m
+[32m+[m[32m    planId = localStorage.getItem('miplanfit_plan_id') || 'B';[m
+[32m+[m[32m    plan30 = JSON.parse(localStorage.getItem('miplanfit_plan30') || 'null');[m
+[32m+[m[32m    if (!Array.isArray(plan30) || plan30.length === 0) {[m
+[32m+[m[32m      planId = typeof recomendarPlan === 'function' ? recomendarPlan(perfil) : planId;[m
+[32m+[m[32m      plan30 = generarPlan30Dias(perfil, planId);[m
+     }[m
+ [m
+[31m-    // Sincronizar progreso de la nube al localStorage[m
+[31m-    const nombre    = perfil.nombre || 'Usuario';[m
+[31m-    const streakKey = `miplanfit_streak_${nombre.replace(/\s/g,'_')}`;[m
+[31m-    const estadoNuvem = {[m
+[31m-      diasCompletados: planNuvem.dias_completados || [],[m
+[31m-      streakActual   : planNuvem.streak_actual    || 0,[m
+[31m-      rachaAcumulada : planNuvem.racha_acumulada   || 0,[m
+[31m-      maxStreak      : planNuvem.max_streak       || 0,[m
+[31m-      logros         : planNuvem.logros           || [],[m
+[31m-      fechaInicio    : planNuvem.fecha_inicio[m
+[31m-    };[m
+[31m-    localStorage.setItem(streakKey, JSON.stringify(estadoNuvem));[m
+[31m-    localStorage.setItem('miplanfit_perfil',  JSON.stringify(perfil));[m
+[31m-    localStorage.setItem('miplanfit_plan30',  JSON.stringify(plan30));[m
+[31m-    localStorage.setItem('miplanfit_plan_id', planId);[m
+[31m-[m
+[31m-    // Actualizar Card de Referidos en la interfaz[m
+[31m-    const userRefCode = planNuvem.referral_code || (typeof generarCodigoReferido === 'function' ? generarCodigoReferido(usuario.id, perfil.nombre) : 'ref');[m
+[31m-    const userRefCount = planNuvem.referrals_count || 0;[m
+[31m-    actualizarCardReferidos(userRefCode, userRefCount, planNuvem.is_premium === true);[m
+[31m-[m
+[31m-    // 1. Recuperar perfil de la URL (OAuth pdata), localStorage, sessionStorage o cookies[m
+[31m-    const urlPdata = new URLSearchParams(window.location.search).get('pdata');[m
+[31m-    let localPerfil = null;[m
+[31m-    if (urlPdata) {[m
+[31m-      try {[m
+[31m-        localPerfil = JSON.parse(decodeURIComponent(escape(atob(urlPdata.replace(/\s/g, '+')))));[m
+[31m-      } catch(e) {[m
+[31m-        try { localPerfil = JSON.parse(decodeURIComponent(urlPdata)); } catch(err) {}[m
+[31m-      }[m
+[31m-    }[m
+[31m-    if (!localPerfil) {[m
+[31m-      try { localPerfil = JSON.parse(localStorage.getItem('miplanfit_perfil') || 'null'); } catch(e) {}[m
+[31m-    }[m
+[31m-    if (!localPerfil) {[m
+[31m-      try { localPerfil = JSON.parse(sessionStorage.getItem('miplanfit_perfil_backup') || localStorage.getItem('miplanfit_perfil_backup') || 'null'); } catch(e) {}[m
+[32m+[m[32m    localStorage.setItem('miplanfit_premium', 'false');[m
+[32m+[m[32m    if (usuario && usuario.id !== 'local_user') {[m
+[32m+[m[32m      const salvo = await salvarPlanoNaNuvem(usuario.id, {[m
+[32m+[m[32m        perfil,[m
+[32m+[m[32m        plan30,[m
+[32m+[m[32m        planId,[m
+[32m+[m[32m        imc: JSON.parse(localStorage.getItem('miplanfit_imc') || '{}'),[m
+[32m+[m[32m        tmb: parseInt(localStorage.getItem('miplanfit_tmb') || '0', 10),[m
+[32m+[m[32m        tdee: parseInt(localStorage.getItem('miplanfit_tdee') || '0', 10)[m
+[32m+[m[32m      });[m
+[32m+[m[32m      if (salvo) localStorage.removeItem('miplanfit_quiz_pending_sync');[m
+     }[m
+[31m-    if (!localPerfil) {[m
+[31m-      const match = document.cookie.match(/miplanfit_perfil_ck=([^;]+)/);[m
+[31m-      if (match) { try { localPerfil = JSON.parse(decodeURIComponent(match[1])); } catch(e) {} }[m
+[32m+[m[32m  } else if (cloudHasValidPerfil) {[m
+[32m+[m[32m    perfil = planNuvem.perfil;[m
+[32m+[m[32m    planId = planNuvem.plan_id || localStorage.getItem('miplanfit_plan_id') || 'B';[m
+[32m+[m[32m    plan30 = cloudHasValidPlan ? planNuvem.plan30 : JSON.parse(localStorage.getItem('miplanfit_plan30') || 'null');[m
+[32m+[m[32m    if (!Array.isArray(plan30) || plan30.length === 0) {[m
+[32m+[m[32m      planId = typeof recomendarPlan === 'function' ? recomendarPlan(perfil) : planId;[m
+[32m+[m[32m      plan30 = generarPlan30Dias(perfil, planId);[m
+     }[m
+ [m
+[31m-    // SI TENEMOS UN PERFIL LOCAL VÁLIDO E O SUPABASE ESTÁ VAZIO OU INCOMPLETO, SALVAR NA NUVEM DE IMEDIATO[m
+[31m-    if (localPerfil && usuario && usuario.id !== 'local_user') {[m
+[31m-      const plan30Tmp = JSON.parse(localStorage.getItem('miplanfit_plan30') || 'null') || (typeof generarPlan30Dias === 'function' ? generarPlan30Dias(localPerfil, 'B') : []);[m
+[31m-      await client.from('planos').update({[m
+[31m-        perfil: localPerfil,[m
+[31m-        plan30: plan30Tmp,[m
+[31m-        user_email: usuario.email,[m
+[31m-        user_name: usuario.user_metadata?.full_name || localPerfil.nombre || 'Usuario',[m
+[31m-        updated_at: new Date().toISOString()[m
+[31m-      }).eq('user_id', usuario.id).catch(() => {});[m
+[31m-    }[m
+[32m+[m[32m    if (planNuvem.is_premium === true) localStorage.setItem('miplanfit_premium', 'true');[m
+[32m+[m[32m    else localStorage.removeItem('miplanfit_premium');[m
+ [m
+[31m-    let localPlan30 = JSON.parse(localStorage.getItem('miplanfit_plan30') || 'null');[m
+[31m-    let localPlanId = localStorage.getItem('miplanfit_plan_id') || 'B';[m
+[31m-[m
+[31m-    // Si tenemos el perfil pero se perdió el plan de 30 días en la redirección, regenerarlo al vuelo[m
+[31m-    if (localPerfil && (!localPlan30 || !Array.isArray(localPlan30) || localPlan30.length === 0)) {[m
+[31m-      if (typeof recomendarPlan === 'function' && typeof generarPlan30Dias === 'function') {[m
+[31m-        localPlanId = recomendarPlan(localPerfil);[m
+[31m-        localPlan30 = generarPlan30Dias(localPerfil, localPlanId);[m
+[31m-      }[m
+[32m+[m[32m    localStorage.setItem('miplanfit_perfil', JSON.stringify(perfil));[m
+[32m+[m[32m    localStorage.setItem('miplanfit_plan30', JSON.stringify(plan30));[m
+[32m+[m[32m    localStorage.setItem('miplanfit_plan_id', planId);[m
+[32m+[m[32m  } else if (perfilLocal) {[m
+[32m+[m[32m    // Recuperação de contas antigas cuja linha existe, mas ainda tem perfil {}.[m
+[32m+[m[32m    perfil = perfilLocal;[m
+[32m+[m[32m    planId = localStorage.getItem('miplanfit_plan_id') || 'B';[m
+[32m+[m[32m    plan30 = JSON.parse(localStorage.getItem('miplanfit_plan30') || 'null');[m
+[32m+[m[32m    if (!Array.isArray(plan30) || plan30.length === 0) {[m
+[32m+[m[32m      planId = typeof recomendarPlan === 'function' ? recomendarPlan(perfil) : planId;[m
+[32m+[m[32m      plan30 = generarPlan30Dias(perfil, planId);[m
+     }[m
+ [m
+[31m-    if (localPerfil && localPlan30) {[m
+[31m-      // TENEMOS DATOS DE PLAN EN EL NAVEGADOR:[m
+[31m-      perfil = localPerfil;[m
+[31m-      plan30 = localPlan30;[m
+[31m-      planId = localPlanId;[m
+[31m-[m
+[31m-      // Garantizar que la nueva cuenta empiece como GRATUITA (3 DÍAS)[m
+[31m-      localStorage.setItem('miplanfit_premium', 'false');[m
+[31m-[m
+[31m-      // Si el usuario se autenticó con Google, asociar y guardar su plan en Supabase de inmediato[m
+[31m-      if (usuario && usuario.id !== 'local_user') {[m
+[31m-        await salvarPlanoNaNuvem(usuario.id, {[m
+[31m-          perfil,[m
+[31m-          plan30,[m
+[31m-          planId,[m
+[31m-          imc: JSON.parse(localStorage.getItem('miplanfit_imc') || '{}'),[m
+[31m-          tmb: parseInt(localStorage.getItem('miplanfit_tmb') || '0'),[m
+[31m-          tdee: parseInt(localStorage.getItem('miplanfit_tdee') || '0')[m
+[31m-        });[m
+[31m-      }[m
+[31m-[m
+[31m-      const tempRefCode = typeof generarCodigoReferido === 'function' ? generarCodigoReferido(usuario?.id || 'guest', perfil.nombre) : 'ref';[m
+[31m-      actualizarCardReferidos(tempRefCode, 0, false);[m
+[31m-    } else if (usuario && usuario.id !== 'local_user') {[m
+[31m-      // SI NO TIENE PLAN EN NUBE NI EN BROWSER (Intento de login sin cuestionario), REDIRIGIR AL QUIZ[m
+[31m-      window.location.href = 'index.html?error=no_plan_found';[m
+[31m-      return;[m
+[31m-    } else {[m
+[31m-      perfil  = localPerfil;[m
+[31m-      plan30  = localPlan30;[m
+[31m-      planId  = localPlanId;[m
+[32m+[m[32m    if (usuario && usuario.id !== 'local_user') {[m
+[32m+[m[32m      const salvo = await salvarPlanoNaNuvem(usuario.id, {[m
+[32m+[m[32m        perfil,[m
+[32m+[m[32m        plan30,[m
+[32m+[m[32m        planId,[m
+[32m+[m[32m        imc: JSON.parse(localStorage.getItem('miplanfit_imc') || '{}'),[m
+[32m+[m[32m        tmb: parseInt(localStorage.getItem('miplanfit_tmb') || '0', 10),[m
+[32m+[m[32m        tdee: parseInt(localStorage.getItem('miplanfit_tdee') || '0', 10)[m
+[32m+[m[32m      });[m
+[32m+[m[32m      if (salvo) localStorage.removeItem('miplanfit_quiz_pending_sync');[m
+     }[m
+[32m+[m[32m  } else if (usuario && usuario.id !== 'local_user') {[m
+[32m+[m[32m    window.location.href = 'index.html?error=no_plan_found';[m
+[32m+[m[32m    return;[m
+   }[m
+ [m
+   // Fallback de seguridad solo para usuarios locales no registrados[m
+[1mdiff --git a/plano.html b/plano.html[m
+[1mindex a9aa192..f7a832a 100644[m
+[1m--- a/plano.html[m
+[1m+++ b/plano.html[m
+[36m@@ -1202,8 +1202,8 @@[m
+ </footer>[m
+ [m
+ <script src="js/supabase-config.js?v=4.9"></script>[m
+[31m-<script src="js/auth.js?v=4.9"></script>[m
+[32m+[m[32m<script src="js/auth.js?v=5.0"></script>[m
+ <script src="js/streak.js?v=4.9"></script>[m
+[31m-<script src="js/plano.js?v=4.9"></script>[m
+[32m+[m[32m<script src="js/plano.js?v=5.0"></script>[m
+ </body>[m
+ </html>[m
+[1mdiff --git a/resultado.html b/resultado.html[m
+[1mindex 2c3870e..7ec7cbd 100644[m
+[1m--- a/resultado.html[m
+[1m+++ b/resultado.html[m
+[36m@@ -375,7 +375,7 @@[m
+ <script src="data/exercises.js"></script>[m
+ <script src="data/plans.js"></script>[m
+ <script src="js/supabase-config.js"></script>[m
+[31m-<script src="js/auth.js"></script>[m
+[32m+[m[32m<script src="js/auth.js?v=5.0"></script>[m
+ <script src="js/resultado.js"></script>[m
+ </body>[m
+ </html>[m
+[1mdiff --git a/test-db.html b/test-db.html[m
+[1mindex 24ed05e..6d53f08 100644[m
+[1m--- a/test-db.html[m
+[1m+++ b/test-db.html[m
+[36m@@ -34,7 +34,7 @@[m
+   <div class="card">[m
+     <h3>2. Contas Salvas no Banco de Dados em Tempo Real</h3>[m
+     <button onclick="carregarDados()">🔄 Atualizar Dados</button>[m
+[31m-    <button onclick="testarGravacaoSimulada()" style="background:#059669;">🧪 Testar Gravação Simulada</button>[m
+[32m+[m[32m    <button disabled title="Use o fluxo real do quiz para validar a escrita" style="background:#64748b; cursor:not-allowed;">🧪 Escrita de teste desativada</button>[m
+ [m
+     <div id="table-container" style="margin-top:15px;">⏳ Carregando registros da tabela 'planos'...</div>[m
+   </div>[m
+[36m@@ -130,27 +130,7 @@[m
+     }[m
+ [m
+     async function testarGravacaoSimulada() {[m
+[31m-      const client = getSupabase();[m
+[31m-      if (!client) return alert('Cliente Supabase indisponível');[m
+[31m-[m
+[31m-      const testUserId = 'test_user_' + Math.floor(Math.random() * 10000);[m
+[31m-      const payload = {[m
+[31m-        user_id: testUserId,[m
+[31m-        user_email: `teste_${testUserId}@miplanfit.com`,[m
+[31m-        user_name: 'Teste Diagnóstico',[m
+[31m-        referral_code: 'teste_' + testUserId.slice(-4),[m
+[31m-        perfil: { nombre: 'Teste Diagnóstico', sexo: 'hombre', edad: 60, peso: 80, objetivo_kg: 10 },[m
+[31m-        plan30: [{ dia: 1, meals: [] }],[m
+[31m-        updated_at: new Date().toISOString()[m
+[31m-      };[m
+[31m-[m
+[31m-      const { data, error } = await client.from('planos').upsert(payload, { onConflict: 'user_id' });[m
+[31m-      if (error) {[m
+[31m-        alert('❌ Falha ao gravar no Supabase:\n' + error.message);[m
+[31m-      } else {[m
+[31m-        alert('✅ Sucesso! Gravação no Supabase funcionou perfeitamente.');[m
+[31m-        carregarDados();[m
+[31m-      }[m
+[32m+[m[32m      alert('A escrita simulada foi desativada: ela usava user_id inválido e podia causar erro 400. Valide o banco concluindo o quiz com uma conta Google real.');[m
+     }[m
+ [m
+     window.addEventListener('DOMContentLoaded', () => {[m
