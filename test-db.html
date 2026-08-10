@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MiPlanFit — Diagnóstico de Banco de Dados (Supabase)</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js?v=5.0"></script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #f8fafc; padding: 24px; }
+    h1 { color: #10b981; font-size: 1.5rem; margin-bottom: 20px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    .status { padding: 8px 16px; border-radius: 6px; font-weight: bold; display: inline-block; }
+    .status-ok { background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid #10b981; }
+    .status-err { background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid #ef4444; }
+    button { background: #7c3aed; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-right: 10px; margin-top: 10px; }
+    button:hover { background: #6d28d9; }
+    pre { background: #090d16; padding: 16px; border-radius: 8px; overflow-x: auto; color: #38bdf8; font-size: 0.85rem; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem; }
+    th, td { border: 1px solid #334155; padding: 10px; text-align: left; }
+    th { background: #334155; color: #f8fafc; }
+  </style>
+</head>
+<body>
+
+  <h1>🧪 Painel de Diagnóstico do Supabase — MiPlanFit</h1>
+
+  <div class="card">
+    <h3>1. Status da Conexão com o Supabase</h3>
+    <div id="conn-status" class="status">⏳ Verificando conexão...</div>
+    <p style="font-size:0.85rem; color:#94a3b8; margin-top:8px;">URL do Banco: <code>https://itiqhoyxfsrzbyeejtdn.supabase.co</code> | Tabela: <code>public.planos</code></p>
+  </div>
+
+  <div class="card">
+    <h3>2. Contas Salvas no Banco de Dados em Tempo Real</h3>
+    <button onclick="carregarDados()">🔄 Atualizar Dados</button>
+    <button onclick="testarGravacaoSimulada()" style="background:#059669;">🧪 Testar Gravação Simulada</button>
+
+    <div id="table-container" style="margin-top:15px;">⏳ Carregando registros da tabela 'planos'...</div>
+  </div>
+
+  <div class="card">
+    <h3>3. Dump do JSON Bruto do Banco de Dados</h3>
+    <pre id="json-raw">Nenhum dado carregado ainda.</pre>
+  </div>
+
+  <script>
+    async function testarConexao() {
+      const el = document.getElementById('conn-status');
+      try {
+        const client = getSupabase();
+        if (!client) {
+          el.className = 'status status-err';
+          el.innerText = '❌ SDK do Supabase não inicializado!';
+          return;
+        }
+        const { data, error } = await client.from('planos').select('count', { count: 'exact', head: true });
+        if (error) {
+          el.className = 'status status-err';
+          el.innerText = '❌ Erro ao conectar com a tabela: ' + error.message;
+        } else {
+          el.className = 'status status-ok';
+          el.innerText = '✅ Conectado com Sucesso ao Supabase!';
+        }
+      } catch(e) {
+        el.className = 'status status-err';
+        el.innerText = '❌ Exceção de rede: ' + e.message;
+      }
+    }
+
+    async function carregarDados() {
+      const container = document.getElementById('table-container');
+      const raw = document.getElementById('json-raw');
+      container.innerHTML = '⏳ Consultando Supabase...';
+
+      try {
+        const client = getSupabase();
+        const { data, error } = await client.from('planos').select('*').order('updated_at', { ascending: false });
+
+        if (error) {
+          container.innerHTML = `<span style="color:#ef4444;">⚠️ Erro de leitura: ${error.message}</span>`;
+          raw.innerText = JSON.stringify(error, null, 2);
+          return;
+        }
+
+        raw.innerText = JSON.stringify(data, null, 2);
+
+        if (!data || data.length === 0) {
+          container.innerHTML = '<p style="color:#94a3b8;">📭 A tabela "planos" está vazia no momento (Nenhum usuário cadastrado).</p>';
+          return;
+        }
+
+        let html = `<table>
+          <thead>
+            <tr>
+              <th>E-mail</th>
+              <th>Nome</th>
+              <th>Código Referido</th>
+              <th>Indicado Por</th>
+              <th>Total Indicações</th>
+              <th>Dados do Quiz (Perfil)</th>
+              <th>Criado em</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
+        data.forEach(u => {
+          const perf = u.perfil || {};
+          const perfStr = Object.keys(perf).length > 0 
+            ? `<b>Sexo:</b> ${perf.sexo || 'N/A'}<br><b>Idade:</b> ${perf.edad || 'N/A'}<br><b>Peso:</b> ${perf.peso || 'N/A'} kg<br><b>Obj:</b> ${perf.objetivo_kg || perf.objetivo || 'N/A'}`
+            : '<span style="color:#ef4444;">⚠️ Quiz Pendente (Vazio)</span>';
+
+          html += `<tr>
+            <td>${u.user_email || 'Sem Email'}</td>
+            <td>${u.user_name || 'Sem Nome'}</td>
+            <td><code>${u.referral_code || 'Sem Código'}</code></td>
+            <td><code>${u.referred_by || 'Nenhum'}</code></td>
+            <td><b>${u.referrals_count || 0}</b></td>
+            <td>${perfStr}</td>
+            <td>${u.created_at ? new Date(u.created_at).toLocaleString('pt-BR') : 'N/A'}</td>
+          </tr>`;
+        });
+
+        html += '</tbody></table>';
+        container.innerHTML = html;
+
+      } catch(e) {
+        container.innerHTML = `<span style="color:#ef4444;">❌ Exceção: ${e.message}</span>`;
+      }
+    }
+
+    async function testarGravacaoSimulada() {
+      const client = getSupabase();
+      if (!client) return alert('Cliente Supabase indisponível');
+
+      const testUserId = 'test_user_' + Math.floor(Math.random() * 10000);
+      const payload = {
+        user_id: testUserId,
+        user_email: `teste_${testUserId}@miplanfit.com`,
+        user_name: 'Teste Diagnóstico',
+        referral_code: 'teste_' + testUserId.slice(-4),
+        perfil: { nombre: 'Teste Diagnóstico', sexo: 'hombre', edad: 60, peso: 80, objetivo_kg: 10 },
+        plan30: [{ dia: 1, meals: [] }],
+        updated_at: new Date().toISOString()
+      };
+
+      const { data, error } = await client.from('planos').upsert(payload, { onConflict: 'user_id' });
+      if (error) {
+        alert('❌ Falha ao gravar no Supabase:\n' + error.message);
+      } else {
+        alert('✅ Sucesso! Gravação no Supabase funcionou perfeitamente.');
+        carregarDados();
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      testarConexao();
+      carregarDados();
+    });
+  </script>
+</body>
+</html>
