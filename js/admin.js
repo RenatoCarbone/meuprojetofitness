@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   await verificarAccesoAdmin();
 });
 
-const MASTER_PINS = ['admin123', 'miplanfit2026', 'renato2026'];
+const MASTER_PINS = ['RenatoLindo123'];
 
 // ─── 1. Segurança: Verificar Acesso do Administrador ───
 async function verificarAccesoAdmin() {
