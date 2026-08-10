@@ -85,14 +85,27 @@ async function salvarPlanoNaNuvem(userId, dados) {
     payload.referred_by = referredByCode;
   }
 
-  const { error } = await client.from('planos').upsert(payload, { onConflict: 'user_id' });
+  // 1. Intentar hacer update para asegurar que perfil y plan30 se actualicen sobre la fila existente
+  const { data: updateData, error: updateErr } = await client
+    .from('planos')
+    .update(payload)
+    .eq('user_id', userId)
+    .select();
 
-  if (error) { 
-    console.error('Erro ao salvar plano:', error.message); 
-    return false; 
+  if (updateErr) {
+    console.warn('Advertencia en update de plano:', updateErr.message);
   }
 
-  console.log('✅ Plano salvo na nuvem con código de referido:', myRefCode);
+  // 2. Si la fila no existía previamente, hacer insert
+  if (!updateData || updateData.length === 0) {
+    const { error: insertErr } = await client.from('planos').insert([payload]);
+    if (insertErr) {
+      console.error('Erro ao inserir plano:', insertErr.message);
+      return false;
+    }
+  }
+
+  console.log('✅ Plano e perfil salvos com sucesso na nuvem:', myRefCode);
 
   // Se o usuário foi indicado por alguém, processar o crédito da indicação
   if (referredByCode && referredByCode !== myRefCode && !sessionStorage.getItem('miplanfit_ref_credited')) {

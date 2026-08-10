@@ -475,8 +475,9 @@ function renderizarTablaAdmin(lista) {
     const fechaFmt = fechaObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
     // Gênero e Idade
-    const sexo = (perfil.sexo || 'Mujer').toUpperCase();
-    const edad = perfil.edad ? `${perfil.edad} anos` : 'N/I';
+    const tienePerfil = perfil && Object.keys(perfil).length > 0 && perfil.peso;
+    const sexoStr = tienePerfil ? ((perfil.sexo || '').toLowerCase() === 'hombre' ? 'HOMEM ♂️' : 'MULHER ♀️') : '⚠️ Quiz Pendente';
+    const edadStr = tienePerfil && perfil.edad ? `${perfil.edad} anos` : '';
 
     // Objetivo
     const objetivoMap = {
@@ -484,7 +485,8 @@ function renderizarTablaAdmin(lista) {
       mantener: '⚖️ Manter Peso',
       ganar_musculo: '💪 Ganhar Massa'
     };
-    const objetivoStr = objetivoMap[perfil.objetivo] || perfil.objetivo || 'Personalizado';
+    const objVal = perfil.objetivo_kg ? `Perder ${perfil.objetivo_kg} kg` : (objetivoMap[perfil.objetivo] || perfil.objetivo || 'Personalizado');
+    const objetivoStr = tienePerfil ? objVal : '⚠️ Quiz Pendente';
 
     // Racha / Progresso
     const streak = user.streak_actual || 0;
@@ -515,7 +517,7 @@ function renderizarTablaAdmin(lista) {
           </div>
         </td>
         <td><span style="font-size:0.78rem; color:var(--text-muted);">${fechaFmt}</span></td>
-        <td><span style="font-size:0.78rem; font-weight:700; color:var(--cyan);">${sexo}</span> <span style="font-size:0.75rem; color:var(--text-muted);">(${edad})</span></td>
+        <td><span style="font-size:0.78rem; font-weight:700; color:${tienePerfil ? 'var(--cyan)' : 'var(--amber)'};">${sexoStr}</span> <span style="font-size:0.75rem; color:var(--text-muted);">${edadStr}</span></td>
         <td><span style="font-size:0.8rem; font-weight:600;">${objetivoStr}</span></td>
         <td>
           <div style="font-weight:700; font-size:0.8rem;">🔥 ${streak} dias</div>
@@ -575,15 +577,34 @@ function abrirDrawerCliente(userId) {
 
   document.getElementById('drw-input-nombre').value = user.user_name || perfil.nombre || '';
   document.getElementById('drw-input-email').value = user.user_email || '';
-  document.getElementById('drw-input-peso-init').value = perfil.peso || 70;
-  document.getElementById('drw-input-peso-actual').value = perfil.pesoActual || perfil.peso || 70;
-  document.getElementById('drw-input-objetivo-kg').value = perfil.objetivo_kg || 5;
+  document.getElementById('drw-input-peso-init').value = perfil.peso || '';
+  document.getElementById('drw-input-peso-actual').value = perfil.pesoActual || perfil.peso || '';
+  document.getElementById('drw-input-objetivo-kg').value = perfil.objetivo_kg || '';
   document.getElementById('drw-input-actividad').value = perfil.actividad || 'sedentario';
 
-  const excluidos = perfil.alimentosExcluidos || [];
+  // Mapa de nombres de alimentos
+  const foodMap = {
+    'f-carne': 'Carne roja',
+    'f-pollo': 'Pollo / Aves',
+    'f-pavo': 'Pavo',
+    'f-pescado': 'Pescado',
+    'f-salmon': 'Salmón',
+    'f-atun': 'Atún',
+    'f-gambas': 'Marisco',
+    'f-huevo': 'Huevo',
+    'f-lacteos': 'Lácteos / Leche',
+    'f-yogur': 'Yogur',
+    'f-queso': 'Queso',
+    'f-frutossecos': 'Frutos secos',
+    'f-gluten': 'Gluten',
+    'f-soja': 'Soja'
+  };
+
+  const rawExcluidos = perfil.alimentosExcluidos || [];
+  const excluidosFormatted = rawExcluidos.map(id => foodMap[id] || id);
   const elExcluidos = document.getElementById('drw-info-excluidos');
   if (elExcluidos) {
-    elExcluidos.innerText = excluidos.length > 0 ? excluidos.join(', ') : 'Nenhum alimento excluído';
+    elExcluidos.innerText = excluidosFormatted.length > 0 ? excluidosFormatted.join(', ') : 'Nenhum alimento excluído';
   }
 
   const btnPremium = document.getElementById('drw-btn-toggle-premium');
