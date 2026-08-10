@@ -127,13 +127,21 @@ document.addEventListener('DOMContentLoaded', async function () {
   } else {
     // Si no hay plan en Supabase, verificar si hay un plan en localStorage o backup de sesión
     let localPerfil = JSON.parse(localStorage.getItem('miplanfit_perfil') || 'null');
-    if (!localPerfil) {
-      try { localPerfil = JSON.parse(sessionStorage.getItem('miplanfit_perfil_backup') || 'null'); } catch(e) {}
+    if (!localPerfil || !localPerfil.peso) {
+      try { localPerfil = JSON.parse(sessionStorage.getItem('miplanfit_perfil_backup') || localStorage.getItem('miplanfit_perfil_backup') || 'null'); } catch(e) {}
     }
-    const localPlan30 = JSON.parse(localStorage.getItem('miplanfit_plan30') || 'null');
-    const localPlanId = localStorage.getItem('miplanfit_plan_id') || 'B';
+    let localPlan30 = JSON.parse(localStorage.getItem('miplanfit_plan30') || 'null');
+    let localPlanId = localStorage.getItem('miplanfit_plan_id') || 'B';
 
-    if (localPerfil && localPlan30) {
+    // Si tenemos el perfil pero se perdió el plan de 30 días en el redireccionamiento, regenerarlo al vuelo
+    if (localPerfil && localPerfil.peso && (!localPlan30 || !Array.isArray(localPlan30) || localPlan30.length === 0)) {
+      if (typeof recomendarPlan === 'function' && typeof generarPlan30Dias === 'function') {
+        localPlanId = recomendarPlan(localPerfil);
+        localPlan30 = generarPlan30Dias(localPerfil, localPlanId);
+      }
+    }
+
+    if (localPerfil && localPerfil.peso && localPlan30) {
       // TENEMOS DATOS DE PLAN EN EL NAVEGADOR:
       perfil = localPerfil;
       plan30 = localPlan30;

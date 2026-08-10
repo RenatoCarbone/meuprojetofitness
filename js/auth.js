@@ -43,9 +43,10 @@ async function logout() {
   window.location.href = 'index.html';
 }
 
-// Helper: Generar código de referido único y limpio para un usuario
+// Helper: Generar código de referido único, limpio y consistente usando el primer nombre
 function generarCodigoReferido(userId, nombre) {
-  const nameClean = (nombre || 'user').toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 8);
+  const firstName = (nombre || 'user').trim().split(/\s+/)[0];
+  const nameClean = firstName.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 8) || 'user';
   const shortId = (userId || '').replace(/[^a-z0-9]/gi, '').substring(0, 4);
   return `${nameClean}_${shortId || 'ref'}`;
 }
@@ -70,7 +71,12 @@ async function salvarPlanoNaNuvem(userId, dados) {
   const myRefCode = dados.referral_code || generarCodigoReferido(userId, nombre);
 
   // Código del patrocinador (quien lo invitó)
-  const referredByCode = dados.referred_by || localStorage.getItem('miplanfit_ref_by') || null;
+  const referredByCode = dados.referred_by || localStorage.getItem('miplanfit_ref_by') || sessionStorage.getItem('miplanfit_ref_by') || null;
+
+  // Garantizar que el perfil contenga pesoActual si tiene peso
+  if (dados.perfil && dados.perfil.peso && !dados.perfil.pesoActual) {
+    dados.perfil.pesoActual = dados.perfil.peso;
+  }
 
   const payload = {
     user_id       : userId,
@@ -104,8 +110,8 @@ async function salvarPlanoNaNuvem(userId, dados) {
   console.log('✅ Plano e perfil salvos com sucesso na nuvem:', myRefCode);
 
   // Se o usuário foi indicado por alguém, processar o crédito da indicação
-  if (referredByCode && referredByCode !== myRefCode && !sessionStorage.getItem('miplanfit_ref_credited')) {
-    sessionStorage.setItem('miplanfit_ref_credited', 'true');
+  if (referredByCode && referredByCode !== myRefCode && !sessionStorage.getItem(`miplanfit_ref_credited_${userId}`)) {
+    sessionStorage.setItem(`miplanfit_ref_credited_${userId}`, 'true');
     await processarIndicacaoNaNuvem(referredByCode, userId);
   }
 
@@ -115,18 +121,35 @@ async function salvarPlanoNaNuvem(userId, dados) {
 // ─── Incrementar contador del patrocinador y dar Premium al llegar a 3 ───
 async function processarIndicacaoNaNuvem(referrerCode, newUserId) {
   const client = getSupabase();
-  if (!client) return;
+  if (!client || !referrerCode) return;
 
   try {
-    // Buscar al usuario patrocinador por su código de referido
-    const { data: referrer, error: searchErr } = await client
+    const cleanCode = referrerCode.trim().toLowerCase();
+
+    // 1. Buscar al usuario patrocinador por su código exacto de referido
+    let { data: referrer, error: searchErr } = await client
       .from('planos')
       .select('*')
-      .eq('referral_code', referrerCode)
+      .eq('referral_code', cleanCode)
       .maybeSingle();
 
+    // Fallback: si no lo encuentra con coincidencia exacta, buscar por el prefijo del nombre (ej: renato_)
+    if (!referrer) {
+      const codePart = cleanCode.split('_')[0];
+      if (codePart && codePart.length >= 3) {
+        const { data: fallbackList } = await client
+          .from('planos')
+          .select('*')
+          .ilike('referral_code', `${codePart}_%`);
+
+        if (fallbackList && fallbackList.length > 0) {
+          referrer = fallbackList[0];
+        }
+      }
+    }
+
     if (searchErr || !referrer) {
-      console.log('Patrocinador no encontrado para el código:', referrerCode);
+      console.log('Patrocinador no encontrado para el código:', cleanCode);
       return;
     }
 
@@ -156,6 +179,7 @@ async function processarIndicacaoNaNuvem(referrerCode, newUserId) {
 
     // Limpiar localStorage de invitación
     localStorage.removeItem('miplanfit_ref_by');
+    sessionStorage.removeItem('miplanfit_ref_by');
   } catch(e) {
     console.error('Error al procesar indicación:', e);
   }
