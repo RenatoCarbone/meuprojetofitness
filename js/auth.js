@@ -178,20 +178,19 @@ async function processarIndicacaoNaNuvem(referrerCode, newUserId) {
     // Si este nuevo usuario aún no ha sido contado para este patrocinador
     if (!list.includes(newUserId)) {
       list.push(newUserId);
-      const newCount = (referrer.referrals_count || 0) + 1;
-
-      // Si llega a 3 referidos y no era Premium, ¡DESBLOQUEAR PREMIUM AUTOMÁTICAMENTE!
-      const shouldBePremium = referrer.is_premium || newCount >= 3;
-
-      await client.from('planos').update({
-        referrals_count: newCount,
-        referrals_list : list,
-        is_premium     : shouldBePremium,
-        updated_at     : new Date().toISOString()
-      }).eq('user_id', referrer.user_id);
-
-      console.log(`🎉 ¡Indicación procesada! ${referrer.user_name} ahora tiene ${newCount} referidos. Premium: ${shouldBePremium}`);
     }
+
+    const newCount = list.length;
+    const shouldBePremium = referrer.is_premium || newCount >= 3;
+
+    await client.from('planos').update({
+      referrals_count: newCount,
+      referrals_list : list,
+      is_premium     : shouldBePremium,
+      updated_at     : new Date().toISOString()
+    }).eq('user_id', referrer.user_id);
+
+    console.log(`🎉 ¡Indicación procesada! ${referrer.user_name} ahora tiene ${newCount} referidos. Premium: ${shouldBePremium}`);
 
     // Limpiar localStorage de invitación
     localStorage.removeItem('miplanfit_ref_by');

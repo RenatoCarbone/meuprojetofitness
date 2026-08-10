@@ -134,16 +134,16 @@ document.addEventListener('DOMContentLoaded', async function () {
       const match = document.cookie.match(/miplanfit_perfil_ck=([^;]+)/);
       if (match) { try { localPerfil = JSON.parse(decodeURIComponent(match[1])); } catch(e) {} }
     }
-    // Garantizar que el perfil NUNCA quede nulo ni vacío en el Supabase
+    // Si el usuario inició sesión directamente sin cuestionario, inicializar perfil con los datos del usuario de Google
     if (!localPerfil || !localPerfil.peso) {
       localPerfil = {
         nombre: usuario?.user_metadata?.full_name || usuario?.user_metadata?.name || usuario?.email?.split('@')[0] || 'Usuario',
         sexo: 'mujer',
-        edad: 30,
-        altura: 168,
-        peso: 65,
-        pesoActual: 65,
-        objetivo_kg: 5,
+        edad: null,
+        altura: null,
+        peso: null,
+        pesoActual: null,
+        objetivo_kg: null,
         actividad: 'sedentario',
         preferencia: 'omnivoro',
         alimentosExcluidos: []
