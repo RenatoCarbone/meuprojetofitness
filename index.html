@@ -784,6 +784,17 @@
       Entrar con Google
     </button>
 
+    <div style="margin:16px 0; display:flex; align-items:center; gap:10px; color:var(--text-muted); font-size:0.8rem;">
+      <div style="flex:1; height:1px; background:rgba(255,255,255,0.1);"></div>
+      <span>o entra con tu e-mail</span>
+      <div style="flex:1; height:1px; background:rgba(255,255,255,0.1);"></div>
+    </div>
+
+    <div style="display:flex; gap:8px;">
+      <input type="email" id="direct-email-input" placeholder="tu-email@ejemplo.com" class="form-input" style="padding:12px; font-size:0.9rem;" />
+      <button onclick="loginComEmail(document.getElementById('direct-email-input').value)" class="btn btn-primary" style="white-space:nowrap; padding:12px 18px; font-size:0.88rem;">Entrar →</button>
+    </div>
+
     <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08);">
       <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:8px;">¿Aún no has creado tu plan?</p>
       <button onclick="cerrarDirectLoginModal();irAlFormulario();" style="background:none;border:none;color:var(--purple-light);font-weight:700;font-size:0.85rem;cursor:pointer;">
@@ -793,12 +804,12 @@
   </div>
 </div>
 
-<script src="data/recipes.js?v=5.5"></script>
-<script src="data/exercises.js?v=5.5"></script>
-<script src="data/plans.js?v=5.5"></script>
-<script src="js/supabase-config.js?v=5.5"></script>
-<script src="js/auth.js?v=5.5"></script>
-<script src="js/app.js?v=5.5"></script>
+<script src="data/recipes.js?v=5.6"></script>
+<script src="data/exercises.js?v=5.6"></script>
+<script src="data/plans.js?v=5.6"></script>
+<script src="js/supabase-config.js?v=5.6"></script>
+<script src="js/auth.js?v=5.6"></script>
+<script src="js/app.js?v=5.6"></script>
 <script>
   function abrirDirectLoginModal() {
     document.getElementById('direct-login-modal').style.display = 'flex';
