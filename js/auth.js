@@ -2,32 +2,90 @@
 // AUTH.JS — Autenticação Google via Supabase
 // ============================================================
 
+// ─── Perfil pendente do quiz ───
+function perfilQuizValido(perfil) {
+  return !!(
+    perfil &&
+    typeof perfil === 'object' &&
+    !Array.isArray(perfil) &&
+    Object.keys(perfil).length > 0 &&
+    Number(perfil.peso) > 0 &&
+    Number(perfil.edad) > 0
+  );
+}
+
+function normalizarPerfilQuiz(perfil) {
+  if (!perfilQuizValido(perfil)) return null;
+
+  const perfilNormalizado = { ...perfil };
+  if (!Number(perfilNormalizado.pesoActual) && Number(perfilNormalizado.peso) > 0) {
+    perfilNormalizado.pesoActual = Number(perfilNormalizado.peso);
+  }
+  return perfilNormalizado;
+}
+
+function parsePerfilQuiz(raw) {
+  if (!raw || typeof raw !== 'string') return null;
+  try {
+    return normalizarPerfilQuiz(JSON.parse(raw));
+  } catch (e) {
+    return null;
+  }
+}
+
+function recuperarPerfilQuiz() {
+  const fontes = [
+    localStorage.getItem('miplanfit_perfil'),
+    sessionStorage.getItem('miplanfit_perfil'),
+    sessionStorage.getItem('miplanfit_perfil_backup'),
+    localStorage.getItem('miplanfit_perfil_backup')
+  ];
+
+  for (const fonte of fontes) {
+    const perfil = parsePerfilQuiz(fonte);
+    if (perfil) return perfil;
+  }
+
+  const cookieMatch = document.cookie.match(/(?:^|; )miplanfit_perfil_ck=([^;]+)/);
+  if (cookieMatch) {
+    try {
+      const perfil = normalizarPerfilQuiz(JSON.parse(decodeURIComponent(cookieMatch[1])));
+      if (perfil) return perfil;
+    } catch (e) {}
+  }
+
+  // Compatibilidade temporária com links OAuth criados por versões antigas.
+  const url = new URL(window.location.href);
+  const legacyPdata = url.searchParams.get('pdata');
+  if (legacyPdata) {
+    try {
+      const perfil = normalizarPerfilQuiz(JSON.parse(decodeURIComponent(escape(atob(legacyPdata.replace(/\s/g, '+'))))));
+      if (perfil) return perfil;
+    } catch (e) {}
+  }
+
+  return null;
+}
+
+function removerPdataLegadoDaUrl() {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has('pdata')) return;
+  url.searchParams.delete('pdata');
+  window.history.replaceState({}, document.title, url.pathname + (url.search ? url.search : '') + url.hash);
+}
+
 // ─── Login com Google ───
 async function loginComGoogle() {
   const client = getSupabase();
   if (!client) return false;
 
-  // Preservar datos del perfil del quiz antes del redireccionamiento OAuth
-  const localPerfil = localStorage.getItem('miplanfit_perfil') || sessionStorage.getItem('miplanfit_perfil_backup');
+  // O localStorage/sessionStorage do mesmo domínio permanece disponível após OAuth.
+  // Não enviar dados de saúde do usuário na URL de redirecionamento.
   const refCode = localStorage.getItem('miplanfit_ref_by') || sessionStorage.getItem('miplanfit_ref_by') || new URLSearchParams(window.location.search).get('ref');
-
   let redirectTarget = SITE_URL + '/plano.html';
-  const params = new URLSearchParams();
 
   if (refCode) {
-    params.set('ref', refCode.trim().toLowerCase());
-  }
-
-  if (localPerfil) {
-    try {
-      // Codificar en Base64 UTF-8 seguro para URL sin espacios ni sintaxis rota
-      const b64 = btoa(unescape(encodeURIComponent(localPerfil)));
-      params.set('pdata', b64);
-    } catch(e) {}
-  }
-
-  if ([...params].length > 0) {
-    redirectTarget += `?${params.toString()}`;
+    redirectTarget += `?ref=${encodeURIComponent(refCode.trim().toLowerCase())}`;
   }
 
   const { error } = await client.auth.signInWithOAuth({
@@ -35,7 +93,10 @@ async function loginComGoogle() {
     options: { redirectTo: redirectTarget }
   });
 
-  if (error) { console.error('Google login error:', error.message); return false; }
+  if (error) {
+    console.error('Google login error:', error.message);
+    return false;
+  }
   return true;
 }
 
@@ -60,93 +121,72 @@ async function logout() {
   window.location.href = 'index.html';
 }
 
-// Helper: Generar código de referido único, limpio y consistente usando el primer nombre
+// ─── Generar código único de referido ───
 function generarCodigoReferido(userId, nombre) {
-  const firstName = (nombre || 'user').trim().split(/\s+/)[0];
-  const nameClean = firstName.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 8) || 'user';
-  const shortId = (userId || '').replace(/[^a-z0-9]/gi, '').substring(0, 4);
-  return `${nameClean}_${shortId || 'ref'}`;
+  const cleanName = (nombre || 'user')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]/g, '')
+    .slice(0, 10);
+
+  const shortId = (userId || Math.random().toString(36)).replace(/[^a-z0-9]/gi, '').slice(0, 4);
+  return `${cleanName || 'usuario'}_${shortId}`;
 }
 
 // ─── Salvar plano na nuvem ───
-async function salvarPlanoNaNuvem(userId, dados) {
+async function salvarPlanoNaNuvem(userId, dados = {}) {
   const client = getSupabase();
-  if (!client) return false;
+  if (!client || !userId) return false;
 
-  let email = dados.user_email || dados.perfil?.email || '';
-  let nombre = dados.user_name || dados.perfil?.nombre || 'Usuario';
+  const perfil = normalizarPerfilQuiz(dados.perfil);
+  if (!perfil) {
+    console.error('Perfil inválido: o plano não foi salvo para evitar gravar perfil vazio.', dados.perfil);
+    return false;
+  }
+
+  let email = dados.user_email || perfil.email || '';
+  let nombre = dados.user_name || perfil.nombre || 'Usuario';
 
   try {
     const { data: { session } } = await client.auth.getSession();
     if (session?.user?.email) {
       email = session.user.email;
       const gName = session.user.user_metadata?.full_name || session.user.user_metadata?.name;
-      if (gName && gName.trim() !== '' && gName.toLowerCase() !== 'usuario') {
+      if (gName && gName.trim() && gName.toLowerCase() !== 'usuario') {
         nombre = gName;
-      } else if (dados.perfil?.nombre && dados.perfil.nombre.trim() !== '' && dados.perfil.nombre.toLowerCase() !== 'usuario') {
-        nombre = dados.perfil.nombre;
-      } else {
-        nombre = session.user.email.split('@')[0];
       }
     }
-  } catch(e) {}
+  } catch (e) {
+    console.warn('Não foi possível obter a sessão ao salvar o plano.', e);
+  }
 
-  // Código de referido del usuario actual
   const myRefCode = dados.referral_code || generarCodigoReferido(userId, nombre);
-
-  // Código del patrocinador (quien lo invitó)
   const urlRef = new URLSearchParams(window.location.search).get('ref');
   const referredByCode = dados.referred_by || localStorage.getItem('miplanfit_ref_by') || sessionStorage.getItem('miplanfit_ref_by') || urlRef || null;
 
-  // Garantizar que el perfil contenga pesoActual si tiene peso
-  if (dados.perfil && dados.perfil.peso && !dados.perfil.pesoActual) {
-    dados.perfil.pesoActual = dados.perfil.peso;
-  }
-
   const payload = {
-    user_id       : userId,
-    user_email    : email,
-    user_name     : nombre,
-    referral_code : myRefCode,
-    plan30        : dados.plan30,
-    plan_id       : dados.planId  || 'B',
-    imc           : dados.imc     || {},
-    tmb           : parseInt(dados.tmb)  || 0,
-    tdee          : parseInt(dados.tdee) || 0,
-    updated_at    : new Date().toISOString()
+    user_id: userId,
+    user_email: email,
+    user_name: nombre,
+    referral_code: myRefCode,
+    perfil,
+    updated_at: new Date().toISOString()
   };
 
-  // Solo incluir perfil en el payload si es un objeto válido con datos reales
-  if (dados.perfil && typeof dados.perfil === 'object' && Object.keys(dados.perfil).length > 0) {
-    payload.perfil = dados.perfil;
-  }
+  if (Array.isArray(dados.plan30)) payload.plan30 = dados.plan30;
+  if (referredByCode && referredByCode !== myRefCode) payload.referred_by = referredByCode;
 
-  // Solo incluir referred_by si existe y el usuario no se está refiriendo a sí mismo
-  if (referredByCode && referredByCode !== myRefCode) {
-    payload.referred_by = referredByCode;
-  }
-
-  // 1. Verificar se a linha já existe no Supabase para evitar erro 400 Bad Request no onConflict
-  const { data: existingRow } = await client
+  const { error } = await client
     .from('planos')
-    .select('user_id')
-    .eq('user_id', userId)
-    .maybeSingle();
+    .upsert(payload, { onConflict: 'user_id' });
 
-  if (existingRow) {
-    const { error: updateErr } = await client.from('planos').update(payload).eq('user_id', userId);
-    if (updateErr) console.warn('Erro ao atualizar plano no Supabase:', updateErr.message);
-  } else {
-    const { error: insertErr } = await client.from('planos').insert(payload);
-    if (insertErr) {
-      console.warn('Erro ao inserir plano no Supabase, tentando update:', insertErr.message);
-      await client.from('planos').update(payload).eq('user_id', userId);
-    }
+  if (error) {
+    console.error('Erro ao salvar plano e perfil no Supabase:', error.message, error);
+    return false;
   }
 
-  console.log('✅ Plano e perfil salvos com sucesso na nuvem:', myRefCode);
+  console.log('Plano e perfil salvos com sucesso na nuvem:', myRefCode);
 
-  // Se o usuário foi indicado por alguém, processar o crédito da indicação
   if (referredByCode && referredByCode !== myRefCode && !sessionStorage.getItem(`miplanfit_ref_credited_${userId}`)) {
     sessionStorage.setItem(`miplanfit_ref_credited_${userId}`, 'true');
     await processarIndicacaoNaNuvem(referredByCode, userId);
@@ -227,13 +267,13 @@ async function carregarPlanoNaNuvem(userId) {
   if (!client) return null;
 
   const { data, error } = await client
-    .from('planos').select('*').eq('user_id', userId).single();
+    .from('planos').select('*').eq('user_id', userId).maybeSingle();
 
   if (error) {
-    if (error.code !== 'PGRST116') console.error('Erro ao carregar plano:', error.message);
+    console.error('Erro ao carregar plano:', error.message);
     return null;
   }
-  return data;
+  return data || null;
 }
 
 // ─── Salvar progresso na nuvem ───
@@ -245,13 +285,10 @@ async function salvarProgressoNaNuvem(userId, progresso) {
     dias_completados: progresso.diasCompletados || [],
     streak_actual   : progresso.streakActual    || 0,
     max_streak      : progresso.maxStreak       || 0,
+    racha_acumulada : progresso.rachaAcumulada   || 0,
     logros          : progresso.logros          || [],
     updated_at      : new Date().toISOString()
   }).eq('user_id', userId);
 
-  if (error) {
-    console.error('Erro ao salvar progresso:', error.message);
-    return false;
-  }
-  return true;
+  return !error;
 }

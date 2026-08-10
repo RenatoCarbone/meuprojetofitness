@@ -75,131 +75,90 @@ document.addEventListener('DOMContentLoaded', async function () {
     userInfo.style.display = 'flex';
   }
 
-  // ─── 3. Cargar datos: Nube primero, localStorage como salvavidas ───
+  // ─── 3. Resolver perfil do quiz e sincronizar com a nuvem ───
+  // O perfil recém-enviado tem prioridade. Caso contrário, a nuvem é a fonte principal.
+  const quizPendingSync = localStorage.getItem('miplanfit_quiz_pending_sync') === 'true';
+  const perfilLocal = typeof recuperarPerfilQuiz === 'function' ? recuperarPerfilQuiz() : null;
+  if (typeof removerPdataLegadoDaUrl === 'function') removerPdataLegadoDaUrl();
+
   let planNuvem = null;
   if (usuario && usuario.id !== 'local_user') {
     planNuvem = await carregarPlanoNaNuvem(usuario.id);
   }
 
-  const cloudHasValidPerfil = planNuvem && planNuvem.perfil && typeof planNuvem.perfil === 'object' && Object.keys(planNuvem.perfil).length > 0 && planNuvem.perfil.peso;
-  const cloudHasValidPlan = planNuvem && planNuvem.plan30 && Array.isArray(planNuvem.plan30) && planNuvem.plan30.length > 0;
+  const cloudHasValidPerfil = !!(
+    planNuvem &&
+    typeof perfilQuizValido === 'function' &&
+    perfilQuizValido(planNuvem.perfil)
+  );
+  const cloudHasValidPlan = !!(
+    planNuvem &&
+    Array.isArray(planNuvem.plan30) &&
+    planNuvem.plan30.length > 0
+  );
 
-  if (cloudHasValidPerfil && cloudHasValidPlan) {
-    perfil  = planNuvem.perfil;
-    plan30  = planNuvem.plan30;
-    planId  = planNuvem.plan_id || 'B';
-
-    if (planNuvem.is_premium === true) {
-      localStorage.setItem('miplanfit_premium', 'true');
-    } else {
-      localStorage.removeItem('miplanfit_premium');
+  // Se houve quiz nesta navegação, nunca deixe um perfil vazio da nuvem vencê-lo.
+  if (quizPendingSync && perfilLocal) {
+    perfil = perfilLocal;
+    planId = localStorage.getItem('miplanfit_plan_id') || 'B';
+    plan30 = JSON.parse(localStorage.getItem('miplanfit_plan30') || 'null');
+    if (!Array.isArray(plan30) || plan30.length === 0) {
+      planId = typeof recomendarPlan === 'function' ? recomendarPlan(perfil) : planId;
+      plan30 = generarPlan30Dias(perfil, planId);
     }
 
-    // Garantizar que el e-mail del usuario de Google esté siempre guardado en Supabase
-    if (usuario && usuario.email && client && (!planNuvem.user_email || planNuvem.user_email === '')) {
-      await client.from('planos').update({
-        user_email: usuario.email,
-        user_name: usuario.user_metadata?.full_name || usuario.user_metadata?.name || perfil.nombre || 'Usuario'
-      }).eq('user_id', usuario.id).catch(() => {});
+    localStorage.setItem('miplanfit_premium', 'false');
+    if (usuario && usuario.id !== 'local_user') {
+      const salvo = await salvarPlanoNaNuvem(usuario.id, {
+        perfil,
+        plan30,
+        planId,
+        imc: JSON.parse(localStorage.getItem('miplanfit_imc') || '{}'),
+        tmb: parseInt(localStorage.getItem('miplanfit_tmb') || '0', 10),
+        tdee: parseInt(localStorage.getItem('miplanfit_tdee') || '0', 10)
+      });
+      if (salvo) localStorage.removeItem('miplanfit_quiz_pending_sync');
+    }
+  } else if (cloudHasValidPerfil) {
+    perfil = planNuvem.perfil;
+    planId = planNuvem.plan_id || localStorage.getItem('miplanfit_plan_id') || 'B';
+    plan30 = cloudHasValidPlan ? planNuvem.plan30 : JSON.parse(localStorage.getItem('miplanfit_plan30') || 'null');
+    if (!Array.isArray(plan30) || plan30.length === 0) {
+      planId = typeof recomendarPlan === 'function' ? recomendarPlan(perfil) : planId;
+      plan30 = generarPlan30Dias(perfil, planId);
     }
 
-    // Sincronizar progreso de la nube al localStorage
-    const nombre    = perfil.nombre || 'Usuario';
-    const streakKey = `miplanfit_streak_${nombre.replace(/\s/g,'_')}`;
-    const estadoNuvem = {
-      diasCompletados: planNuvem.dias_completados || [],
-      streakActual   : planNuvem.streak_actual    || 0,
-      rachaAcumulada : planNuvem.racha_acumulada   || 0,
-      maxStreak      : planNuvem.max_streak       || 0,
-      logros         : planNuvem.logros           || [],
-      fechaInicio    : planNuvem.fecha_inicio
-    };
-    localStorage.setItem(streakKey, JSON.stringify(estadoNuvem));
-    localStorage.setItem('miplanfit_perfil',  JSON.stringify(perfil));
-    localStorage.setItem('miplanfit_plan30',  JSON.stringify(plan30));
+    if (planNuvem.is_premium === true) localStorage.setItem('miplanfit_premium', 'true');
+    else localStorage.removeItem('miplanfit_premium');
+
+    localStorage.setItem('miplanfit_perfil', JSON.stringify(perfil));
+    localStorage.setItem('miplanfit_plan30', JSON.stringify(plan30));
     localStorage.setItem('miplanfit_plan_id', planId);
-
-    // Actualizar Card de Referidos en la interfaz
-    const userRefCode = planNuvem.referral_code || (typeof generarCodigoReferido === 'function' ? generarCodigoReferido(usuario.id, perfil.nombre) : 'ref');
-    const userRefCount = planNuvem.referrals_count || 0;
-    actualizarCardReferidos(userRefCode, userRefCount, planNuvem.is_premium === true);
-
-    // 1. Recuperar perfil de la URL (OAuth pdata), localStorage, sessionStorage o cookies
-    const urlPdata = new URLSearchParams(window.location.search).get('pdata');
-    let localPerfil = null;
-    if (urlPdata) {
-      try {
-        localPerfil = JSON.parse(decodeURIComponent(escape(atob(urlPdata.replace(/\s/g, '+')))));
-      } catch(e) {
-        try { localPerfil = JSON.parse(decodeURIComponent(urlPdata)); } catch(err) {}
-      }
-    }
-    if (!localPerfil) {
-      try { localPerfil = JSON.parse(localStorage.getItem('miplanfit_perfil') || 'null'); } catch(e) {}
-    }
-    if (!localPerfil) {
-      try { localPerfil = JSON.parse(sessionStorage.getItem('miplanfit_perfil_backup') || localStorage.getItem('miplanfit_perfil_backup') || 'null'); } catch(e) {}
-    }
-    if (!localPerfil) {
-      const match = document.cookie.match(/miplanfit_perfil_ck=([^;]+)/);
-      if (match) { try { localPerfil = JSON.parse(decodeURIComponent(match[1])); } catch(e) {} }
+  } else if (perfilLocal) {
+    // Recuperação de contas antigas cuja linha existe, mas ainda tem perfil {}.
+    perfil = perfilLocal;
+    planId = localStorage.getItem('miplanfit_plan_id') || 'B';
+    plan30 = JSON.parse(localStorage.getItem('miplanfit_plan30') || 'null');
+    if (!Array.isArray(plan30) || plan30.length === 0) {
+      planId = typeof recomendarPlan === 'function' ? recomendarPlan(perfil) : planId;
+      plan30 = generarPlan30Dias(perfil, planId);
     }
 
-    // SI TENEMOS UN PERFIL LOCAL VÁLIDO E O SUPABASE ESTÁ VAZIO OU INCOMPLETO, SALVAR NA NUVEM DE IMEDIATO
-    if (localPerfil && usuario && usuario.id !== 'local_user') {
-      const plan30Tmp = JSON.parse(localStorage.getItem('miplanfit_plan30') || 'null') || (typeof generarPlan30Dias === 'function' ? generarPlan30Dias(localPerfil, 'B') : []);
-      await client.from('planos').update({
-        perfil: localPerfil,
-        plan30: plan30Tmp,
-        user_email: usuario.email,
-        user_name: usuario.user_metadata?.full_name || localPerfil.nombre || 'Usuario',
-        updated_at: new Date().toISOString()
-      }).eq('user_id', usuario.id).catch(() => {});
+    if (usuario && usuario.id !== 'local_user') {
+      const salvo = await salvarPlanoNaNuvem(usuario.id, {
+        perfil,
+        plan30,
+        planId,
+        imc: JSON.parse(localStorage.getItem('miplanfit_imc') || '{}'),
+        tmb: parseInt(localStorage.getItem('miplanfit_tmb') || '0', 10),
+        tdee: parseInt(localStorage.getItem('miplanfit_tdee') || '0', 10)
+      });
+      if (salvo) localStorage.removeItem('miplanfit_quiz_pending_sync');
     }
-
-    let localPlan30 = JSON.parse(localStorage.getItem('miplanfit_plan30') || 'null');
-    let localPlanId = localStorage.getItem('miplanfit_plan_id') || 'B';
-
-    // Si tenemos el perfil pero se perdió el plan de 30 días en la redirección, regenerarlo al vuelo
-    if (localPerfil && (!localPlan30 || !Array.isArray(localPlan30) || localPlan30.length === 0)) {
-      if (typeof recomendarPlan === 'function' && typeof generarPlan30Dias === 'function') {
-        localPlanId = recomendarPlan(localPerfil);
-        localPlan30 = generarPlan30Dias(localPerfil, localPlanId);
-      }
-    }
-
-    if (localPerfil && localPlan30) {
-      // TENEMOS DATOS DE PLAN EN EL NAVEGADOR:
-      perfil = localPerfil;
-      plan30 = localPlan30;
-      planId = localPlanId;
-
-      // Garantizar que la nueva cuenta empiece como GRATUITA (3 DÍAS)
-      localStorage.setItem('miplanfit_premium', 'false');
-
-      // Si el usuario se autenticó con Google, asociar y guardar su plan en Supabase de inmediato
-      if (usuario && usuario.id !== 'local_user') {
-        await salvarPlanoNaNuvem(usuario.id, {
-          perfil,
-          plan30,
-          planId,
-          imc: JSON.parse(localStorage.getItem('miplanfit_imc') || '{}'),
-          tmb: parseInt(localStorage.getItem('miplanfit_tmb') || '0'),
-          tdee: parseInt(localStorage.getItem('miplanfit_tdee') || '0')
-        });
-      }
-
-      const tempRefCode = typeof generarCodigoReferido === 'function' ? generarCodigoReferido(usuario?.id || 'guest', perfil.nombre) : 'ref';
-      actualizarCardReferidos(tempRefCode, 0, false);
-    } else if (usuario && usuario.id !== 'local_user') {
-      // SI NO TIENE PLAN EN NUBE NI EN BROWSER (Intento de login sin cuestionario), REDIRIGIR AL QUIZ
-      window.location.href = 'index.html?error=no_plan_found';
-      return;
-    } else {
-      perfil  = localPerfil;
-      plan30  = localPlan30;
-      planId  = localPlanId;
-    }
+  } else if (usuario && usuario.id !== 'local_user') {
+    window.location.href = 'index.html?error=no_plan_found';
+    return;
+  }
   }
 
   // Fallback de seguridad solo para usuarios locales no registrados

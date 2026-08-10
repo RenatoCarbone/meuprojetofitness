@@ -34,7 +34,7 @@
   <div class="card">
     <h3>2. Contas Salvas no Banco de Dados em Tempo Real</h3>
     <button onclick="carregarDados()">🔄 Atualizar Dados</button>
-    <button onclick="testarGravacaoSimulada()" style="background:#059669;">🧪 Testar Gravação Simulada</button>
+    <button disabled title="Use o fluxo real do quiz para validar a escrita" style="background:#64748b; cursor:not-allowed;">🧪 Escrita de teste desativada</button>
 
     <div id="table-container" style="margin-top:15px;">⏳ Carregando registros da tabela 'planos'...</div>
   </div>
@@ -130,27 +130,7 @@
     }
 
     async function testarGravacaoSimulada() {
-      const client = getSupabase();
-      if (!client) return alert('Cliente Supabase indisponível');
-
-      const testUserId = 'test_user_' + Math.floor(Math.random() * 10000);
-      const payload = {
-        user_id: testUserId,
-        user_email: `teste_${testUserId}@miplanfit.com`,
-        user_name: 'Teste Diagnóstico',
-        referral_code: 'teste_' + testUserId.slice(-4),
-        perfil: { nombre: 'Teste Diagnóstico', sexo: 'hombre', edad: 60, peso: 80, objetivo_kg: 10 },
-        plan30: [{ dia: 1, meals: [] }],
-        updated_at: new Date().toISOString()
-      };
-
-      const { data, error } = await client.from('planos').upsert(payload, { onConflict: 'user_id' });
-      if (error) {
-        alert('❌ Falha ao gravar no Supabase:\n' + error.message);
-      } else {
-        alert('✅ Sucesso! Gravação no Supabase funcionou perfeitamente.');
-        carregarDados();
-      }
+      alert('A escrita simulada foi desativada: ela usava user_id inválido e podia causar erro 400. Valide o banco concluindo o quiz com uma conta Google real.');
     }
 
     window.addEventListener('DOMContentLoaded', () => {

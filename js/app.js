@@ -226,6 +226,7 @@ document.getElementById('main-form').addEventListener('submit', async function(e
   localStorage.setItem('miplanfit_premium', 'false');
   localStorage.setItem('miplanfit_perfil', perfilStr);
   localStorage.setItem('miplanfit_perfil_backup', perfilStr);
+  localStorage.setItem('miplanfit_quiz_pending_sync', 'true');
   sessionStorage.setItem('miplanfit_perfil', perfilStr);
   sessionStorage.setItem('miplanfit_perfil_backup', perfilStr);
   document.cookie = `miplanfit_perfil_ck=${encodeURIComponent(perfilStr)}; path=/; max-age=86400; SameSite=Lax`;

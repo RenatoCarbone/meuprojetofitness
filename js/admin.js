@@ -11,6 +11,30 @@ let chartAgeInstance = null;
 let chartGoalInstance = null;
 let chartDietInstance = null;
 
+function categoriaObjetivo(perfil = {}) {
+  const objetivoKg = Number(perfil.objetivo_kg);
+  if (Number.isFinite(objetivoKg)) return objetivoKg <= 0 ? 'mantener' : 'perder';
+
+  const objetivo = String(perfil.objetivo || '').toLowerCase();
+  if (objetivo.includes('mantener')) return 'mantener';
+  if (objetivo.includes('musculo') || objetivo.includes('massa')) return 'musculo';
+  return 'perder';
+}
+
+function textoObjetivo(perfil = {}) {
+  const objetivoKg = Number(perfil.objetivo_kg);
+  if (Number.isFinite(objetivoKg)) {
+    return objetivoKg <= 0 ? '⚖️ Manter peso' : `📉 Perder ${objetivoKg} kg`;
+  }
+
+  const objetivoMap = {
+    perder_peso: '📉 Perder Peso',
+    mantener: '⚖️ Manter Peso',
+    ganar_musculo: '💪 Ganhar Massa'
+  };
+  return objetivoMap[perfil.objetivo] || perfil.objetivo || 'Personalizado';
+}
+
 document.addEventListener('DOMContentLoaded', async function() {
   await verificarAccesoAdmin();
 });
@@ -204,9 +228,9 @@ function renderizarGraficosDemograficos(usuarios) {
     else edadGroup['55+']++;
 
     // Objetivo
-    const obj = (perfil.objetivo || 'perder_peso').toLowerCase();
-    if (obj.includes('perder')) objetivos.perder++;
-    else if (obj.includes('mantener')) objetivos.mantener++;
+    const categoria = categoriaObjetivo(perfil);
+    if (categoria === 'perder') objetivos.perder++;
+    else if (categoria === 'mantener') objetivos.mantener++;
     else objetivos.musculo++;
 
     // Dieta
@@ -336,7 +360,7 @@ function renderizarResumoPersona(usuarios) {
     const perfil = u.perfil || {};
     if ((perfil.sexo || 'mujer').toLowerCase() === 'mujer') mulheres++;
     somaIdades += parseInt(perfil.edad || 30);
-    if ((perfil.objetivo || 'perder').toLowerCase().includes('perder')) perderPesoCount++;
+    if (categoriaObjetivo(perfil) === 'perder') perderPesoCount++;
     if ((perfil.ejercicios || 'casa').toLowerCase().includes('casa')) treinoCasaCount++;
   });
 
@@ -477,13 +501,7 @@ function renderizarTablaAdmin(lista) {
     const edadStr = tienePerfil && perfil.edad ? `${perfil.edad} anos` : '';
 
     // Objetivo
-    const objetivoMap = {
-      perder_peso: '📉 Perder Peso',
-      mantener: '⚖️ Manter Peso',
-      ganar_musculo: '💪 Ganhar Massa'
-    };
-    const objVal = perfil.objetivo_kg ? `Perder ${perfil.objetivo_kg} kg` : (objetivoMap[perfil.objetivo] || perfil.objetivo || 'Personalizado');
-    const objetivoStr = tienePerfil ? objVal : '⚠️ Quiz Pendente';
+    const objetivoStr = tienePerfil ? textoObjetivo(perfil) : '⚠️ Quiz Pendente';
 
     // Racha / Progresso
     const streak = user.streak_actual || 0;
