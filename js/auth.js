@@ -83,7 +83,7 @@ async function loginComGoogle() {
     // Save profile to both cookie and localStorage before redirect
     const perfil = JSON.parse(localPerfil || '{}');
     if (perfil.nombre) {
-      document.cookie = `miplanfit_perfil=${JSON.stringify(perfil)}; Path=/`;
+      document.cookie = `miplanfit_perfil_ck=${encodeURIComponent(JSON.stringify(perfil))}; Path=/; max-age=86400; SameSite=Lax`;
       localStorage.setItem('miplanfit_perfil', JSON.stringify(perfil));
     }
   } catch(e) {}
