@@ -236,7 +236,7 @@ function renderizarGraficosDemograficos(usuarios) {
       data: {
         labels: ['Mulheres', 'Homens'],
         datasets: [{
-          data: [mujeres || 1, hombres],
+          data: [mujeres, hombres],
           backgroundColor: ['#ec4899', '#06b6d4'],
           borderWidth: 0
         }]
@@ -258,7 +258,7 @@ function renderizarGraficosDemograficos(usuarios) {
         labels: ['< 25', '25-34', '35-44', '45-54', '55+'],
         datasets: [{
           label: 'Usuários',
-          data: [edadGroup['<25'], edadGroup['25-34'] || 1, edadGroup['35-44'], edadGroup['45-54'], edadGroup['55+']],
+          data: [edadGroup['<25'], edadGroup['25-34'], edadGroup['35-44'], edadGroup['45-54'], edadGroup['55+']],
           backgroundColor: '#8b5cf6',
           borderRadius: 6
         }]
@@ -283,7 +283,7 @@ function renderizarGraficosDemograficos(usuarios) {
       data: {
         labels: ['Perder Peso', 'Manter Peso', 'Ganhar Massa'],
         datasets: [{
-          data: [objetivos.perder || 1, objetivos.mantener, objetivos.musculo],
+          data: [objetivos.perder, objetivos.mantener, objetivos.musculo],
           backgroundColor: ['#f59e0b', '#10b981', '#3b82f6'],
           borderWidth: 0
         }]
@@ -305,7 +305,7 @@ function renderizarGraficosDemograficos(usuarios) {
         labels: ['Onívoro', 'Vegetariano', 'Vegano'],
         datasets: [{
           label: 'Dieta',
-          data: [dietas.omnivoro || 1, dietas.vegetariano, dietas.vegano],
+          data: [dietas.omnivoro, dietas.vegetariano, dietas.vegano],
           backgroundColor: '#10b981',
           borderRadius: 6
         }]
