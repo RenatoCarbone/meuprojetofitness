@@ -138,17 +138,30 @@ async function loginComEmail(emailDigitado) {
       });
 
       if (authErr || !authData?.user) {
-        const { data: signUpData } = await client.auth.signUp({
+        const { data: signUpData, error: sErr } = await client.auth.signUp({
           email: cleanEmail,
           password: password,
           options: {
             data: { full_name: perfil?.nombre || cleanEmail.split('@')[0] }
           }
         });
-        if (signUpData?.user) userId = signUpData.user.id;
+        if (signUpData?.user) {
+          userId = signUpData.user.id;
+        } else if (sErr) {
+          console.warn('Supabase Auth signUp aviso/erro:', sErr.message);
+        }
       } else {
         userId = authData.user.id;
       }
+    } catch(e) {
+      console.warn('Erro ao autenticar e-mail no Supabase Auth:', e);
+    }
+  }
+
+  if (!userId) {
+    try {
+      const { data: existingUser } = await client.from('planos').select('user_id').eq('user_email', cleanEmail).maybeSingle();
+      if (existingUser?.user_id) userId = existingUser.user_id;
     } catch(e) {}
   }
 
@@ -177,21 +190,25 @@ async function loginComEmail(emailDigitado) {
     if (referredByCode && referredByCode !== myRefCode) payload.referred_by = referredByCode;
 
     try {
-      let { error } = await client.from('planos').upsert(payload, { onConflict: 'user_id' });
-      if (error) {
+      let res = await client.from('planos').upsert(payload, { onConflict: 'user_id' });
+      if (res.error) {
+        console.warn('Upsert direto no loginComEmail falhou:', res.error.message);
         const { data: existingRow } = await client.from('planos').select('user_id').eq('user_email', cleanEmail).maybeSingle();
         if (existingRow) {
           await client.from('planos').update(payload).eq('user_email', cleanEmail);
         } else {
-          await client.from('planos').insert(payload);
+          const insertRes = await client.from('planos').insert(payload);
+          if (insertRes.error) console.error('Insert em planos falhou:', insertRes.error.message);
         }
+      } else {
+        console.log('Plano salvo com sucesso no banco para:', cleanEmail);
       }
     } catch(e) {
       console.warn('Erro ao salvar plano por e-mail:', e);
     }
 
     if (referredByCode && referredByCode !== myRefCode) {
-      await processarIndicacaoNaNuvem(referredByCode, userId).catch(() => {});
+      await processarIndicacaoNaNuvem(referredByCode, userId).catch((err) => console.warn('Erro ao creditar indicação:', err));
     }
   }
 
