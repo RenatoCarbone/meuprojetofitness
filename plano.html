@@ -983,10 +983,11 @@
 <div class="celebration-overlay" id="celebration-overlay">
   <div style="font-size:4rem; animation: bounce-gentle 1s infinite;">🏆</div>
   <h1 class="gradient-text">¡30 Días Completados!</h1>
-  <p style="font-size:1.1rem;max-width:400px;text-align:center;">Has completado tu plan de 30 días. ¡Eres increíble! ¿Quieres seguir?</p>
-  <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:10px;">
-    <button class="btn btn-amber btn-lg" onclick="reiniciarPlan()">🔄 Repetir el plan</button>
-    <a href="index.html" class="btn btn-outline">Crear nuevo perfil</a>
+  <p style="font-size:1.1rem;max-width:400px;text-align:center;">Has completado tu plan de 30 días con éxito. ¡Eres increíble!</p>
+  <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:14px;">
+    <button class="btn btn-green btn-lg" onclick="document.getElementById('celebration-overlay').classList.remove('show'); abrirModalNuevoCiclo();" style="box-shadow:0 4px 20px rgba(16,185,129,0.5); font-weight:800;">
+      🚀 Iniciar Nuevo Ciclo (Recalcular Peso & Continuar Racha 🔥)
+    </button>
   </div>
 </div>
 
@@ -1163,9 +1164,9 @@
   </div>
 </div>
 
-<script src="js/supabase-config.js?v=2.4"></script>
-<script src="js/auth.js?v=2.4"></script>
-<script src="js/streak.js?v=2.4"></script>
-<script src="js/plano.js?v=2.4"></script>
+<script src="js/supabase-config.js?v=2.5"></script>
+<script src="js/auth.js?v=2.5"></script>
+<script src="js/streak.js?v=2.5"></script>
+<script src="js/plano.js?v=2.5"></script>
 </body>
 </html>
