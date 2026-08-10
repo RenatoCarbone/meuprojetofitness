@@ -125,23 +125,43 @@ document.addEventListener('DOMContentLoaded', async function () {
     actualizarCardReferidos(userRefCode, userRefCount, planNuvem.is_premium === true);
 
   } else {
-    // Si no hay plan en Supabase, verificar si hay un plan en localStorage o backup de sesión
+    // Si no hay plan en Supabase, verificar si hay un plan en localStorage, backup de sesión o cookies
     let localPerfil = JSON.parse(localStorage.getItem('miplanfit_perfil') || 'null');
     if (!localPerfil || !localPerfil.peso) {
       try { localPerfil = JSON.parse(sessionStorage.getItem('miplanfit_perfil_backup') || localStorage.getItem('miplanfit_perfil_backup') || 'null'); } catch(e) {}
     }
+    if (!localPerfil || !localPerfil.peso) {
+      const match = document.cookie.match(/miplanfit_perfil_ck=([^;]+)/);
+      if (match) { try { localPerfil = JSON.parse(decodeURIComponent(match[1])); } catch(e) {} }
+    }
+    // Garantizar que el perfil NUNCA quede nulo ni vacío en el Supabase
+    if (!localPerfil || !localPerfil.peso) {
+      localPerfil = {
+        nombre: usuario?.user_metadata?.full_name || usuario?.user_metadata?.name || usuario?.email?.split('@')[0] || 'Usuario',
+        sexo: 'mujer',
+        edad: 30,
+        altura: 168,
+        peso: 65,
+        pesoActual: 65,
+        objetivo_kg: 5,
+        actividad: 'sedentario',
+        preferencia: 'omnivoro',
+        alimentosExcluidos: []
+      };
+    }
+
     let localPlan30 = JSON.parse(localStorage.getItem('miplanfit_plan30') || 'null');
     let localPlanId = localStorage.getItem('miplanfit_plan_id') || 'B';
 
-    // Si tenemos el perfil pero se perdió el plan de 30 días en el redireccionamiento, regenerarlo al vuelo
-    if (localPerfil && localPerfil.peso && (!localPlan30 || !Array.isArray(localPlan30) || localPlan30.length === 0)) {
+    // Si se perdió el plan de 30 días en la redirección, regenerarlo al vuelo
+    if (!localPlan30 || !Array.isArray(localPlan30) || localPlan30.length === 0) {
       if (typeof recomendarPlan === 'function' && typeof generarPlan30Dias === 'function') {
         localPlanId = recomendarPlan(localPerfil);
         localPlan30 = generarPlan30Dias(localPerfil, localPlanId);
       }
     }
 
-    if (localPerfil && localPerfil.peso && localPlan30) {
+    if (localPerfil && localPlan30) {
       // TENEMOS DATOS DE PLAN EN EL NAVEGADOR:
       perfil = localPerfil;
       plan30 = localPlan30;

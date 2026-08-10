@@ -241,22 +241,21 @@ document.getElementById('main-form').addEventListener('submit', async function(e
   const planRecomendado = recomendarPlan(perfil);
   const plan30dias = generarPlan30Dias(perfil, planRecomendado);
 
-  // Guardar en localStorage (persistente) y garantizar que la nueva cuenta inicie como Gratuito (3 días)
+  // Guardar en localStorage, sessionStorage y cookies de respaldo para que NUNCA se pierda en redirecciones
+  const perfilStr = JSON.stringify(perfil);
   localStorage.removeItem('miplanfit_premium');
   localStorage.setItem('miplanfit_premium', 'false');
-  localStorage.setItem('miplanfit_perfil', JSON.stringify(perfil));
+  localStorage.setItem('miplanfit_perfil', perfilStr);
+  localStorage.setItem('miplanfit_perfil_backup', perfilStr);
+  sessionStorage.setItem('miplanfit_perfil', perfilStr);
+  sessionStorage.setItem('miplanfit_perfil_backup', perfilStr);
+  document.cookie = `miplanfit_perfil_ck=${encodeURIComponent(perfilStr)}; path=/; max-age=86400; SameSite=Lax`;
+
   localStorage.setItem('miplanfit_imc', JSON.stringify(imc));
   localStorage.setItem('miplanfit_tmb', tmb);
   localStorage.setItem('miplanfit_tdee', tdee);
   localStorage.setItem('miplanfit_plan_id', planRecomendado);
   localStorage.setItem('miplanfit_plan30', JSON.stringify(plan30dias));
-
-  // También guardamos en sessionStorage por compatibilidad
-  sessionStorage.setItem('miplanfit_perfil', JSON.stringify(perfil));
-  sessionStorage.setItem('miplanfit_imc', JSON.stringify(imc));
-  sessionStorage.setItem('miplanfit_tmb', tmb);
-  sessionStorage.setItem('miplanfit_tdee', tdee);
-  sessionStorage.setItem('miplanfit_plan_id', planRecomendado);
   sessionStorage.setItem('miplanfit_plan30', JSON.stringify(plan30dias));
 
   // Inicializar streak si no existe
