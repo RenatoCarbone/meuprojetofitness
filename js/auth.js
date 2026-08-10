@@ -110,24 +110,92 @@ async function loginComGoogle() {
   return true;
 }
 
+// ─── Login Direto com E-mail ───
+async function loginComEmail(emailDigitado) {
+  const client = getSupabase();
+  const cleanEmail = (emailDigitado || '').trim().toLowerCase();
+
+  if (!cleanEmail || !cleanEmail.includes('@')) {
+    alert('Por favor, introduce un e-mail válido.');
+    return false;
+  }
+
+  const perfil = typeof recuperarPerfilQuiz === 'function' ? recuperarPerfilQuiz() : null;
+  const localPlan30 = JSON.parse(localStorage.getItem('miplanfit_plan30') || 'null');
+  const localPlanId = localStorage.getItem('miplanfit_plan_id') || 'B';
+  const imc = JSON.parse(localStorage.getItem('miplanfit_imc') || '{}');
+  const tmb = parseInt(localStorage.getItem('miplanfit_tmb') || '0', 10);
+  const tdee = parseInt(localStorage.getItem('miplanfit_tdee') || '0', 10);
+
+  // Gerar um UUID válido e determinístico para o Postgres
+  const hashStr = cleanEmail.split('').reduce((acc, char) => (acc * 31 + char.charCodeAt(0)) >>> 0, 0).toString(16).padStart(12, '0');
+  const pseudoUserId = `e0000000-0000-4000-8000-${hashStr.slice(-12)}`;
+
+  if (client) {
+    const payload = {
+      user_id: pseudoUserId,
+      user_email: cleanEmail,
+      user_name: perfil?.nombre || cleanEmail.split('@')[0],
+      referral_code: typeof generarCodigoReferido === 'function' ? generarCodigoReferido(pseudoUserId, cleanEmail.split('@')[0]) : 'ref',
+      perfil: perfil || { nombre: cleanEmail.split('@')[0] },
+      plan30: localPlan30 || [],
+      plan_id: localPlanId,
+      imc,
+      tmb,
+      tdee,
+      updated_at: new Date().toISOString()
+    };
+
+    let { error } = await client.from('planos').upsert(payload, { onConflict: 'user_id' });
+    if (error) {
+      const { data: existingRow } = await client.from('planos').select('user_id').eq('user_email', cleanEmail).maybeSingle();
+      if (existingRow) {
+        await client.from('planos').update(payload).eq('user_email', cleanEmail);
+      } else {
+        await client.from('planos').insert(payload).catch(() => {});
+      }
+    }
+  }
+
+  localStorage.setItem('miplanfit_active_email', cleanEmail);
+  localStorage.setItem('miplanfit_active_userid', pseudoUserId);
+  localStorage.removeItem('miplanfit_quiz_pending_sync');
+
+  window.location.href = 'plano.html';
+  return true;
+}
+
 // ─── Obter usuário atual ───
 async function getUsuarioAtual() {
   const client = getSupabase();
-  if (!client) return null;
-  try {
-    const { data: { session } } = await client.auth.getSession();
-    return session?.user || null;
-  } catch (e) {
-    return null;
+  if (client) {
+    try {
+      const { data: { session } } = await client.auth.getSession();
+      if (session?.user) return session.user;
+    } catch (e) {}
   }
+
+  // Fallback para sessão direta de e-mail
+  const activeEmail = localStorage.getItem('miplanfit_active_email');
+  const activeUserId = localStorage.getItem('miplanfit_active_userid');
+  if (activeEmail && activeUserId) {
+    return {
+      id: activeUserId,
+      email: activeEmail,
+      user_metadata: { full_name: activeEmail.split('@')[0] }
+    };
+  }
+
+  return null;
 }
 
 // ─── Logout ───
 async function logout() {
   const client = getSupabase();
-  if (client) await client.auth.signOut();
+  if (client) await client.auth.signOut().catch(() => {});
   ['miplanfit_perfil','miplanfit_plan30','miplanfit_plan_id',
-   'miplanfit_imc','miplanfit_tmb','miplanfit_tdee'].forEach(k => localStorage.removeItem(k));
+   'miplanfit_imc','miplanfit_tmb','miplanfit_tdee',
+   'miplanfit_active_email','miplanfit_active_userid'].forEach(k => localStorage.removeItem(k));
   window.location.href = 'index.html';
 }
 
