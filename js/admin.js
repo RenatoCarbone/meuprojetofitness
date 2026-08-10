@@ -467,7 +467,7 @@ function renderizarTablaAdmin(lista) {
     const fechaFmt = fechaObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
     // Gênero e Idade
-    const tienePerfil = perfil && Object.keys(perfil).length > 0 && perfil.peso;
+    const tienePerfil = perfil && typeof perfil === 'object' && Object.keys(perfil).length > 0 && (perfil.peso || perfil.edad || perfil.sexo || perfil.nombre);
     const sexoStr = tienePerfil ? ((perfil.sexo || '').toLowerCase() === 'hombre' ? 'HOMEM ♂️' : 'MULHER ♀️') : '⚠️ Quiz Pendente';
     const edadStr = tienePerfil && perfil.edad ? `${perfil.edad} anos` : '';
 

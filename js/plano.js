@@ -124,8 +124,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const userRefCount = planNuvem.referrals_count || 0;
     actualizarCardReferidos(userRefCode, userRefCount, planNuvem.is_premium === true);
 
-  } else {
-    // Si no hay plan en Supabase, verificar si hay un plan en la URL (OAuth pdata), localStorage, backup de sesión o cookies
+    // 1. Recuperar perfil de la URL (OAuth pdata), localStorage, sessionStorage o cookies
     const urlPdata = new URLSearchParams(window.location.search).get('pdata');
     let localPerfil = null;
     if (urlPdata) {
@@ -134,37 +133,22 @@ document.addEventListener('DOMContentLoaded', async function () {
         localPerfil = JSON.parse(rawStr.startsWith('%') ? decodeURIComponent(rawStr) : rawStr);
       } catch(e) {}
     }
-    if (!localPerfil || !localPerfil.peso) {
+    if (!localPerfil) {
       try { localPerfil = JSON.parse(localStorage.getItem('miplanfit_perfil') || 'null'); } catch(e) {}
     }
-    if (!localPerfil || !localPerfil.peso) {
+    if (!localPerfil) {
       try { localPerfil = JSON.parse(sessionStorage.getItem('miplanfit_perfil_backup') || localStorage.getItem('miplanfit_perfil_backup') || 'null'); } catch(e) {}
     }
-    if (!localPerfil || !localPerfil.peso) {
+    if (!localPerfil) {
       const match = document.cookie.match(/miplanfit_perfil_ck=([^;]+)/);
       if (match) { try { localPerfil = JSON.parse(decodeURIComponent(match[1])); } catch(e) {} }
-    }
-    // Si el usuario inició sesión directamente sin cuestionario, inicializar perfil con métricas estándar
-    if (!localPerfil || !localPerfil.peso) {
-      localPerfil = {
-        nombre: usuario?.user_metadata?.full_name || usuario?.user_metadata?.name || usuario?.email?.split('@')[0] || 'Usuario',
-        sexo: 'mujer',
-        edad: 30,
-        altura: 168,
-        peso: 68,
-        pesoActual: 68,
-        objetivo_kg: 5,
-        actividad: 'sedentario',
-        preferencia: 'omnivoro',
-        alimentosExcluidos: []
-      };
     }
 
     let localPlan30 = JSON.parse(localStorage.getItem('miplanfit_plan30') || 'null');
     let localPlanId = localStorage.getItem('miplanfit_plan_id') || 'B';
 
-    // Si se perdió el plan de 30 días en la redirección, regenerarlo al vuelo
-    if (!localPlan30 || !Array.isArray(localPlan30) || localPlan30.length === 0) {
+    // Si tenemos el perfil pero se perdió el plan de 30 días en la redirección, regenerarlo al vuelo
+    if (localPerfil && (!localPlan30 || !Array.isArray(localPlan30) || localPlan30.length === 0)) {
       if (typeof recomendarPlan === 'function' && typeof generarPlan30Dias === 'function') {
         localPlanId = recomendarPlan(localPerfil);
         localPlan30 = generarPlan30Dias(localPerfil, localPlanId);
