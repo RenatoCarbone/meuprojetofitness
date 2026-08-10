@@ -157,28 +157,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     return;
   }
 
-  // Detectar si el usuario está regresando de un login con Google (OAuth callback) o si ya tiene sesión activa
-  const hash = window.location.hash;
-  const search = window.location.search;
-  const isAuthCallback = hash.includes('access_token=') || search.includes('code=');
-
-  // Si NO es un enlace de referido de invitación, ir directo a plano.html si ya hay sesión activa
-  if (!isReferralLink) {
-    const client = getSupabase();
-    if (client) {
-      try {
-        const { data: { session } } = await client.auth.getSession();
-
-        if (session || isAuthCallback) {
-          // ¡SI EL USUARIO TIENE SESIÓN O VIENE DE GOOGLE, IR DIRECTO A PLANO.HTML!
-          window.location.href = 'plano.html';
-          return;
-        }
-      } catch(e) {
-        console.warn('Auth check error:', e);
-      }
-    }
-  }
+  // Permitir que el usuario responda al cuestionario libremente en index.html
 
   // Si no hay sesión activa pero hay datos locales en el navegador, mostrar el banner de continuar
   const perfilGuardado = localStorage.getItem('miplanfit_perfil');
