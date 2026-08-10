@@ -85,24 +85,14 @@ async function salvarPlanoNaNuvem(userId, dados) {
     payload.referred_by = referredByCode;
   }
 
-  // 1. Intentar hacer update para asegurar que perfil y plan30 se actualicen sobre la fila existente
-  const { data: updateData, error: updateErr } = await client
+  // 1. Forzar upsert de perfil, plan30 e dados do usuário no Supabase
+  const { error: upsertErr } = await client
     .from('planos')
-    .update(payload)
-    .eq('user_id', userId)
-    .select();
+    .upsert(payload, { onConflict: 'user_id' });
 
-  if (updateErr) {
-    console.warn('Advertencia en update de plano:', updateErr.message);
-  }
-
-  // 2. Si la fila no existía previamente, hacer insert
-  if (!updateData || updateData.length === 0) {
-    const { error: insertErr } = await client.from('planos').insert([payload]);
-    if (insertErr) {
-      console.error('Erro ao inserir plano:', insertErr.message);
-      return false;
-    }
+  if (upsertErr) {
+    console.warn('Upsert falhou, executando update direto:', upsertErr.message);
+    await client.from('planos').update(payload).eq('user_id', userId);
   }
 
   console.log('✅ Plano e perfil salvos com sucesso na nuvem:', myRefCode);
