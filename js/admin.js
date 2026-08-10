@@ -569,9 +569,9 @@ function abrirDrawerCliente(userId) {
 
   document.getElementById('drw-input-nombre').value = user.user_name || perfil.nombre || '';
   document.getElementById('drw-input-email').value = user.user_email || '';
-  document.getElementById('drw-input-peso-init').value = perfil.peso ? `${perfil.peso} kg` : 'Pendente (Login Direto)';
-  document.getElementById('drw-input-peso-actual').value = (perfil.pesoActual || perfil.peso) ? `${perfil.pesoActual || perfil.peso} kg` : 'Pendente (Login Direto)';
-  document.getElementById('drw-input-objetivo-kg').value = perfil.objetivo_kg ? `${perfil.objetivo_kg} kg a perder` : 'Pendente';
+  document.getElementById('drw-input-peso-init').value = perfil.peso || '';
+  document.getElementById('drw-input-peso-actual').value = perfil.pesoActual || perfil.peso || '';
+  document.getElementById('drw-input-objetivo-kg').value = perfil.objetivo_kg || '';
   document.getElementById('drw-input-actividad').value = perfil.actividad || 'sedentario';
 
   // Mapa de nombres de alimentos
