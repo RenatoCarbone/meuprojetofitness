@@ -1543,7 +1543,10 @@ async function confirmarNuevoCiclo() {
     return;
   }
 
-  // 1. Actualizar perfil local con el nuevo peso registrado por el usuario
+  // 1. Preservar estado Premium si el usuario ya era Premium
+  const wasPremium = (typeof isPremium === 'function' ? isPremium() : false) || (localStorage.getItem('miplanfit_premium') === 'true');
+
+  // 2. Actualizar perfil local con el nuevo peso registrado por el usuario
   perfil = perfil || {};
   perfil.pesoActual = nuevoPeso;
 
@@ -1554,9 +1557,10 @@ async function confirmarNuevoCiclo() {
   const nuevoPlanId = typeof recomendarPlan === 'function' ? recomendarPlan(perfil) : (planId || 'B');
   const nuevoPlan30 = typeof generarPlan30Dias === 'function' ? generarPlan30Dias(perfil, nuevoPlanId) : plan30;
 
-  // 2. Renovar el plan30 local manteniendo la racha acumulada
+  // Renovar el plan30 local manteniendo la racha acumulada
   plan30 = nuevoPlan30;
   planId = nuevoPlanId;
+  diaAtual = 1;
 
   // Limpiar solo los días completados del ciclo anterior, acumulando la racha alcanzada
   const nombre = perfil.nombre || 'Usuario';
@@ -1574,6 +1578,11 @@ async function confirmarNuevoCiclo() {
   localStorage.setItem('miplanfit_perfil', JSON.stringify(perfil));
   localStorage.setItem('miplanfit_plan30', JSON.stringify(plan30));
   localStorage.setItem('miplanfit_plan_id', planId);
+  localStorage.setItem('miplanfit_dia_atual', '1');
+
+  if (wasPremium) {
+    localStorage.setItem('miplanfit_premium', 'true');
+  }
 
   // 3. Sincronizar en Supabase si el usuario está autenticado
   const usuario = typeof getUsuarioAtual === 'function' ? await getUsuarioAtual() : null;
@@ -1595,6 +1604,7 @@ async function confirmarNuevoCiclo() {
           streak_actual   : estadoStreak.rachaAcumulada,
           racha_acumulada : estadoStreak.rachaAcumulada,
           max_streak      : estadoStreak.maxStreak,
+          is_premium      : wasPremium,
           updated_at      : new Date().toISOString()
         }).eq('user_id', usuario.id);
       } catch(e) {
@@ -1605,5 +1615,5 @@ async function confirmarNuevoCiclo() {
 
   cerrarModalNuevoCiclo();
   alert(`🏆 ¡Felicidades! Has iniciado tu Nuevo Ciclo con tu peso actualizado de ${nuevoPeso} kg. Tu menú ha sido recalculado y tu racha de días en ofensiva continúa activa.`);
-  window.location.reload();
+  window.location.href = 'plano.html?day=1';
 }
