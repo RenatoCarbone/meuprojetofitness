@@ -70,16 +70,25 @@ function getStreakKey(nombre) {
 function leerEstado(nombre) {
   const key = getStreakKey(nombre);
   const raw = localStorage.getItem(key);
-  if (!raw) {
-    return {
-      diasCompletados: [],
-      streakActual: 0,
-      maxStreak: 0,
-      logros: [],
-      fechaInicio: new Date().toISOString()
-    };
+  let parsed = {
+    diasCompletados: [],
+    streakActual: 0,
+    rachaAcumulada: 0,
+    maxStreak: 0,
+    logros: [],
+    fechaInicio: new Date().toISOString()
+  };
+
+  if (raw) {
+    try { parsed = { ...parsed, ...JSON.parse(raw) }; } catch(e) {}
   }
-  return JSON.parse(raw);
+
+  // Backup permanente de rachaAcumulada desde el perfil global
+  if (!parsed.rachaAcumulada && typeof perfil !== 'undefined' && perfil && perfil.rachaAcumulada) {
+    parsed.rachaAcumulada = perfil.rachaAcumulada;
+  }
+
+  return parsed;
 }
 
 // ─── Guardar estado ───
@@ -100,8 +109,9 @@ function marcarDiaCompletado(nombre, dia) {
   estado.diasCompletados.sort((a, b) => a - b);
 
   // Recalcular streak actual acumulando rachas de ciclos anteriores
-  const rachaBase = estado.rachaAcumulada || 0;
+  const rachaBase = estado.rachaAcumulada || (typeof perfil !== 'undefined' && perfil && perfil.rachaAcumulada) || 0;
   const streakCiclo = calcularStreakActual(estado.diasCompletados);
+  estado.rachaAcumulada = rachaBase;
   estado.streakActual = rachaBase + streakCiclo;
   estado.maxStreak = Math.max(estado.maxStreak || 0, estado.streakActual);
 
