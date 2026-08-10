@@ -63,7 +63,14 @@ async function salvarPlanoNaNuvem(userId, dados) {
     const { data: { session } } = await client.auth.getSession();
     if (session?.user?.email) {
       email = session.user.email;
-      nombre = session.user.user_metadata?.full_name || session.user.user_metadata?.name || nombre;
+      const gName = session.user.user_metadata?.full_name || session.user.user_metadata?.name;
+      if (gName && gName.trim() !== '' && gName.toLowerCase() !== 'usuario') {
+        nombre = gName;
+      } else if (dados.perfil?.nombre && dados.perfil.nombre.trim() !== '' && dados.perfil.nombre.toLowerCase() !== 'usuario') {
+        nombre = dados.perfil.nombre;
+      } else {
+        nombre = session.user.email.split('@')[0];
+      }
     }
   } catch(e) {}
 

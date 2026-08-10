@@ -1456,7 +1456,10 @@ function cerrarModalReferidos() {
 // Helper para obtener el enlace de referido único del usuario actual
 function obtenerEnlaceReferidoActual() {
   const usuario = window._currentUser || null;
-  const nombreUser = (usuario?.user_metadata?.full_name || usuario?.user_metadata?.name || perfil?.nombre || usuario?.email?.split('@')[0] || 'user');
+  let nombreUser = usuario?.user_metadata?.full_name || usuario?.user_metadata?.name || perfil?.nombre;
+  if (!nombreUser || nombreUser.trim() === '' || nombreUser.toLowerCase() === 'usuario' || nombreUser.toLowerCase() === 'user') {
+    nombreUser = usuario?.email ? usuario.email.split('@')[0] : 'user';
+  }
   const userId = window._userId || usuario?.id || 'ref';
   
   const refCode = (typeof generarCodigoReferido === 'function') 
@@ -1482,7 +1485,10 @@ function actualizarCardReferidos(refCode, refCount, esPremium) {
   // 1. Enlace de invitación
   const canonicalDomain = 'https://miplanfit.pages.dev';
   const usuario = window._currentUser || null;
-  const nombreUser = (usuario?.user_metadata?.full_name || usuario?.user_metadata?.name || perfil?.nombre || usuario?.email?.split('@')[0] || 'user');
+  let nombreUser = usuario?.user_metadata?.full_name || usuario?.user_metadata?.name || perfil?.nombre;
+  if (!nombreUser || nombreUser.trim() === '' || nombreUser.toLowerCase() === 'usuario' || nombreUser.toLowerCase() === 'user') {
+    nombreUser = usuario?.email ? usuario.email.split('@')[0] : 'user';
+  }
   const actualRefCode = refCode || (typeof generarCodigoReferido === 'function' ? generarCodigoReferido(window._userId || usuario?.id, nombreUser) : 'ref');
   
   const shareUrl = `${canonicalDomain}/index.html?ref=${actualRefCode}`;
