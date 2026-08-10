@@ -4,317 +4,249 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Términos de Uso y Política de Privacidad — MiPlanFit</title>
-  <link rel="stylesheet" href="css/style.css"/>
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
-      background: var(--bg-dark);
-      color: var(--text-primary);
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      min-height: 100vh;
+      background-color: #f9fafb;
+      color: #111827;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.65;
       margin: 0;
       padding: 0;
+      -webkit-font-smoothing: antialiased;
     }
-
-    .legal-header {
-      background: rgba(13, 15, 24, 0.9);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
       padding: 16px 24px;
-      position: sticky; top: 0; z-index: 100;
     }
-
-    .legal-header-inner {
-      max-width: 900px; margin: 0 auto;
-      display: flex; align-items: center; justify-content: space-between;
-    }
-
-    .legal-container {
-      max-width: 900px;
-      margin: 40px auto;
-      padding: 0 24px 60px;
-    }
-
-    .legal-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 36px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-      backdrop-filter: blur(12px);
-    }
-
-    .legal-tabs {
+    .header-inner {
+      max-width: 800px;
+      margin: 0 auto;
       display: flex;
-      gap: 12px;
-      margin-bottom: 32px;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 14px;
-      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
     }
-
-    .legal-tab-btn {
-      padding: 10px 20px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.04);
-      color: var(--text-secondary);
-      font-weight: 700;
+    .back-link {
+      color: #2563eb;
+      text-decoration: none;
       font-size: 0.9rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
+      font-weight: 600;
     }
-
-    .legal-tab-btn.active {
-      background: var(--purple);
-      color: white;
-      border-color: var(--purple-light);
-      box-shadow: 0 4px 16px rgba(124,58,237,0.3);
+    .back-link:hover {
+      text-decoration: underline;
     }
-
-    .legal-section-title {
-      font-size: 1.6rem;
-      font-weight: 900;
-      color: white;
-      margin-bottom: 8px;
-      display: flex; align-items: center; gap: 10px;
+    .brand {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #111827;
     }
-
-    .legal-subtitle {
-      font-size: 0.88rem;
-      color: var(--text-muted);
-      margin-bottom: 28px;
+    .document-container {
+      max-width: 800px;
+      margin: 40px auto 80px;
+      background: #ffffff;
+      padding: 48px 56px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
-
-    .legal-article {
-      margin-bottom: 28px;
-    }
-
-    .legal-article h3 {
-      font-size: 1.1rem;
+    h1 {
+      font-size: 1.8rem;
       font-weight: 800;
-      color: var(--purple-light);
-      margin-bottom: 10px;
-      display: flex; align-items: center; gap: 8px;
-    }
-
-    .legal-article p, .legal-article ul {
-      font-size: 0.92rem;
-      color: var(--text-secondary);
-      line-height: 1.7;
-      margin: 0 0 12px;
-    }
-
-    .legal-article ul {
-      padding-left: 20px;
-    }
-
-    .legal-article li {
+      color: #111827;
+      margin-top: 0;
       margin-bottom: 6px;
     }
-
-    .legal-highlight-box {
-      background: rgba(124, 58, 237, 0.08);
-      border: 1px solid rgba(124, 58, 237, 0.3);
-      border-radius: 14px;
+    .meta-date {
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-bottom: 32px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .toc-box {
+      background: #f3f4f6;
+      border-left: 4px solid #2563eb;
       padding: 16px 20px;
-      margin: 16px 0;
+      margin-bottom: 36px;
+      border-radius: 0 6px 6px 0;
+    }
+    .toc-box p {
+      margin: 0 0 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .toc-box ul {
+      margin: 0;
+      padding-left: 20px;
       font-size: 0.88rem;
-      color: var(--text-primary);
-      line-height: 1.6;
     }
-
-    .legal-footer-links {
-      text-align: center;
+    .toc-box a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+    .toc-box a:hover {
+      text-decoration: underline;
+    }
+    h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #111827;
       margin-top: 40px;
-      padding-top: 24px;
-      border-top: 1px solid var(--border);
-      font-size: 0.82rem;
-      color: var(--text-muted);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #111827;
     }
-
-    @media (max-width: 600px) {
-      .legal-card { padding: 24px 18px; }
-      .legal-tab-btn { flex: 1; text-align: center; font-size: 0.82rem; padding: 10px 10px; }
+    h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #111827;
+      margin-top: 24px;
+      margin-bottom: 8px;
+    }
+    p {
+      font-size: 0.95rem;
+      color: #374151;
+      margin-top: 0;
+      margin-bottom: 14px;
+    }
+    ul {
+      margin-top: 0;
+      margin-bottom: 16px;
+      padding-left: 24px;
+      color: #374151;
+      font-size: 0.95rem;
+    }
+    li {
+      margin-bottom: 6px;
+    }
+    .notice-box {
+      background: #fffbebfb;
+      border: 1px solid #fcd34d;
+      padding: 14px 18px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      color: #92400e;
+      margin: 20px 0;
+    }
+    footer {
+      text-align: center;
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid #e5e7eb;
+      font-size: 0.82rem;
+      color: #6b7280;
+    }
+    @media (max-width: 640px) {
+      .document-container {
+        padding: 24px 20px;
+        margin: 20px 12px 40px;
+        border-radius: 0;
+        border: none;
+        box-shadow: none;
+      }
+      h1 { font-size: 1.5rem; }
+      h2 { font-size: 1.2rem; }
     }
   </style>
 </head>
 <body>
 
-<!-- Header con navegación de regreso -->
-<header class="legal-header">
-  <div class="legal-header-inner">
-    <a href="plano.html" class="btn btn-outline btn-sm" style="border-radius:20px; font-size:0.82rem; gap:6px;">
-      ← Volver a MiPlanFit
-    </a>
-    <div style="display:flex; align-items:center; gap:8px;">
-      <span style="font-size:1.3rem;">🥗</span>
-      <span style="font-weight:900; color:white; font-size:1.1rem;">MiPlanFit</span>
-    </div>
+<header>
+  <div class="header-inner">
+    <a href="plano.html" class="back-link">← Volver a MiPlanFit</a>
+    <span class="brand">MiPlanFit</span>
   </div>
 </header>
 
-<main class="legal-container">
-  <div class="legal-card">
-    
-    <!-- Pestañas de Navegación Legal -->
-    <div class="legal-tabs">
-      <button class="legal-tab-btn active" id="tab-btn-terminos" onclick="switchLegalTab('terminos')">
-        📄 Términos de Uso y Servicio
-      </button>
-      <button class="legal-tab-btn" id="tab-btn-privacidad" onclick="switchLegalTab('privacidad')">
-        🔒 Política de Privacidad (RGPD)
-      </button>
-    </div>
+<div class="document-container">
+  <h1>Términos de Servicio y Política de Privacidad</h1>
+  <div class="meta-date">Última actualización: 10 de agosto de 2026 &middot; MiPlanFit España & UE</div>
 
-    <!-- SECCIÓN 1: TÉRMINOS DE USO Y SERVICIO -->
-    <section id="sec-terminos">
-      <div class="legal-section-title">
-        <span>📄</span> Términos y Condiciones de Uso y Servicio
-      </div>
-      <div class="legal-subtitle">
-        Última actualización: 10 de Agosto de 2026 &middot; Vigente en España y la Unión Europea
-      </div>
-
-      <div class="legal-highlight-box">
-        💡 <strong>Resumen Claro:</strong> MiPlanFit es un asistente de nutrición personalizada basado en la Dieta Mediterránea. Al registrarte y utilizar nuestra plataforma, aceptas estos términos. Tu acceso completo tiene un costo único de 14,90€ (sin cargos ocultos ni suscripciones recurrentes) y cuentas con 7 días de garantía.
-      </div>
-
-      <article class="legal-article">
-        <h3>1. Naturaleza del Servicio y Objeto</h3>
-        <p>
-          MiPlanFit proporciona planes nutricionales adaptativos de 30 días, recetas mediterráneas equilibradas, cálculo de metabolismo (TMB/TDEE) y rutinas de ejercicio diarias diseñadas para acompañar objetivos de salud, pérdida de peso y hábitos saludables.
-        </p>
-      </article>
-
-      <article class="legal-article">
-        <h3>2. Registro, Cuenta de Usuario y Acceso</h3>
-        <p>
-          El acceso a MiPlanFit requiere autenticación mediante correo electrónico o cuenta de Google OAuth. El usuario es responsable de mantener la confidencialidad de su acceso. El servicio incluye 3 días de prueba gratuita y la opción de desbloquear los 30 días mediante invitación o pago único.
-        </p>
-      </article>
-
-      <article class="legal-article">
-        <h3>3. Precios, Pago Único y Garantía de Devolución</h3>
-        <ul>
-          <li><strong>Pago Único:</strong> El importe del Plan Completo es de <strong>14,90€ (pago único)</strong>. No existen renovaciones automáticas ni cobros mensuales recurrentes.</li>
-          <li><strong>Procesamiento Seguro:</strong> Los pagos son procesados a través de Lemon Squeezy MOR, cumpliendo con los estándares internacionales de seguridad PCI-DSS y cifrado SSL.</li>
-          <li><strong>Garantía de 7 Días:</strong> Si dentro de los primeros 7 días tras tu compra no estás satisfecho con tu plan, puedes solicitar la devolución íntegra de tu dinero escribiendo a nuestro soporte.</li>
-        </ul>
-      </article>
-
-      <article class="legal-article">
-        <h3>4. Exención de Responsabilidad Médica (Aviso de Salud)</h3>
-        <p>
-          Los planes de alimentación y consejos de MiPlanFit son sugerencias nutricionales basadas en patrones de Dieta Mediterránea para adultos sanos. 
-          <strong>MiPlanFit no es un centro médico ni emite diagnósticos clínicos.</strong> Si padeces enfermedades crónicas, diabetes, hipertensión o alergias graves, debes consultar con tu médico o nutricionista antes de realizar cambios drásticos en tu dieta.
-        </p>
-      </article>
-
-      <article class="legal-article">
-        <h3>5. Propiedad Intelectual</h3>
-        <p>
-          Todos los contenidos, menús, algoritmos de cálculo, marcas, imágenes y textos de MiPlanFit son propiedad exclusiva de la plataforma y están protegidos por las leyes de propiedad intelectual e industrial aplicables en España y la UE.
-        </p>
-      </article>
-    </section>
-
-    <!-- SECCIÓN 2: POLÍTICA DE PRIVACIDAD (RGPD / GDPR) -->
-    <section id="sec-privacidad" style="display:none;">
-      <div class="legal-section-title">
-        <span>🔒</span> Política de Privacidad y Protección de Datos (RGPD)
-      </div>
-      <div class="legal-subtitle">
-        Conforme al Reglamento General de Protección de Datos (UE 2016/679) y la LOPDGDD de España
-      </div>
-
-      <div class="legal-highlight-box">
-        🛡️ <strong>Tu Privacidad es Sagrada:</strong> Solo recopilamos los datos estrictamente necesarios (nombre, correo electrónico y datos nutricionales del cuestionario) para generar tu plan personalizado. Nunca vendemos tus datos a terceros.
-      </div>
-
-      <article class="legal-article">
-        <h3>1. Responsable del Tratamiento de los Datos</h3>
-        <p>
-          El responsable del tratamiento de tus datos personales recopilados a través de MiPlanFit es la administración de la plataforma. Para cualquier duda o ejercicio de tus derechos de privacidad, puedes contactarnos en nuestro canal oficial de soporte.
-        </p>
-      </article>
-
-      <article class="legal-article">
-        <h3>2. Datos que Recopilamos y Finalidad</h3>
-        <p>Recopilamos y tratamos las siguientes categorías de datos:</p>
-        <ul>
-          <li><strong>Datos de Identificación y Contacto:</strong> Nombre y correo electrónico (obtenidos mediante Google OAuth o registro voluntario).</li>
-          <li><strong>Datos Nutricionales y de Hábitos:</strong> Edad, peso, altura, objetivo de peso, alimentos excluidos y preferencia alimentaria (proporcionados en el cuestionario inicial de 2 minutos).</li>
-        </ul>
-        <p><strong>Finalidades del tratamiento:</strong></p>
-        <ul>
-          <li>Generar y personalizar tu plan de 30 días de alimentación y ejercicios.</li>
-          <li>Sincronizar tu progreso diário y rachas en la nube.</li>
-          <li>Enviarte tu plan, recordatorios del servicio y comunicaciones informativas relacionadas por correo electrónico.</li>
-        </ul>
-      </article>
-
-      <article class="legal-article">
-        <h3>3. Base Jurídica del Tratamiento</h3>
-        <p>
-          La base legal para el tratamiento de tus datos es la <strong>ejecución del contrato</strong> para la prestación del servicio y tu <strong>consentimiento explícito e informado</strong> otorgado al registrarte e iniciar sesión en la plataforma.
-        </p>
-      </article>
-
-      <article class="legal-article">
-        <h3>4. Almacenamiento y Seguridad de los Datos</h3>
-        <p>
-          Tus datos se almacenan en infraestructura en la nube cifrada y protegida a través de Supabase y la red global de Cloudflare. Aplicamos medidas técnicas de cifrado SSL/TLS para evitar el acceso no autorizado o la pérdida de información.
-        </p>
-      </article>
-
-      <article class="legal-article">
-        <h3>5. Tus Derechos de Privacidad (Derechos ARCO / RGPD)</h3>
-        <p>Tienes derecho a ejercer en cualquier momento tus derechos garantizados por la legislación de la UE:</p>
-        <ul>
-          <li><strong>Acceso:</strong> Saber qué datos tuyos tenemos almacenados.</li>
-          <li><strong>Rectificación:</strong> Modificar tu peso o datos directamente desde el panel o soporte.</li>
-          <li><strong>Supresión (Derecho al Olvido):</strong> Solicitar el borrado completo de tu cuenta y datos de nuestros servidores.</li>
-          <li><strong>Oposición y Cancelación:</strong> Darse de baja de las comunicaciones por e-mail en un solo clic.</li>
-        </ul>
-      </article>
-    </section>
-
-    <!-- Footer dentro del card -->
-    <div class="legal-footer-links">
-      <div>© 2026 MiPlanFit &middot; Todos los derechos reservados</div>
-      <div style="margin-top:6px; font-size:0.78rem; color:var(--text-muted);">
-        Plataforma adaptativa de nutrición mediterránea y hábitos saludables.
-      </div>
-    </div>
-
+  <div class="toc-box">
+    <p>Índice del documento:</p>
+    <ul>
+      <li><a href="#terminos">Parte 1: Términos y Condiciones de Uso y Servicio</a></li>
+      <li><a href="#privacidad">Parte 2: Política de Privacidad y Protección de Datos (RGPD)</a></li>
+    </ul>
   </div>
-</main>
 
-<script>
-  function switchLegalTab(tab) {
-    const btnTerminos = document.getElementById('tab-btn-terminos');
-    const btnPrivacidad = document.getElementById('tab-btn-privacidad');
-    const secTerminos = document.getElementById('sec-terminos');
-    const secPrivacidad = document.getElementById('sec-privacidad');
+  <!-- PARTE 1: TÉRMINOS Y CONDICIONES -->
+  <section id="terminos">
+    <h2>Parte 1: Términos y Condiciones de Uso</h2>
 
-    if (tab === 'terminos') {
-      btnTerminos.classList.add('active');
-      btnPrivacidad.classList.remove('active');
-      secTerminos.style.display = 'block';
-      secPrivacidad.style.display = 'none';
-    } else {
-      btnPrivacidad.classList.add('active');
-      btnTerminos.classList.remove('active');
-      secPrivacidad.style.display = 'block';
-      secTerminos.style.display = 'none';
-    }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
+    <h3>1. Información General</h3>
+    <p>
+      El presente documento regula el uso de la plataforma <strong>MiPlanFit</strong>. Al registrarte, crear un plan o utilizar cualquier función del sitio web, aceptas quedar vinculado por estos términos.
+    </p>
 
-  // Activar pestaña según hash en URL si existe (#privacidad)
-  if (window.location.hash === '#privacidad') {
-    switchLegalTab('privacidad');
-  }
-</script>
+    <h3>2. Descripción del Servicio</h3>
+    <p>
+      MiPlanFit proporciona sugerencias nutricionales personalizadas de 30 días basadas en principios de la Dieta Mediterránea, cálculo de gasto energético diário (TMB/TDEE) y rutinas de ejercicio adaptadas para el hogar o gimnasio.
+    </p>
+
+    <h3>3. Registro y Cuentas</h3>
+    <p>
+      Para guardar su progreso y acceder a las funciones del servicio, el usuario inicia sesión mediante autenticación segura con Google OAuth. El usuario es responsable de mantener la seguridad de sus credenciales de acceso.
+    </p>
+
+    <h3>4. Precios, Pago Único y Devoluciones</h3>
+    <ul>
+      <li><strong>Acceso Completo:</strong> El desbloqueo del plan de 30 días tiene un costo único de <strong>14,90€ (pago único)</strong>. No existen suscripciones mensuales recurrentes ni cargos automáticos posteriores.</li>
+      <li><strong>Procesamiento de Pago:</strong> Los pagos son procesados de forma segura mediante pasarelas con cifrado SSL cumplimiento normativa PCI-DSS.</li>
+      <li><strong>Garantía de 7 Días:</strong> Si el usuario no está satisfecho con su plan dentro de los primeros 7 días posteriores a la compra, puede solicitar el reembolso total contactando a soporte.</li>
+    </ul>
+
+    <div class="notice-box">
+      <strong>Aviso de Salud Importante:</strong> MiPlanFit es una guía nutricional y de hábitos para adultos sanos. No constituye asesoramiento médico, diagnóstico ni tratamiento clínico. Si tienes condiciones médicas previas, embarazo o alergias alimentarias, consulta a tu médico antes de iniciar cambios significativos en tu dieta.
+    </div>
+
+    <h3>5. Propiedad Intelectual</h3>
+    <p>
+      Todos los textos, recetas, diseños, código fuente y contenidos de MiPlanFit pertenecen exclusivamente a la plataforma y están protegidos por las leyes de propiedad intelectual en España y la Unión Europea.
+    </p>
+  </section>
+
+  <!-- PARTE 2: POLÍTICA DE PRIVACIDAD -->
+  <section id="privacidad">
+    <h2>Parte 2: Política de Privacidad (RGPD)</h2>
+
+    <p>
+      De conformidad con el Reglamento General de Protección de Datos (UE 2016/679) y la Ley Orgánica 3/2018 (LOPDGDD) de España, informamos sobre el tratamiento de datos personales en MiPlanFit.
+    </p>
+
+    <h3>1. Datos Recopilados</h3>
+    <p>Recopilamos únicamente los datos necesarios para prestar el servicio:</p>
+    <ul>
+      <li><strong>Datos de Cuenta:</strong> Nombre de usuario y correo electrónico facilitados a través del registro con Google OAuth.</li>
+      <li><strong>Datos Nutricionales:</strong> Respuestas al cuestionario inicial (edad, peso, altura, objetivo y preferencias alimentarias).</li>
+    </ul>
+
+    <h3>2. Finalidad del Tratamiento</h3>
+    <p>Los datos recopilados se utilizan exclusivamente para:</p>
+    <ul>
+      <li>Generar y adaptar el plan nutricional de 30 días del usuario.</li>
+      <li>Guardar y sincronizar el progreso diário y rachas en la nube.</li>
+      <li>Enviar el plan de alimentación, actualizaciones del servicio y comunicaciones relacionadas por correo electrónico.</li>
+    </ul>
+
+    <h3>3. Almacenamiento y Seguridad</h3>
+    <p>
+      Tus datos se almacenan en bases de datos cifradas en la nube a través de la infraestructura de Supabase y Cloudflare con protocolos de seguridad HTTPS/SSL. No vendemos ni cedemos tus datos personales a empresas de terceros.
+    </p>
+
+    <h3>4. Derechos del Usuario</h3>
+    <p>
+      El usuario puede ejercer en cualquier momento sus derechos de acceso, rectificación, cancelación, supresión (derecho al olvido) y oposición solicitándolo por correo electrónico a soporte. Asimismo, puede darse de baja de los correos informativos en cualquier momento mediante el enlace incluido en cada mensaje.
+    </p>
+  </section>
+
+  <footer>
+    <p>© 2026 MiPlanFit &middot; Todos los derechos reservados</p>
+  </footer>
+</div>
+
 </body>
 </html>
