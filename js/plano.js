@@ -109,6 +109,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const estadoNuvem = {
       diasCompletados: planNuvem.dias_completados || [],
       streakActual   : planNuvem.streak_actual    || 0,
+      rachaAcumulada : planNuvem.racha_acumulada   || 0,
       maxStreak      : planNuvem.max_streak       || 0,
       logros         : planNuvem.logros           || [],
       fechaInicio    : planNuvem.fecha_inicio
@@ -1591,7 +1592,10 @@ async function confirmarNuevoCiclo() {
       try {
         await client.from('planos').update({
           dias_completados: [],
-          updated_at: new Date().toISOString()
+          streak_actual   : estadoStreak.rachaAcumulada,
+          racha_acumulada : estadoStreak.rachaAcumulada,
+          max_streak      : estadoStreak.maxStreak,
+          updated_at      : new Date().toISOString()
         }).eq('user_id', usuario.id);
       } catch(e) {
         console.warn('Advertencia al actualizar dias_completados en Supabase:', e);

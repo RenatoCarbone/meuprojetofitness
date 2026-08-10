@@ -178,11 +178,15 @@ async function salvarProgressoNaNuvem(userId, progresso) {
   const { error } = await client.from('planos').update({
     dias_completados: progresso.diasCompletados || [],
     streak_actual   : progresso.streakActual    || 0,
+    racha_acumulada : progresso.rachaAcumulada  || 0,
     max_streak      : progresso.maxStreak       || 0,
     logros          : progresso.logros          || [],
     updated_at      : new Date().toISOString()
   }).eq('user_id', userId);
 
-  if (error) { console.error('Erro ao salvar progresso:', error.message); return false; }
+  if (error) {
+    console.error('Erro ao salvar progresso:', error.message);
+    return false;
+  }
   return true;
 }
