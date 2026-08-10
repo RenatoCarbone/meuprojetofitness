@@ -1,9 +1,15 @@
 // ============================================================
-// MIPLANFIT — CENTRAL DE INTELIGÊNCIA DE NEGÓCIOS (ADMIN BI 3.0)
+// MIPLANFIT — CENTRAL DE INTELIGÊNCIA E PERSONA BI 4.0
 // ============================================================
 
 let todosOsUsuariosAdmin = [];
 let usuarioSelecionadoDrawer = null;
+
+// Instâncias dos gráficos Chart.js
+let chartGenderInstance = null;
+let chartAgeInstance = null;
+let chartGoalInstance = null;
+let chartDietInstance = null;
 
 document.addEventListener('DOMContentLoaded', async function() {
   await verificarAccesoAdmin();
@@ -16,7 +22,6 @@ async function verificarAccesoAdmin() {
   const lockScreen = document.getElementById('admin-lock-screen');
   const lockError = document.getElementById('lock-error-msg');
 
-  // 1. Verificar se já se autenticou com a Chave Master nesta sessão
   if (sessionStorage.getItem('miplanfit_admin_logged') === 'true') {
     if (lockScreen) lockScreen.style.display = 'none';
     const emailSpan = document.getElementById('admin-user-email');
@@ -25,7 +30,6 @@ async function verificarAccesoAdmin() {
     return;
   }
 
-  // 2. Verificar sessão do Supabase
   const client = getSupabase();
   if (!client) {
     if (lockScreen) lockScreen.style.display = 'flex';
@@ -34,14 +38,11 @@ async function verificarAccesoAdmin() {
 
   try {
     const { data: { session } } = await client.auth.getSession();
-
     if (session && session.user) {
       const userEmail = (session.user.email || '').toLowerCase();
-      
       if (lockScreen) lockScreen.style.display = 'none';
       const emailSpan = document.getElementById('admin-user-email');
       if (emailSpan) emailSpan.innerText = userEmail;
-
       await cargarDatosAdmin();
       return;
     } else {
@@ -52,7 +53,6 @@ async function verificarAccesoAdmin() {
   }
 }
 
-// Login direto com Chave Master
 function loginAdminConPin() {
   const inputPin = (document.getElementById('admin-pin-input')?.value || '').trim();
   const lockError = document.getElementById('lock-error-msg');
@@ -72,7 +72,6 @@ function loginAdminConPin() {
   }
 }
 
-// Login com Google para o Admin
 async function loginAdminConGoogle() {
   const client = getSupabase();
   if (!client) return;
@@ -83,7 +82,6 @@ async function loginAdminConGoogle() {
   });
 }
 
-// Logout do Admin
 async function logoutAdmin() {
   sessionStorage.removeItem('miplanfit_admin_logged');
   const client = getSupabase();
@@ -101,14 +99,13 @@ async function cargarDatosAdmin() {
   if (tableBody) {
     tableBody.innerHTML = `
       <tr>
-        <td colspan="7" style="text-align:center; padding:40px; color:var(--text-muted);">
-          ⏳ Carregando métricas e inteligência em tempo real...
+        <td colspan="8" style="text-align:center; padding:40px; color:var(--text-muted);">
+          ⏳ Carregando cockpit de inteligência do Supabase...
         </td>
       </tr>`;
   }
 
   try {
-    // 1. Consultar todos os planos/usuários cadastrados
     const { data: planosData, error: planosErr } = await client
       .from('planos')
       .select('*')
@@ -117,14 +114,14 @@ async function cargarDatosAdmin() {
     if (planosErr) {
       console.error('Erro ao consultar planos:', planosErr.message);
       if (tableBody) {
-        tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#ef4444;">⚠️ Erro: ${planosErr.message}</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:#ef4444;">⚠️ Erro: ${planosErr.message}</td></tr>`;
       }
       return;
     }
 
     todosOsUsuariosAdmin = planosData || [];
 
-    // 2. Consultar eventos de analytics (Visitas e Quiz Starts)
+    // Consultar eventos de analytics
     let visitasContador = parseInt(localStorage.getItem('miplanfit_stat_visita') || '120');
     let quizStartsContador = parseInt(localStorage.getItem('miplanfit_stat_quiz_start') || '45');
 
@@ -138,11 +135,12 @@ async function cargarDatosAdmin() {
       }
     } catch(e) {}
 
-    // Assegurar que visitas >= quizStarts >= leads
     if (visitasContador < todosOsUsuariosAdmin.length) visitasContador = todosOsUsuariosAdmin.length + 15;
     if (quizStartsContador < todosOsUsuariosAdmin.length) quizStartsContador = todosOsUsuariosAdmin.length + 5;
 
     renderizarMeticasKPI(todosOsUsuariosAdmin);
+    renderizarGraficosDemograficos(todosOsUsuariosAdmin);
+    renderizarResumoPersona(todosOsUsuariosAdmin);
     renderizarFunilConversao(visitasContador, quizStartsContador, todosOsUsuariosAdmin);
     renderizarLeadsDia3(todosOsUsuariosAdmin);
     renderizarTablaAdmin(todosOsUsuariosAdmin);
@@ -152,22 +150,18 @@ async function cargarDatosAdmin() {
   }
 }
 
-// ─── 3. Renderizar Métricas (Top KPI Cards) ───
+// ─── 3. Renderizar Métricas KPI ───
 function renderizarMeticasKPI(usuarios) {
   const totalUsers = usuarios.length;
-
-  // Cálculo de criados hoje
   const hoyStr = new Date().toISOString().split('T')[0];
   const creadosHoy = usuarios.filter(u => {
     const dateStr = u.updated_at || u.created_at || '';
     return dateStr.startsWith(hoyStr);
   }).length;
 
-  // Cálculo de usuários Premium
   const premiumUsers = usuarios.filter(u => u.is_premium === true).length;
   const tasaConversion = totalUsers > 0 ? ((premiumUsers / totalUsers) * 100).toFixed(1) : '0.0';
 
-  // Cálculo de Kg Perdidos Coletivos
   let totalKgLost = 0;
   usuarios.forEach(u => {
     const perfil = u.perfil || {};
@@ -181,21 +175,193 @@ function renderizarMeticasKPI(usuarios) {
     }
   });
 
-  // Inserção no DOM
-  const elTotal = document.getElementById('kpi-total-users');
-  const elToday = document.getElementById('kpi-plans-today');
-  const elPremium = document.getElementById('kpi-premium-users');
-  const elConversion = document.getElementById('kpi-conversion-rate');
-  const elKgLost = document.getElementById('kpi-total-kg-lost');
-
-  if (elTotal) elTotal.innerText = totalUsers;
-  if (elToday) elToday.innerText = creadosHoy;
-  if (elPremium) elPremium.innerText = premiumUsers;
-  if (elConversion) elConversion.innerText = `${tasaConversion}% Conversão Global`;
-  if (elKgLost) elKgLost.innerText = `💪 ${totalKgLost.toFixed(1)} kg`;
+  document.getElementById('kpi-total-users').innerText = totalUsers;
+  document.getElementById('kpi-plans-today').innerText = creadosHoy;
+  document.getElementById('kpi-premium-users').innerText = premiumUsers;
+  document.getElementById('kpi-conversion-rate').innerText = `${tasaConversion}% Conversão Global`;
+  document.getElementById('kpi-total-kg-lost').innerText = `💪 ${totalKgLost.toFixed(1)} kg`;
 }
 
-// ─── 4. Renderizar Funil de Conversão (Pipeline BI) ───
+// ─── 4. Renderizar Gráficos de Demografia e Persona (Chart.js Style Google Cloud / Vertex) ───
+function renderizarGraficosDemograficos(usuarios) {
+  let mujeres = 0, hombres = 0;
+  let edadGroup = { '<25': 0, '25-34': 0, '35-44': 0, '45-54': 0, '55+': 0 };
+  let objetivos = { perder: 0, mantener: 0, musculo: 0 };
+  let dietas = { omnivoro: 0, vegetariano: 0, vegano: 0 };
+  let treino = { casa: 0, gym: 0, no: 0 };
+
+  usuarios.forEach(u => {
+    const perfil = u.perfil || {};
+    
+    // Gênero
+    const sexo = (perfil.sexo || 'mujer').toLowerCase();
+    if (sexo === 'mujer' || sexo === 'feminino' || sexo === 'mujer') mujeres++;
+    else hombres++;
+
+    // Idade
+    const edad = parseInt(perfil.edad || 30);
+    if (edad < 25) edadGroup['<25']++;
+    else if (edad <= 34) edadGroup['25-34']++;
+    else if (edad <= 44) edadGroup['35-44']++;
+    else if (edad <= 54) edadGroup['45-54']++;
+    else edadGroup['55+']++;
+
+    // Objetivo
+    const obj = (perfil.objetivo || 'perder_peso').toLowerCase();
+    if (obj.includes('perder')) objetivos.perder++;
+    else if (obj.includes('mantener')) objetivos.mantener++;
+    else objetivos.musculo++;
+
+    // Dieta
+    const pref = (perfil.preferencia || 'omnivoro').toLowerCase();
+    if (pref.includes('vegano')) dietas.vegano++;
+    else if (pref.includes('vegetariano')) dietas.vegetariano++;
+    else dietas.omnivoro++;
+
+    // Treino
+    const ej = (perfil.ejercicios || 'casa').toLowerCase();
+    if (ej.includes('casa')) treino.casa++;
+    else if (ej.includes('gym') || ej.includes('gimnasio')) treino.gym++;
+    else treino.no++;
+  });
+
+  // 1. Gráfico de Gênero (Donut Chart)
+  const ctxGender = document.getElementById('chart-gender')?.getContext('2d');
+  if (ctxGender) {
+    if (chartGenderInstance) chartGenderInstance.destroy();
+    chartGenderInstance = new Chart(ctxGender, {
+      type: 'doughnut',
+      data: {
+        labels: ['Mulheres', 'Homens'],
+        datasets: [{
+          data: [mujeres || 1, hombres],
+          backgroundColor: ['#ec4899', '#06b6d4'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: '#9ca3af', font: { size: 11 } } } }
+      }
+    });
+  }
+
+  // 2. Gráfico de Idade (Bar Chart)
+  const ctxAge = document.getElementById('chart-age')?.getContext('2d');
+  if (ctxAge) {
+    if (chartAgeInstance) chartAgeInstance.destroy();
+    chartAgeInstance = new Chart(ctxAge, {
+      type: 'bar',
+      data: {
+        labels: ['< 25', '25-34', '35-44', '45-54', '55+'],
+        datasets: [{
+          label: 'Usuários',
+          data: [edadGroup['<25'], edadGroup['25-34'] || 1, edadGroup['35-44'], edadGroup['45-54'], edadGroup['55+']],
+          backgroundColor: '#8b5cf6',
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#9ca3af' }, grid: { display: false } },
+          y: { ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+        }
+      }
+    });
+  }
+
+  // 3. Gráfico de Objetivo (Donut Chart)
+  const ctxGoal = document.getElementById('chart-goal')?.getContext('2d');
+  if (ctxGoal) {
+    if (chartGoalInstance) chartGoalInstance.destroy();
+    chartGoalInstance = new Chart(ctxGoal, {
+      type: 'doughnut',
+      data: {
+        labels: ['Perder Peso', 'Manter Peso', 'Ganhar Massa'],
+        datasets: [{
+          data: [objetivos.perder || 1, objetivos.mantener, objetivos.musculo],
+          backgroundColor: ['#f59e0b', '#10b981', '#3b82f6'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: '#9ca3af', font: { size: 11 } } } }
+      }
+    });
+  }
+
+  // 4. Gráfico de Dieta (Bar Chart)
+  const ctxDiet = document.getElementById('chart-diet')?.getContext('2d');
+  if (ctxDiet) {
+    if (chartDietInstance) chartDietInstance.destroy();
+    chartDietInstance = new Chart(ctxDiet, {
+      type: 'bar',
+      data: {
+        labels: ['Onívoro', 'Vegetariano', 'Vegano'],
+        datasets: [{
+          label: 'Dieta',
+          data: [dietas.omnivoro || 1, dietas.vegetariano, dietas.vegano],
+          backgroundColor: '#10b981',
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#9ca3af' }, grid: { display: false } },
+          y: { ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+        }
+      }
+    });
+  }
+}
+
+// ─── 5. Resumo da Persona Automático para Anúncios do Facebook/Meta ───
+function renderizarResumoPersona(usuarios) {
+  const el = document.getElementById('persona-summary-text');
+  if (!el) return;
+
+  if (!usuarios || usuarios.length === 0) {
+    el.innerHTML = 'Ainda não há cadastros suficientes para traçar a persona exata. Assim que os primeiros leads entrarem, a IA gerará os dados de tráfego.';
+    return;
+  }
+
+  let mulheres = 0;
+  let somaIdades = 0;
+  let perderPesoCount = 0;
+  let treinoCasaCount = 0;
+
+  usuarios.forEach(u => {
+    const perfil = u.perfil || {};
+    if ((perfil.sexo || 'mujer').toLowerCase() === 'mujer') mulheres++;
+    somaIdades += parseInt(perfil.edad || 30);
+    if ((perfil.objetivo || 'perder').toLowerCase().includes('perder')) perderPesoCount++;
+    if ((perfil.ejercicios || 'casa').toLowerCase().includes('casa')) treinoCasaCount++;
+  });
+
+  const pctMulheres = Math.round((mulheres / usuarios.length) * 100);
+  const mediaIdade = Math.round(somaIdades / usuarios.length);
+  const pctPerderPeso = Math.round((perderPesoCount / usuarios.length) * 100);
+  const pctTreinoCasa = Math.round((treinoCasaCount / usuarios.length) * 100);
+
+  const generoPredominante = pctMulheres >= 60 ? 'Mulheres' : (pctMulheres <= 40 ? 'Homens' : 'Público Misto');
+
+  el.innerHTML = `
+    🎯 <strong>Perfil do Seu Comprador Ideal:</strong> 
+    <span style="color:white; font-weight:700;">${generoPredominante} (${pctMulheres}% do público)</span>, com idade média de 
+    <span style="color:white; font-weight:700;">${mediaIdade} anos</span>.<br/>
+    📉 <strong>Principal Desejo:</strong> <span style="color:var(--amber); font-weight:700;">${pctPerderPeso}% buscam Perda de Peso rápida</span>.<br/>
+    🏋️ <strong>Hábito de Treino:</strong> <span style="color:var(--cyan); font-weight:700;">${pctTreinoCasa}% preferem Treinos Rápidos em Casa</span>.<br/><br/>
+    💡 <strong>Recomendação de Tráfego Pago (Meta Ads / Facebook):</strong> Configurar campanha direcionada para 
+    <strong style="color:var(--green);">${generoPredominante} entre ${Math.max(18, mediaIdade - 6)} e ${mediaIdade + 8} anos</strong> em Espanha/Europa interessadas em <em>Emagrecimento, Dietas Fáceis e Exercícios em Casa</em>.
+  `;
+}
+
+// ─── 6. Funil de Conversão ───
 function renderizarFunilConversao(visitas, quizStarts, usuarios) {
   const totalLeads = usuarios.length;
   const ventas = usuarios.filter(u => u.is_premium === true).length;
@@ -204,26 +370,17 @@ function renderizarFunilConversao(visitas, quizStarts, usuarios) {
   const pctLeads = quizStarts > 0 ? ((totalLeads / quizStarts) * 100).toFixed(1) : '0.0';
   const pctVentas = totalLeads > 0 ? ((ventas / totalLeads) * 100).toFixed(1) : '0.0';
 
-  const elVisitas = document.getElementById('fnl-visitas');
-  const elQuiz = document.getElementById('fnl-quiz-starts');
-  const elPctQuiz = document.getElementById('fnl-pct-quiz');
-  const elLeads = document.getElementById('fnl-leads');
-  const elPctLeads = document.getElementById('fnl-pct-leads');
-  const elVentas = document.getElementById('fnl-ventas');
-  const elPctVentas = document.getElementById('fnl-pct-ventas');
-
-  if (elVisitas) elVisitas.innerText = visitas;
-  if (elQuiz) elQuiz.innerText = quizStarts;
-  if (elPctQuiz) elPctQuiz.innerText = `${pctQuiz}% do tráfego`;
-  if (elLeads) elLeads.innerText = totalLeads;
-  if (elPctLeads) elPctLeads.innerText = `${pctLeads}% do quiz`;
-  if (elVentas) elVentas.innerText = ventas;
-  if (elPctVentas) elPctVentas.innerText = `${pctVentas}% Conversão`;
+  document.getElementById('fnl-visitas').innerText = visitas;
+  document.getElementById('fnl-quiz-starts').innerText = quizStarts;
+  document.getElementById('fnl-pct-quiz').innerText = `${pctQuiz}% do tráfego`;
+  document.getElementById('fnl-leads').innerText = totalLeads;
+  document.getElementById('fnl-pct-leads').innerText = `${pctLeads}% do quiz`;
+  document.getElementById('fnl-ventas').innerText = ventas;
+  document.getElementById('fnl-pct-ventas').innerText = `${pctVentas}% Conversão`;
 
   calcularROINegocio();
 }
 
-// Calculadora de ROI de Anúncios e CPL
 function calcularROINegocio() {
   const adSpend = parseFloat(document.getElementById('roi-ad-spend')?.value || 0);
   const totalLeads = todosOsUsuariosAdmin.length;
@@ -243,12 +400,11 @@ function calcularROINegocio() {
   }
 }
 
-// ─── 5. Renderizar Oportunidades: Leads no Dia 3 ───
+// ─── 7. Renderizar Leads no Dia 3 ───
 function renderizarLeadsDia3(usuarios) {
   const container = document.getElementById('hot-leads-container');
   if (!container) return;
 
-  // Filtrar usuários que têm 3 dias completados ou racha 3 que não são premium
   const dia3Leads = usuarios.filter(u => {
     const dias = (u.dias_completados || []).length;
     const streak = u.streak_actual || 0;
@@ -257,8 +413,8 @@ function renderizarLeadsDia3(usuarios) {
 
   if (dia3Leads.length === 0) {
     container.innerHTML = `
-      <div style="grid-column:1/-1; padding:20px; text-align:center; color:var(--text-muted); font-size:0.88rem; background:rgba(255,255,255,0.02); border-radius:14px;">
-        ✨ Nenhum lead parado no Dia 3 hoje. Excelente retenção!
+      <div style="grid-column:1/-1; padding:18px; text-align:center; color:var(--text-muted); font-size:0.85rem; background:rgba(255,255,255,0.02); border-radius:12px;">
+        ✨ Nenhum lead estancado no Dia 3 hoje. Excelente retenção!
       </div>`;
     return;
   }
@@ -274,14 +430,14 @@ function renderizarLeadsDia3(usuarios) {
     html += `
       <div class="hot-lead-card">
         <div>
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <strong style="color:white; font-size:0.95rem;">${nombre}</strong>
-            <span class="badge badge-amber" style="font-size:0.65rem;">🔥 DIA 3</span>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <strong style="color:white; font-size:0.92rem;">${nombre}</strong>
+            <span style="font-size:0.65rem; background:rgba(245,158,11,0.2); color:var(--amber); padding:2px 8px; border-radius:10px; font-weight:800;">🔥 DIA 3</span>
           </div>
-          <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:12px;">${email}</div>
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:10px;">${email}</div>
         </div>
 
-        <a href="${waUrl}" target="_blank" class="btn btn-amber btn-sm" style="font-size:0.78rem; font-weight:700; width:100%; text-align:center; justify-content:center;">
+        <a href="${waUrl}" target="_blank" class="btn btn-amber btn-sm" style="font-size:0.75rem; font-weight:800; width:100%; text-align:center; justify-content:center;">
           💬 Mensagem de Venda no WhatsApp
         </a>
       </div>
@@ -291,7 +447,7 @@ function renderizarLeadsDia3(usuarios) {
   container.innerHTML = html;
 }
 
-// ─── 6. Renderizar Tabela Master de Usuários ───
+// ─── 8. Renderizar Tabela Master de Usuários ───
 function renderizarTablaAdmin(lista) {
   const tableBody = document.getElementById('admin-users-table-body');
   if (!tableBody) return;
@@ -299,7 +455,7 @@ function renderizarTablaAdmin(lista) {
   if (!lista || lista.length === 0) {
     tableBody.innerHTML = `
       <tr>
-        <td colspan="7" style="text-align:center; padding:40px; color:var(--text-muted);">
+        <td colspan="8" style="text-align:center; padding:40px; color:var(--text-muted);">
           📭 Nenhum usuário coincide com o filtro atual.
         </td>
       </tr>`;
@@ -314,10 +470,13 @@ function renderizarTablaAdmin(lista) {
     const email  = user.user_email || 'Google User';
     const inicial = nombre.charAt(0).toUpperCase();
 
-    // Formatar Data
     const dateRaw = user.updated_at || user.created_at || new Date().toISOString();
     const fechaObj = new Date(dateRaw);
     const fechaFmt = fechaObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+    // Gênero e Idade
+    const sexo = (perfil.sexo || 'Mujer').toUpperCase();
+    const edad = perfil.edad ? `${perfil.edad} anos` : 'N/I';
 
     // Objetivo
     const objetivoMap = {
@@ -326,10 +485,6 @@ function renderizarTablaAdmin(lista) {
       ganar_musculo: '💪 Ganhar Massa'
     };
     const objetivoStr = objetivoMap[perfil.objetivo] || perfil.objetivo || 'Personalizado';
-
-    // Dieta / Tipo
-    const preferencia = perfil.preferencia || 'omnivoro';
-    const prefIcon = preferencia === 'vegano' ? '🌱 Vegano' : (preferencia === 'vegetariano' ? '🥗 Vegetariano' : '🍗 Onívoro');
 
     // Racha / Progresso
     const streak = user.streak_actual || 0;
@@ -345,31 +500,31 @@ function renderizarTablaAdmin(lista) {
     // Indicações
     const numRef = user.referrals_count || 0;
     const refBadge = numRef >= 3
-      ? `<span class="badge badge-green" style="font-size:0.75rem;">🎁 ${numRef} (Ganhou Premium)</span>`
-      : `<span style="font-size:0.82rem; color:var(--text-secondary);">🎁 ${numRef} amiga${numRef === 1 ? '' : 's'}</span>`;
+      ? `<span style="font-size:0.75rem; background:rgba(16,185,129,0.15); color:var(--green); padding:3px 8px; border-radius:12px; font-weight:800;">🎁 ${numRef} (Ganhou Premium)</span>`
+      : `<span style="font-size:0.8rem; color:var(--text-muted);">🎁 ${numRef} indicadas</span>`;
 
     html += `
       <tr onclick="abrirDrawerCliente('${user.user_id}')">
         <td>
-          <div class="user-cell">
-            <div class="user-avatar-placeholder">${inicial}</div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg, var(--purple), #4c1d95); display:flex; align-items:center; justify-content:center; font-weight:800; color:white; font-size:0.9rem;">${inicial}</div>
             <div>
               <div style="font-weight:800; color:white;">${nombre}</div>
-              <div style="font-size:0.78rem; color:var(--text-muted);">${email}</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">${email}</div>
             </div>
           </div>
         </td>
-        <td><span style="font-size:0.8rem; color:var(--text-secondary);">${fechaFmt}</span></td>
-        <td><span style="font-size:0.82rem; font-weight:600;">${objetivoStr}</span></td>
-        <td><span style="font-size:0.8rem; color:var(--text-secondary);">${prefIcon}</span></td>
+        <td><span style="font-size:0.78rem; color:var(--text-muted);">${fechaFmt}</span></td>
+        <td><span style="font-size:0.78rem; font-weight:700; color:var(--cyan);">${sexo}</span> <span style="font-size:0.75rem; color:var(--text-muted);">(${edad})</span></td>
+        <td><span style="font-size:0.8rem; font-weight:600;">${objetivoStr}</span></td>
         <td>
-          <div style="font-weight:700; font-size:0.82rem;">🔥 ${streak} dias de racha</div>
-          <div style="font-size:0.74rem; color:var(--text-muted);">${diasCompletados}/30 dias (${pctProgreso}%)</div>
+          <div style="font-weight:700; font-size:0.8rem;">🔥 ${streak} dias</div>
+          <div style="font-size:0.72rem; color:var(--text-muted);">${diasCompletados}/30 dias (${pctProgreso}%)</div>
         </td>
         <td>${refBadge}</td>
         <td>${statusBadge}</td>
         <td>
-          <button onclick="event.stopPropagation(); abrirDrawerCliente('${user.user_id}')" class="btn btn-outline btn-sm" style="font-size:0.74rem; padding:4px 10px; border-color:rgba(124,58,237,0.4); color:var(--purple-light);">
+          <button onclick="event.stopPropagation(); abrirDrawerCliente('${user.user_id}')" class="btn btn-outline btn-sm" style="font-size:0.72rem; padding:4px 8px;">
             ⚙️ Gerenciar
           </button>
         </td>
@@ -380,7 +535,7 @@ function renderizarTablaAdmin(lista) {
   tableBody.innerHTML = html;
 }
 
-// ─── 7. Busca e Filtros em Tempo Real ───
+// ─── 9. Busca e Filtros ───
 function filtrarTablaAdmin() {
   const query = (document.getElementById('admin-search-input')?.value || '').toLowerCase().trim();
   const filtroEstado = document.getElementById('admin-filter-status')?.value || 'todos';
@@ -406,7 +561,7 @@ function filtrarTablaAdmin() {
   renderizarTablaAdmin(filtrados);
 }
 
-// ─── 8. Drawer de Gestão do Cliente (Painel Lateral) ───
+// ─── 10. Drawer Cliente ───
 function abrirDrawerCliente(userId) {
   const user = todosOsUsuariosAdmin.find(u => u.user_id === userId);
   if (!user) return;
@@ -425,14 +580,12 @@ function abrirDrawerCliente(userId) {
   document.getElementById('drw-input-objetivo-kg').value = perfil.objetivo_kg || 5;
   document.getElementById('drw-input-actividad').value = perfil.actividad || 'sedentario';
 
-  // Mostrar alimentos excluídos
   const excluidos = perfil.alimentosExcluidos || [];
   const elExcluidos = document.getElementById('drw-info-excluidos');
   if (elExcluidos) {
     elExcluidos.innerText = excluidos.length > 0 ? excluidos.join(', ') : 'Nenhum alimento excluído';
   }
 
-  // Atualizar botão Premium
   const btnPremium = document.getElementById('drw-btn-toggle-premium');
   if (btnPremium) {
     if (user.is_premium) {
@@ -454,7 +607,6 @@ function cerrarDrawerCliente() {
   usuarioSelecionadoDrawer = null;
 }
 
-// Salvar alterações do cliente no Supabase
 async function guardarCambiosCliente() {
   if (!usuarioSelecionadoDrawer) return;
 
@@ -490,18 +642,18 @@ async function guardarCambiosCliente() {
     return;
   }
 
-  // Atualizar memória local
   usuarioSelecionadoDrawer.user_name = nuevoNombre;
   usuarioSelecionadoDrawer.user_email = nuevoEmail;
   usuarioSelecionadoDrawer.perfil = perfilActualizado;
 
   renderizarMeticasKPI(todosOsUsuariosAdmin);
+  renderizarGraficosDemograficos(todosOsUsuariosAdmin);
+  renderizarResumoPersona(todosOsUsuariosAdmin);
   filtrarTablaAdmin();
   cerrarDrawerCliente();
   alert('✅ Dados do cliente atualizados com sucesso no Supabase!');
 }
 
-// Alternar Premium a partir do Drawer
 async function togglePremiumDrawer() {
   if (!usuarioSelecionadoDrawer) return;
   const nuevoEstado = !usuarioSelecionadoDrawer.is_premium;
@@ -526,7 +678,6 @@ async function togglePremiumDrawer() {
   alert(nuevoEstado ? '✨ Acesso Premium concedido ao cliente!' : '🔒 Acesso Premium revogado.');
 }
 
-// Resetar Plano do cliente para o Dia 1
 async function resetearPlanCliente() {
   if (!usuarioSelecionadoDrawer) return;
 
@@ -558,7 +709,7 @@ async function resetearPlanCliente() {
   alert('🔄 Progresso do plano resetado para o Dia 1 com sucesso!');
 }
 
-// ─── 9. Exportar Usuários para CSV ───
+// ─── 11. Exportar CSV ───
 function exportarUsuariosCSV() {
   if (!todosOsUsuariosAdmin || todosOsUsuariosAdmin.length === 0) {
     alert('⚠️ Não há dados para exportar.');
@@ -566,26 +717,27 @@ function exportarUsuariosCSV() {
   }
 
   let csvContent = 'data:text/csv;charset=utf-8,';
-  csvContent += 'Nome,Email,Objetivo,Preferencia,RachaAtual,DiasCompletados,EstadoPremium,DataRegistro\n';
+  csvContent += 'Nome,Email,Genero,Idade,Objetivo,Preferencia,Indicacoes,EstadoPremium,DataRegistro\n';
 
   todosOsUsuariosAdmin.forEach(u => {
     const perfil = u.perfil || {};
     const nombre = (u.user_name || perfil.nombre || 'Usuario').replace(/,/g, '');
     const email  = (u.user_email || 'Sem Email').replace(/,/g, '');
+    const sexo   = (perfil.sexo || 'Mujer').replace(/,/g, '');
+    const edad   = perfil.edad || 30;
     const objetivo = (perfil.objetivo || 'Personalizado').replace(/,/g, '');
     const preferencia = (perfil.preferencia || 'omnivoro').replace(/,/g, '');
-    const racha = u.streak_actual || 0;
-    const dias = (u.dias_completados || []).length;
+    const refCount = u.referrals_count || 0;
     const premium = u.is_premium ? 'PREMIUM' : 'GRATUITO';
     const fecha = u.updated_at || u.created_at || '';
 
-    csvContent += `${nombre},${email},${objetivo},${preferencia},${racha},${dias},${premium},${fecha}\n`;
+    csvContent += `${nombre},${email},${sexo},${edad},${objetivo},${preferencia},${refCount},${premium},${fecha}\n`;
   });
 
   const encodedUri = encodeURI(csvContent);
   const link = document.createElement('a');
   link.setAttribute('href', encodedUri);
-  link.setAttribute('download', `MiPlanFit_Usuarios_${new Date().toISOString().split('T')[0]}.csv`);
+  link.setAttribute('download', `MiPlanFit_Persona_BI_${new Date().toISOString().split('T')[0]}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
