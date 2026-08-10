@@ -157,35 +157,17 @@ async function loginComEmail(emailDigitado) {
     userId = `e0000000-0000-4000-8000-${hashStr.slice(-12)}`;
   }
 
-  if (client && userId) {
-    const payload = {
-      user_id: userId,
-      user_email: cleanEmail,
-      user_name: perfil?.nombre || cleanEmail.split('@')[0],
-      referral_code: typeof generarCodigoReferido === 'function' ? generarCodigoReferido(userId, cleanEmail.split('@')[0]) : 'ref',
-      perfil: perfil || { nombre: cleanEmail.split('@')[0] },
-      plan30: localPlan30 || [],
-      plan_id: localPlanId,
-      imc,
-      tmb,
-      tdee,
-      updated_at: new Date().toISOString()
-    };
-
-    try {
-      let { error } = await client.from('planos').upsert(payload, { onConflict: 'user_id' });
-      if (error) {
-        const { data: existingRow } = await client.from('planos').select('user_id').eq('user_email', cleanEmail).maybeSingle();
-        if (existingRow) {
-          await client.from('planos').update(payload).eq('user_email', cleanEmail);
-        } else {
-          await client.from('planos').insert(payload);
-        }
-      }
-    } catch(e) {
-      console.warn('Erro ao salvar plano por e-mail:', e);
-    }
-  }
+  // Usar a função oficial salvarPlanoNaNuvem para garantir o processamento de indicações de amigos
+  await salvarPlanoNaNuvem(userId, {
+    user_email: cleanEmail,
+    user_name: perfil?.nombre || cleanEmail.split('@')[0],
+    perfil: perfil || { nombre: cleanEmail.split('@')[0] },
+    plan30: localPlan30 || [],
+    planId: localPlanId,
+    imc,
+    tmb,
+    tdee
+  });
 
   localStorage.setItem('miplanfit_active_email', cleanEmail);
   localStorage.setItem('miplanfit_active_userid', userId);
