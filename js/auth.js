@@ -79,13 +79,25 @@ async function loginComGoogle() {
   const client = getSupabase();
   if (!client) return false;
 
-  // O localStorage/sessionStorage do mesmo domínio permanece disponível após OAuth.
-  // Não enviar dados de saúde do usuário na URL de redirecionamento.
+  const localPerfil = localStorage.getItem('miplanfit_perfil') || sessionStorage.getItem('miplanfit_perfil_backup');
   const refCode = localStorage.getItem('miplanfit_ref_by') || sessionStorage.getItem('miplanfit_ref_by') || new URLSearchParams(window.location.search).get('ref');
+
   let redirectTarget = SITE_URL + '/plano.html';
+  const params = new URLSearchParams();
 
   if (refCode) {
-    redirectTarget += `?ref=${encodeURIComponent(refCode.trim().toLowerCase())}`;
+    params.set('ref', refCode.trim().toLowerCase());
+  }
+
+  if (localPerfil) {
+    try {
+      const b64 = btoa(unescape(encodeURIComponent(localPerfil)));
+      params.set('pdata', b64);
+    } catch(e) {}
+  }
+
+  if ([...params].length > 0) {
+    redirectTarget += `?${params.toString()}`;
   }
 
   const { error } = await client.auth.signInWithOAuth({
@@ -172,9 +184,23 @@ async function salvarPlanoNaNuvem(userId, dados = {}) {
   if (Array.isArray(dados.plan30)) payload.plan30 = dados.plan30;
   if (referredByCode && referredByCode !== myRefCode) payload.referred_by = referredByCode;
 
-  const { error } = await client
+  // 1. Tentar upsert primeiro
+  let { error } = await client
     .from('planos')
     .upsert(payload, { onConflict: 'user_id' });
+
+  // 2. Se o upsert falhar por ausência de índice único em user_id ou erro PostgREST, usar fallback atômico de update/insert
+  if (error) {
+    console.warn('Upsert direto falhou, usando fallback de update/insert:', error.message);
+    const { data: existingRow } = await client.from('planos').select('user_id').eq('user_id', userId).maybeSingle();
+    if (existingRow) {
+      const res = await client.from('planos').update(payload).eq('user_id', userId);
+      error = res.error;
+    } else {
+      const res = await client.from('planos').insert(payload);
+      error = res.error;
+    }
+  }
 
   if (error) {
     console.error('Erro ao salvar plano e perfil no Supabase:', error.message, error);
