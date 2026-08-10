@@ -1584,10 +1584,14 @@ async function confirmarNuevoCiclo() {
 
     const client = typeof getSupabase === 'function' ? getSupabase() : null;
     if (client) {
-      await client.from('planos').update({
-        dias_completados: [],
-        updated_at: new Date().toISOString()
-      }).eq('user_id', usuario.id).catch(() => {});
+      try {
+        await client.from('planos').update({
+          dias_completados: [],
+          updated_at: new Date().toISOString()
+        }).eq('user_id', usuario.id);
+      } catch(e) {
+        console.warn('Advertencia al actualizar dias_completados en Supabase:', e);
+      }
     }
   }
 
