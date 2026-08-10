@@ -192,11 +192,13 @@ function renderizarGraficosDemograficos(usuarios) {
 
   usuarios.forEach(u => {
     const perfil = u.perfil || {};
-    
+    const tienePerfil = perfil && typeof perfil === 'object' && Object.keys(perfil).length > 0 && perfil.peso;
+    if (!tienePerfil) return;
+
     // Gênero
     const sexo = (perfil.sexo || 'mujer').toLowerCase();
-    if (sexo === 'mujer' || sexo === 'feminino' || sexo === 'mujer') mujeres++;
-    else hombres++;
+    if (sexo === 'hombre' || sexo === 'masculino') hombres++;
+    else mujeres++;
 
     // Idade
     const edad = parseInt(perfil.edad || 30);

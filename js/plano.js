@@ -81,7 +81,10 @@ document.addEventListener('DOMContentLoaded', async function () {
     planNuvem = await carregarPlanoNaNuvem(usuario.id);
   }
 
-  if (planNuvem && planNuvem.perfil && planNuvem.plan30) {
+  const cloudHasValidPerfil = planNuvem && planNuvem.perfil && typeof planNuvem.perfil === 'object' && Object.keys(planNuvem.perfil).length > 0 && planNuvem.perfil.peso;
+  const cloudHasValidPlan = planNuvem && planNuvem.plan30 && Array.isArray(planNuvem.plan30) && planNuvem.plan30.length > 0;
+
+  if (cloudHasValidPerfil && cloudHasValidPlan) {
     perfil  = planNuvem.perfil;
     plan30  = planNuvem.plan30;
     planId  = planNuvem.plan_id || 'B';
