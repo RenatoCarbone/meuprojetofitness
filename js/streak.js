@@ -99,21 +99,23 @@ function marcarDiaCompletado(nombre, dia) {
   estado.diasCompletados.push(dia);
   estado.diasCompletados.sort((a, b) => a - b);
 
-  // Recalcular streak actual
-  estado.streakActual = calcularStreakActual(estado.diasCompletados);
-  estado.maxStreak = Math.max(estado.maxStreak, estado.streakActual);
+  // Recalcular streak actual acumulando rachas de ciclos anteriores
+  const rachaBase = estado.rachaAcumulada || 0;
+  const streakCiclo = calcularStreakActual(estado.diasCompletados);
+  estado.streakActual = rachaBase + streakCiclo;
+  estado.maxStreak = Math.max(estado.maxStreak || 0, estado.streakActual);
 
   // Verificar nuevos logros
-  const nuevosLogros = [];
+  const novosLogros = [];
   LOGROS_CONFIG.forEach(logro => {
     if (!estado.logros.includes(logro.id) && logro.condicion(estado)) {
       estado.logros.push(logro.id);
-      nuevosLogros.push(logro);
+      novosLogros.push(logro);
     }
   });
 
   guardarEstado(nombre, estado);
-  return { yaCompletado: false, estado, nuevosLogros };
+  return { yaCompletado: false, estado, novosLogros };
 }
 
 // ─── Calcular racha actual ───

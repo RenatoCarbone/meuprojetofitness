@@ -1557,11 +1557,15 @@ async function confirmarNuevoCiclo() {
   plan30 = nuevoPlan30;
   planId = nuevoPlanId;
 
-  // Limpiar solo los días completados del ciclo anterior, conservando streakActual y maxStreak
+  // Limpiar solo los días completados del ciclo anterior, acumulando la racha alcanzada
   const nombre = perfil.nombre || 'Usuario';
   const streakKey = `miplanfit_streak_${nombre.replace(/\s/g,'_')}`;
   let estadoStreak = JSON.parse(localStorage.getItem(streakKey) || '{}');
   
+  const rachaAnterior = estadoStreak.streakActual || 30;
+  estadoStreak.rachaAcumulada = Math.max(estadoStreak.rachaAcumulada || 0, rachaAnterior);
+  estadoStreak.streakActual = estadoStreak.rachaAcumulada;
+  estadoStreak.maxStreak = Math.max(estadoStreak.maxStreak || 0, estadoStreak.rachaAcumulada);
   estadoStreak.diasCompletados = []; // Reinicia las casillas del calendario para el nuevo mes
   estadoStreak.fechaInicio = new Date().toISOString();
   
