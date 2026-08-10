@@ -143,7 +143,6 @@ async function cargarDatosAdmin() {
     renderizarGraficosDemograficos(todosOsUsuariosAdmin);
     renderizarResumoPersona(todosOsUsuariosAdmin);
     renderizarFunilConversao(visitasContador, quizStartsContador, todosOsUsuariosAdmin);
-    renderizarLeadsDia3(todosOsUsuariosAdmin);
     renderizarTablaAdmin(todosOsUsuariosAdmin);
 
   } catch(e) {
