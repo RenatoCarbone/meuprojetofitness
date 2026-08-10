@@ -11,11 +11,19 @@ async function loginComGoogle() {
   const localPerfil = localStorage.getItem('miplanfit_perfil');
   if (localPerfil) {
     sessionStorage.setItem('miplanfit_perfil_backup', localPerfil);
+    localStorage.setItem('miplanfit_perfil_backup', localPerfil);
+  }
+
+  // Preservar código de referido en la URL de redirección de OAuth para que nunca se pierda
+  const refCode = localStorage.getItem('miplanfit_ref_by') || sessionStorage.getItem('miplanfit_ref_by') || new URLSearchParams(window.location.search).get('ref');
+  let redirectTarget = SITE_URL + '/plano.html';
+  if (refCode) {
+    redirectTarget += `?ref=${encodeURIComponent(refCode.trim().toLowerCase())}`;
   }
 
   const { error } = await client.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: SITE_URL + '/plano.html' }
+    options: { redirectTo: redirectTarget }
   });
 
   if (error) { console.error('Google login error:', error.message); return false; }
@@ -78,7 +86,8 @@ async function salvarPlanoNaNuvem(userId, dados) {
   const myRefCode = dados.referral_code || generarCodigoReferido(userId, nombre);
 
   // Código del patrocinador (quien lo invitó)
-  const referredByCode = dados.referred_by || localStorage.getItem('miplanfit_ref_by') || sessionStorage.getItem('miplanfit_ref_by') || null;
+  const urlRef = new URLSearchParams(window.location.search).get('ref');
+  const referredByCode = dados.referred_by || localStorage.getItem('miplanfit_ref_by') || sessionStorage.getItem('miplanfit_ref_by') || urlRef || null;
 
   // Garantizar que el perfil contenga pesoActual si tiene peso
   if (dados.perfil && dados.perfil.peso && !dados.perfil.pesoActual) {

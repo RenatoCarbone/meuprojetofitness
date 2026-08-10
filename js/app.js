@@ -210,13 +210,18 @@ function mostrarBannerPlanExistente(nombre) {
 document.getElementById('main-form').addEventListener('submit', async function(e) {
   e.preventDefault();
 
-  // Recopilar datos
+  // Recopilar datos con valores por defecto seguros para evitar NaN
+  const rawEdad = parseInt(document.getElementById('edad')?.value);
+  const rawAltura = parseInt(document.getElementById('altura')?.value);
+  const rawPeso = parseFloat(document.getElementById('peso')?.value);
+
   const perfil = {
-    nombre: document.getElementById('nombre').value.trim(),
-    sexo: document.querySelector('input[name="sexo"]:checked')?.value || 'hombre',
-    edad: parseInt(document.getElementById('edad').value),
-    altura: parseInt(document.getElementById('altura').value),
-    peso: parseFloat(document.getElementById('peso').value),
+    nombre: document.getElementById('nombre')?.value.trim() || 'Usuario',
+    sexo: document.querySelector('input[name="sexo"]:checked')?.value || 'mujer',
+    edad: (!isNaN(rawEdad) && rawEdad > 0) ? rawEdad : 30,
+    altura: (!isNaN(rawAltura) && rawAltura > 0) ? rawAltura : 168,
+    peso: (!isNaN(rawPeso) && rawPeso > 0) ? rawPeso : 68,
+    pesoActual: (!isNaN(rawPeso) && rawPeso > 0) ? rawPeso : 68,
     objetivo_kg: parseInt(document.querySelector('input[name="objetivo_kg"]:checked')?.value || 5),
     actividad: document.querySelector('input[name="actividad"]:checked')?.value || 'sedentario',
     ejercicios: document.querySelector('input[name="ejercicios"]:checked')?.value || 'no',
