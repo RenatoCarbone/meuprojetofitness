@@ -1509,9 +1509,16 @@ function abrirModalNuevoCiclo() {
   const inputPeso = document.getElementById('cycle-input-peso');
   const elStreak = document.getElementById('cycle-modal-streak');
 
+  const nombreUser = (perfil && perfil.nombre) ? perfil.nombre : 'Usuario';
+  let currentStreak = 30;
+
+  if (typeof leerEstado === 'function') {
+    const st = leerEstado(nombreUser);
+    if (st && st.streakActual) currentStreak = st.streakActual;
+  }
+
   if (elStreak) {
-    const streakVal = (typeof streakActualData !== 'undefined' && streakActualData && streakActualData.streakActual) ? streakActualData.streakActual : (streakData ? streakData.streakActual : 30);
-    elStreak.innerText = `🔥 ${streakVal} días en ofensiva`;
+    elStreak.innerText = `🔥 ${currentStreak} días en ofensiva`;
   }
 
   if (inputPeso && perfil) {
