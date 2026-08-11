@@ -16,6 +16,44 @@ function isPremium() {
   return localStorage.getItem('miplanfit_premium') === 'true';
 }
 
+// 🛠️ Lógica de Ouro para calcular TMB e TDEE se vierem zerados (Refinada por Manus AI)
+function calcularIMCFallback(perfil) {
+  const peso = Number(perfil.pesoActual || perfil.peso || 70);
+  const altura = Number(perfil.altura || 170);
+  if (!peso || !altura) return { valor: 22.0, estado: 'Normal' };
+  const val = Number((peso / Math.pow(altura / 100, 2)).toFixed(1));
+  let estado = 'Normal';
+  if (val < 18.5) estado = 'Bajo peso';
+  else if (val >= 25 && val < 30) estado = 'Sobrepeso';
+  else if (val >= 30) estado = 'Obesidad';
+  return { valor: val, estado };
+}
+
+function calcularTMBFallback(perfil) {
+  const peso = Number(perfil.pesoActual || perfil.peso || 70);
+  const altura = Number(perfil.altura || 170);
+  const edad = Number(perfil.edad || 30);
+  const sexo = perfil.sexo || 'mujer';
+  
+  // Fórmula de Mifflin-St Jeor
+  let tmb = (10 * peso) + (6.25 * altura) - (5 * edad);
+  tmb += (sexo === 'hombre' ? 5 : -161);
+  return Math.round(tmb);
+}
+
+function calcularTDEEFallback(tmb, perfil) {
+  // 🛡️ IMPORTANTE: Usando 'actividad' que é o campo real do seu perfil
+  const atividade = perfil.actividad || 'sedentario'; 
+  const fatores = { 
+      sedentario: 1.2, 
+      moderado: 1.375, 
+      activo: 1.55, 
+      muy_activo: 1.725 
+  };
+  const fator = fatores[atividade] || 1.375;
+  return Math.round(tmb * fator);
+}
+
 document.addEventListener('DOMContentLoaded', async function () {
 
   // ─── 1. Verificar sesión de OAuth de forma asíncrona garantizada ───
@@ -109,13 +147,20 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     localStorage.setItem('miplanfit_premium', 'false');
     if (usuario && usuario.id !== 'local_user') {
+      const imcLocal = JSON.parse(localStorage.getItem('miplanfit_imc') || 'null');
+      const imcCalculado = (imcLocal && imcLocal.valor) ? imcLocal : calcularIMCFallback(perfil);
+      const tmbLocal = parseInt(localStorage.getItem('miplanfit_tmb') || '0', 10);
+      const tmbCalculado = tmbLocal > 0 ? tmbLocal : calcularTMBFallback(perfil);
+      const tdeeLocal = parseInt(localStorage.getItem('miplanfit_tdee') || '0', 10);
+      const tdeeCalculado = tdeeLocal > 0 ? tdeeLocal : calcularTDEEFallback(tmbCalculado, perfil);
+
       const salvo = await salvarPlanoNaNuvem(usuario.id, {
         perfil,
         plan30,
         planId,
-        imc: JSON.parse(localStorage.getItem('miplanfit_imc') || '{}'),
-        tmb: parseInt(localStorage.getItem('miplanfit_tmb') || '0', 10),
-        tdee: parseInt(localStorage.getItem('miplanfit_tdee') || '0', 10)
+        imc: imcCalculado,
+        tmb: tmbCalculado,
+        tdee: tdeeCalculado
       });
       if (salvo) localStorage.removeItem('miplanfit_quiz_pending_sync');
     }
@@ -145,13 +190,20 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     if (usuario && usuario.id !== 'local_user') {
+      const imcLocal = JSON.parse(localStorage.getItem('miplanfit_imc') || 'null');
+      const imcCalculado = (imcLocal && imcLocal.valor) ? imcLocal : calcularIMCFallback(perfil);
+      const tmbLocal = parseInt(localStorage.getItem('miplanfit_tmb') || '0', 10);
+      const tmbCalculado = tmbLocal > 0 ? tmbLocal : calcularTMBFallback(perfil);
+      const tdeeLocal = parseInt(localStorage.getItem('miplanfit_tdee') || '0', 10);
+      const tdeeCalculado = tdeeLocal > 0 ? tdeeLocal : calcularTDEEFallback(tmbCalculado, perfil);
+
       const salvo = await salvarPlanoNaNuvem(usuario.id, {
         perfil,
         plan30,
         planId,
-        imc: JSON.parse(localStorage.getItem('miplanfit_imc') || '{}'),
-        tmb: parseInt(localStorage.getItem('miplanfit_tmb') || '0', 10),
-        tdee: parseInt(localStorage.getItem('miplanfit_tdee') || '0', 10)
+        imc: imcCalculado,
+        tmb: tmbCalculado,
+        tdee: tdeeCalculado
       });
       if (salvo) localStorage.removeItem('miplanfit_quiz_pending_sync');
     }
