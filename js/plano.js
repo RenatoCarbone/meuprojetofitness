@@ -164,23 +164,10 @@ document.addEventListener('DOMContentLoaded', async function () {
       });
       if (salvo) localStorage.removeItem('miplanfit_quiz_pending_sync');
     }
-  } else if (usuario && usuario.id !== 'local_user' && !cloudHasValidPerfil) {
-    // Usuario logueado en Google pero sin perfil en la nube ni local: crear perfil automático y salvar en Supabase
-    const nombreGoogle = usuario.user_metadata?.full_name || usuario.user_metadata?.name || 'Usuario';
-    perfil = { nombre: nombreGoogle, peso: 70, altura: 170, objetivo: 'perder_peso', nivel: 'moderado', ejercicios: 'casa' };
-    planId = typeof recomendarPlan === 'function' ? recomendarPlan(perfil) : 'B';
-    plan30 = generarPlan30Dias(perfil, planId);
-
-    await salvarPlanoNaNuvem(usuario.id, {
-      perfil,
-      plan30,
-      planId,
-      imc: JSON.parse(localStorage.getItem('miplanfit_imc') || '{}'),
-      tmb: parseInt(localStorage.getItem('miplanfit_tmb') || '0', 10),
-      tdee: parseInt(localStorage.getItem('miplanfit_tdee') || '0', 10)
-    });
-    localStorage.setItem('miplanfit_perfil', JSON.stringify(perfil));
-    localStorage.setItem('miplanfit_plan30', JSON.stringify(plan30));
+  } else if (usuario && usuario.id !== 'local_user' && !cloudHasValidPerfil && !perfilLocal) {
+    // Si la cuenta fue eliminada del Supabase o no tiene perfil registrado, forzar a responder el quiz en index.html
+    window.location.href = 'index.html?error=no_plan_found';
+    return;
   }
 
   // Fallback de seguridad solo para usuarios locales no registrados
