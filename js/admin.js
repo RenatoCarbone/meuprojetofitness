@@ -517,8 +517,8 @@ function renderizarTablaAdmin(lista) {
     // Indicações
     const numRef = user.referrals_count || (Array.isArray(user.referrals_list) ? user.referrals_list.length : 0);
     const refBadge = numRef >= 3
-      ? `<span style="font-size:0.75rem; background:rgba(16,185,129,0.15); color:var(--green); padding:3px 8px; border-radius:12px; font-weight:800;">🎁 ${numRef} (Ganhou Premium)</span>`
-      : `<span style="font-size:0.8rem; color:${numRef > 0 ? 'var(--cyan)' : 'var(--text-muted)'}; font-weight:${numRef > 0 ? '700' : '400'};">🎁 ${numRef} indicadas</span>`;
+      ? `<span style="font-size:0.75rem; background:rgba(16,185,129,0.15); color:var(--green); padding:5px 12px; border-radius:14px; font-weight:800; display:inline-flex; align-items:center; gap:4px; white-space:nowrap;">🎁 ${numRef} (Ganhou Premium)</span>`
+      : `<span style="font-size:0.8rem; color:${numRef > 0 ? 'var(--cyan)' : 'var(--text-muted)'}; font-weight:${numRef > 0 ? '700' : '400'}; display:inline-flex; align-items:center; gap:4px; white-space:nowrap;">🎁 ${numRef} indicadas</span>`;
 
     html += `
       <tr onclick="abrirDrawerCliente('${user.user_id}')">

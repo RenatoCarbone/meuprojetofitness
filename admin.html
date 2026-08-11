@@ -201,32 +201,36 @@
     .table-container {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
-      border-radius: 18px; overflow: hidden;
+      border-radius: 18px; overflow-x: auto;
     }
 
-    .admin-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .admin-table { width: 100%; border-collapse: collapse; text-align: left; min-width: 950px; }
     .admin-table th {
       background: rgba(255, 255, 255, 0.03);
       padding: 14px 18px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase;
       letter-spacing: 0.8px; color: var(--cyan); border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
     }
 
     .admin-table td {
       padding: 16px 18px; border-bottom: 1px solid rgba(255, 255, 255, 0.04);
       font-size: 0.85rem; vertical-align: middle; cursor: pointer;
+      white-space: nowrap;
     }
     .admin-table tr:hover { background: rgba(139, 92, 246, 0.08); }
 
     .badge-status-premium {
       background: rgba(16, 185, 129, 0.15); color: #34d399;
-      border: 1px solid rgba(16, 185, 129, 0.4); padding: 4px 10px;
-      border-radius: 20px; font-weight: 700; font-size: 0.72rem;
+      border: 1px solid rgba(16, 185, 129, 0.4); padding: 5px 12px;
+      border-radius: 20px; font-weight: 700; font-size: 0.75rem;
+      display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
     }
 
     .badge-status-free {
       background: rgba(245, 158, 11, 0.15); color: #fbbf24;
-      border: 1px solid rgba(245, 158, 11, 0.4); padding: 4px 10px;
-      border-radius: 20px; font-weight: 700; font-size: 0.72rem;
+      border: 1px solid rgba(245, 158, 11, 0.4); padding: 5px 12px;
+      border-radius: 20px; font-weight: 700; font-size: 0.75rem;
+      display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
     }
 
     /* Drawer Cliente */
@@ -601,8 +605,8 @@
   </div>
 </div>
 
-<script src="js/supabase-config.js?v=31.0"></script>
-<script src="js/auth.js?v=31.0"></script>
-<script src="js/admin.js?v=31.0"></script>
+<script src="js/supabase-config.js?v=32.0"></script>
+<script src="js/auth.js?v=32.0"></script>
+<script src="js/admin.js?v=32.0"></script>
 </body>
 </html>
