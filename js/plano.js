@@ -147,20 +147,18 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     localStorage.setItem('miplanfit_premium', 'false');
     if (usuario && usuario.id !== 'local_user') {
-      const imcLocal = JSON.parse(localStorage.getItem('miplanfit_imc') || 'null');
-      const imcCalculado = (imcLocal && imcLocal.valor) ? imcLocal : calcularIMCFallback(perfil);
-      const tmbLocal = parseInt(localStorage.getItem('miplanfit_tmb') || '0', 10);
-      const tmbCalculado = tmbLocal > 0 ? tmbLocal : calcularTMBFallback(perfil);
-      const tdeeLocal = parseInt(localStorage.getItem('miplanfit_tdee') || '0', 10);
-      const tdeeCalculado = tdeeLocal > 0 ? tdeeLocal : calcularTDEEFallback(tmbCalculado, perfil);
+      const perfilAtual = perfil;
+      const tmbFinal = calcularTMBFallback(perfilAtual);
+      const tdeeFinal = calcularTDEEFallback(tmbFinal, perfilAtual);
+      const imcFinal = calcularIMCFallback(perfilAtual);
 
       const salvo = await salvarPlanoNaNuvem(usuario.id, {
-        perfil,
+        perfil: perfilAtual,
         plan30,
         planId,
-        imc: imcCalculado,
-        tmb: tmbCalculado,
-        tdee: tdeeCalculado
+        imc: imcFinal,
+        tmb: tmbFinal,
+        tdee: tdeeFinal
       });
       if (salvo) localStorage.removeItem('miplanfit_quiz_pending_sync');
     }
@@ -190,20 +188,18 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     if (usuario && usuario.id !== 'local_user') {
-      const imcLocal = JSON.parse(localStorage.getItem('miplanfit_imc') || 'null');
-      const imcCalculado = (imcLocal && imcLocal.valor) ? imcLocal : calcularIMCFallback(perfil);
-      const tmbLocal = parseInt(localStorage.getItem('miplanfit_tmb') || '0', 10);
-      const tmbCalculado = tmbLocal > 0 ? tmbLocal : calcularTMBFallback(perfil);
-      const tdeeLocal = parseInt(localStorage.getItem('miplanfit_tdee') || '0', 10);
-      const tdeeCalculado = tdeeLocal > 0 ? tdeeLocal : calcularTDEEFallback(tmbCalculado, perfil);
+      const perfilAtual = perfil;
+      const tmbFinal = calcularTMBFallback(perfilAtual);
+      const tdeeFinal = calcularTDEEFallback(tmbFinal, perfilAtual);
+      const imcFinal = calcularIMCFallback(perfilAtual);
 
       const salvo = await salvarPlanoNaNuvem(usuario.id, {
-        perfil,
+        perfil: perfilAtual,
         plan30,
         planId,
-        imc: imcCalculado,
-        tmb: tmbCalculado,
-        tdee: tdeeCalculado
+        imc: imcFinal,
+        tmb: tmbFinal,
+        tdee: tdeeFinal
       });
       if (salvo) localStorage.removeItem('miplanfit_quiz_pending_sync');
     }

@@ -189,6 +189,10 @@ async function salvarPlanoNaNuvem(userId, dados = {}) {
     updated_at: new Date().toISOString()
   };
 
+  if (dados.planId) payload.plan_id = dados.planId;
+  if (dados.imc) payload.imc = dados.imc;
+  if (dados.tmb) payload.tmb = dados.tmb;
+  if (dados.tdee) payload.tdee = dados.tdee;
   if (Array.isArray(dados.plan30)) payload.plan30 = dados.plan30;
   if (referredByCode && referredByCode !== myRefCode) payload.referred_by = referredByCode;
 
