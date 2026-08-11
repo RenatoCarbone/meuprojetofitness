@@ -207,6 +207,11 @@ async function salvarPlanoNaNuvem(userId, dados = {}) {
 
   console.log('Plano e perfil salvos com sucesso na nuvem:', myRefCode);
 
+  // 📧 Sincroniza automaticamente o lead com o Mailrelay (Grupo Leads Quiz ID 2)
+  if (typeof syncMailrelayLead === 'function' && email) {
+    syncMailrelayLead(email, nombre).catch(e => console.warn('Mailrelay lead sync error:', e));
+  }
+
   if (referredByCode && referredByCode !== myRefCode && !sessionStorage.getItem(`miplanfit_ref_credited_${userId}`)) {
     sessionStorage.setItem(`miplanfit_ref_credited_${userId}`, 'true');
     await processarIndicacaoNaNuvem(referredByCode, userId);
@@ -277,6 +282,12 @@ async function processarIndicacaoNaNuvem(referrerCode, newUserId) {
       }).eq('user_id', referrer.user_id);
 
       console.log(`🎉 Sucesso! Indicação creditada para ${referrer.user_name} (${referrer.referral_code}). Total: ${newCount}`);
+      
+      // 📧 Promove automaticamente o indicado no Mailrelay para Clientes Premium (Grupo ID 3) e remove do Gratuito (ID 2)
+      if (isNowPremium && typeof syncMailrelayUpgrade === 'function' && referrer.user_email) {
+        syncMailrelayUpgrade(referrer.user_email, referrer.user_name).catch(e => console.warn('Mailrelay upgrade error:', e));
+      }
+
       localStorage.removeItem('miplanfit_ref_by');
       sessionStorage.removeItem('miplanfit_ref_by');
     }
