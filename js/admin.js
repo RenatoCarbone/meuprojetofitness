@@ -469,6 +469,7 @@ function renderizarLeadsDia3(usuarios) {
 }
 
 // ─── 8. Renderizar Tabela Master de Usuários ───
+// ─── 8. Renderizar Tabela Master de Usuários (CRM 5.0 Ultrawide) ───
 function renderizarTablaAdmin(lista) {
   const tableBody = document.getElementById('admin-users-table-body');
   if (!tableBody) return;
@@ -476,8 +477,8 @@ function renderizarTablaAdmin(lista) {
   if (!lista || lista.length === 0) {
     tableBody.innerHTML = `
       <tr>
-        <td colspan="8" style="text-align:center; padding:40px; color:var(--text-muted);">
-          📭 Nenhum usuário coincide com o filtro atual.
+        <td colspan="7" style="text-align:center; padding:40px; color:var(--text-muted);">
+          📭 Nenhum usuário coincide com os filtros atuais.
         </td>
       </tr>`;
     return;
@@ -493,15 +494,23 @@ function renderizarTablaAdmin(lista) {
 
     const dateRaw = user.updated_at || user.created_at || new Date().toISOString();
     const fechaObj = new Date(dateRaw);
-    const fechaFmt = fechaObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const fechaFmt = fechaObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
 
-    // Gênero e Idade
+    // Gênero, Idade e Objetivo (Tags)
     const tienePerfil = perfil && typeof perfil === 'object' && Object.keys(perfil).length > 0 && (perfil.peso || perfil.edad || perfil.sexo || perfil.nombre);
-    const sexoStr = tienePerfil ? ((perfil.sexo || '').toLowerCase() === 'hombre' ? 'HOMEM ♂️' : 'MULHER ♀️') : '⚠️ Quiz Pendente';
-    const edadStr = tienePerfil && perfil.edad ? `${perfil.edad} anos` : '';
+    const sexoStr = tienePerfil ? ((perfil.sexo || '').toLowerCase() === 'hombre' ? 'HOMEM ♂️' : 'MULHER ♀️') : '⚠️ Pendente';
+    const edadStr = tienePerfil && perfil.edad ? `${perfil.edad}a` : '';
+    const objetivoText = tienePerfil ? textoObjetivo(perfil) : '⚠️ Pendente';
 
-    // Objetivo
-    const objetivoStr = tienePerfil ? textoObjetivo(perfil) : '⚠️ Quiz Pendente';
+    // Métricas Bio (Peso, IMC, TMB, TDEE)
+    const pesoVal = Number(perfil.pesoActual || perfil.peso || 0);
+    const pesoStr = pesoVal > 0 ? `${pesoVal.toFixed(1)}kg` : '--';
+    
+    const imcObj = user.imc || (typeof perfil.imc === 'object' ? perfil.imc : null);
+    const imcVal = imcObj?.valor || (pesoVal > 0 && perfil.altura ? (pesoVal / Math.pow(perfil.altura / 100, 2)).toFixed(1) : '--');
+    
+    const tmbVal = user.tmb || perfil.tmb || '--';
+    const tdeeVal = user.tdee || perfil.tdee || '--';
 
     // Racha / Progresso
     const streak = user.streak_actual || 0;
@@ -510,40 +519,71 @@ function renderizarTablaAdmin(lista) {
 
     // Estado Premium
     const esPremium = user.is_premium === true;
-    const statusBadge = esPremium
-      ? `<span class="badge-status-premium">✨ PREMIUM (€14,90)</span>`
-      : `<span class="badge-status-free">🔒 Gratuito (3 dias)</span>`;
+    let statusBadge = `<span class="badge-status-free">🔒 Gratuito (3 dias)</span>`;
+    if (esPremium) {
+      statusBadge = `<span class="badge-status-premium">✨ PREMIUM (€14,90)</span>`;
+    } else if (diasCompletados >= 3 || streak >= 3) {
+      statusBadge = `<span style="background:rgba(245,158,11,0.2); color:#fbbf24; border:1px solid #f59e0b; padding:4px 10px; border-radius:20px; font-weight:800; font-size:0.72rem; white-space:nowrap;">🔥 Dia 3 (Perto)</span>`;
+    }
 
-    // Indicações
+    // Viralidade (Mini barra 0 a 3)
     const numRef = user.referrals_count || (Array.isArray(user.referrals_list) ? user.referrals_list.length : 0);
-    const refBadge = numRef >= 3
-      ? `<span style="font-size:0.75rem; background:rgba(16,185,129,0.15); color:var(--green); padding:5px 12px; border-radius:14px; font-weight:800; display:inline-flex; align-items:center; gap:4px; white-space:nowrap;">🎁 ${numRef} (Ganhou Premium)</span>`
-      : `<span style="font-size:0.8rem; color:${numRef > 0 ? 'var(--cyan)' : 'var(--text-muted)'}; font-weight:${numRef > 0 ? '700' : '400'}; display:inline-flex; align-items:center; gap:4px; white-space:nowrap;">🎁 ${numRef} indicadas</span>`;
+    const pctRef = Math.min(Math.round((numRef / 3) * 100), 100);
+    const refBadge = `
+      <div style="display:inline-flex; align-items:center; gap:8px;">
+        <div style="width:50px; height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden;">
+          <div style="width:${pctRef}%; height:100%; background:${numRef >= 3 ? 'var(--green)' : 'var(--cyan)'}; border-radius:3px;"></div>
+        </div>
+        <span style="font-size:0.78rem; font-weight:800; color:${numRef >= 3 ? 'var(--green)' : numRef > 0 ? 'var(--cyan)' : 'var(--text-muted)'}; white-space:nowrap;">
+          🎁 ${numRef}/3
+        </span>
+      </div>
+    `;
+
+    // WhatsApp Direct URL Button
+    const waPhone = perfil.telefono || perfil.phone || '';
+    const cleanPhone = waPhone.replace(/[^0-9]/g, '');
+    const waUrl = cleanPhone ? `https://api.whatsapp.com/send?phone=${cleanPhone}` : `mailto:${email}`;
 
     html += `
       <tr onclick="abrirDrawerCliente('${user.user_id}')">
         <td>
           <div style="display:flex; align-items:center; gap:10px;">
-            <div style="width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg, var(--purple), #4c1d95); display:flex; align-items:center; justify-content:center; font-weight:800; color:white; font-size:0.9rem;">${inicial}</div>
+            <div style="width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg, var(--purple), #4c1d95); display:flex; align-items:center; justify-content:center; font-weight:800; color:white; font-size:0.85rem; flex-shrink:0;">${inicial}</div>
             <div>
-              <div style="font-weight:800; color:white;">${nombre}</div>
-              <div style="font-size:0.75rem; color:var(--text-muted);">${email}</div>
+              <div style="font-weight:800; color:white; font-size:0.85rem;">${nombre}</div>
+              <div style="font-size:0.72rem; color:var(--text-muted);">${email} · <span style="color:rgba(255,255,255,0.4);">${fechaFmt}</span></div>
             </div>
           </div>
         </td>
-        <td><span style="font-size:0.78rem; color:var(--text-muted);">${fechaFmt}</span></td>
-        <td><span style="font-size:0.78rem; font-weight:700; color:${tienePerfil ? 'var(--cyan)' : 'var(--amber)'};">${sexoStr}</span> <span style="font-size:0.75rem; color:var(--text-muted);">${edadStr}</span></td>
-        <td><span style="font-size:0.8rem; font-weight:600;">${objetivoStr}</span></td>
         <td>
-          <div style="font-weight:700; font-size:0.8rem;">🔥 ${streak} dias</div>
+          <div style="display:flex; flex-direction:column; gap:3px;">
+            <div>
+              <span style="font-size:0.72rem; background:rgba(6,182,212,0.15); color:var(--cyan); padding:2px 6px; border-radius:6px; font-weight:700;">${sexoStr}</span>
+              ${edadStr ? `<span style="font-size:0.72rem; background:rgba(255,255,255,0.06); color:#cbd5e1; padding:2px 6px; border-radius:6px; font-weight:600;">${edadStr}</span>` : ''}
+            </div>
+            <div style="font-size:0.75rem; color:white; font-weight:600;">${objetivoText}</div>
+          </div>
+        </td>
+        <td>
+          <div style="font-size:0.78rem; font-weight:700; color:white;">⚖️ ${pesoStr} · <span style="color:var(--purple-light);">IMC ${imcVal}</span></div>
+          <div style="font-size:0.72rem; color:var(--text-muted);">🔥 TMB: ${tmbVal} kcal | TDEE: ${tdeeVal}</div>
+        </td>
+        <td>
+          <div style="font-weight:800; font-size:0.8rem; color:${streak > 0 ? '#f59e0b' : 'var(--text-muted)'};">🔥 ${streak} dias</div>
           <div style="font-size:0.72rem; color:var(--text-muted);">${diasCompletados}/30 dias (${pctProgreso}%)</div>
         </td>
         <td>${refBadge}</td>
         <td>${statusBadge}</td>
         <td>
-          <button onclick="event.stopPropagation(); abrirDrawerCliente('${user.user_id}')" class="btn btn-outline btn-sm" style="font-size:0.72rem; padding:4px 8px;">
-            ⚙️ Gerenciar
-          </button>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <button onclick="event.stopPropagation(); abrirDrawerCliente('${user.user_id}')" class="btn btn-outline btn-sm" style="font-size:0.72rem; padding:4px 8px;">
+              ⚙️
+            </button>
+            <a href="${waUrl}" target="_blank" onclick="event.stopPropagation();" class="btn btn-outline btn-sm" style="font-size:0.72rem; padding:4px 8px; color:var(--green); border-color:rgba(16,185,129,0.3);">
+              💬 WhatsApp
+            </a>
+          </div>
         </td>
       </tr>
     `;
@@ -552,10 +592,12 @@ function renderizarTablaAdmin(lista) {
   tableBody.innerHTML = html;
 }
 
-// ─── 9. Busca e Filtros ───
+// ─── 9. Busca e Filtros Avançados CRM 5.0 ───
 function filtrarTablaAdmin() {
   const query = (document.getElementById('admin-search-input')?.value || '').toLowerCase().trim();
   const filtroEstado = document.getElementById('admin-filter-status')?.value || 'todos';
+  const filtroObjetivo = document.getElementById('admin-filter-objetivo')?.value || 'todos';
+  const filtroEngajamento = document.getElementById('admin-filter-engajamento')?.value || 'todos';
 
   const filtrados = todosOsUsuariosAdmin.filter(u => {
     const perfil = u.perfil || {};
@@ -572,7 +614,19 @@ function filtrarTablaAdmin() {
       coincideEstado = (dias === 3 || u.streak_actual === 3);
     }
 
-    return coincideBusqueda && coincideEstado;
+    let coincideObjetivo = true;
+    if (filtroObjetivo !== 'todos') {
+      const objRaw = (perfil.objetivo_kg || perfil.objetivo || '').toLowerCase();
+      if (filtroObjetivo === 'perder') coincideObjetivo = objRaw.includes('perder') || objRaw.includes('perda');
+      if (filtroObjetivo === 'ganar') coincideObjetivo = objRaw.includes('ganar') || objRaw.includes('massa') || objRaw.includes('ganho');
+      if (filtroObjetivo === 'mantener') coincideObjetivo = objRaw.includes('mantener') || objRaw.includes('manter');
+    }
+
+    let coincideEngajamento = true;
+    if (filtroEngajamento === 'ativos') coincideEngajamento = ((u.streak_actual || 0) > 0 || (u.dias_completados || []).length > 0);
+    if (filtroEngajamento === 'inativos') coincideEngajamento = ((u.streak_actual || 0) === 0 && (u.dias_completados || []).length === 0);
+
+    return coincideBusqueda && coincideEstado && coincideObjetivo && coincideEngajamento;
   });
 
   renderizarTablaAdmin(filtrados);

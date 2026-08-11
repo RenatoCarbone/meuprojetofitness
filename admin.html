@@ -32,13 +32,13 @@
     .admin-navbar {
       background: #0d0f18;
       border-bottom: 1px solid var(--border-color);
-      padding: 14px 24px;
+      padding: 12px 24px;
       position: sticky; top: 0; z-index: 100;
     }
 
     .admin-nav-inner {
       display: flex; align-items: center; justify-content: space-between;
-      max-width: 1400px; margin: 0 auto;
+      width: 98vw; max-width: 100% !important; margin: 0 auto;
     }
 
     .nav-brand {
@@ -49,9 +49,9 @@
       font-weight: 900; font-size: 1.15rem; color: white; letter-spacing: -0.5px;
     }
 
-    /* Grid principal */
+    /* Grid principal Ultrawide */
     .dashboard-container {
-      max-width: 1400px; margin: 0 auto; padding: 24px;
+      width: 98vw; max-width: 100% !important; margin: 0 auto; padding: 16px 20px;
     }
 
     /* KPI Grid */
@@ -477,12 +477,25 @@
       <input type="text" id="admin-search-input" placeholder="🔍 Buscar usuário por nome ou e-mail..." oninput="filtrarTablaAdmin()"/>
     </div>
 
-    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
       <select id="admin-filter-status" onchange="filtrarTablaAdmin()" style="background:rgba(0,0,0,0.5); border:1px solid var(--border-color); color:white; padding:8px 12px; border-radius:10px; font-size:0.82rem; outline:none;">
         <option value="todos">Todos os Status</option>
-        <option value="premium">Apenas Premium (Pagos €14,90)</option>
-        <option value="free">Apenas Gratuitos (3 Dias)</option>
+        <option value="premium">✨ Apenas Premium (Pagos / 3 Amigas)</option>
+        <option value="free">🔒 Apenas Gratuitos (3 Dias)</option>
         <option value="dia3">🔥 Apenas Dia 3 (Perto do bloqueio)</option>
+      </select>
+
+      <select id="admin-filter-objetivo" onchange="filtrarTablaAdmin()" style="background:rgba(0,0,0,0.5); border:1px solid var(--border-color); color:white; padding:8px 12px; border-radius:10px; font-size:0.82rem; outline:none;">
+        <option value="todos">Todos os Objetivos</option>
+        <option value="perder">📉 Perder Peso</option>
+        <option value="ganar">💪 Ganhar Peso / Massa</option>
+        <option value="mantener">⚖️ Manter Peso</option>
+      </select>
+
+      <select id="admin-filter-engajamento" onchange="filtrarTablaAdmin()" style="background:rgba(0,0,0,0.5); border:1px solid var(--border-color); color:white; padding:8px 12px; border-radius:10px; font-size:0.82rem; outline:none;">
+        <option value="todos">Todos os Engajamentos</option>
+        <option value="ativos">🔥 Racha > 0 (Ativos)</option>
+        <option value="inativos">💤 Racha = 0 (Inativos)</option>
       </select>
 
       <button onclick="exportarUsuariosCSV()" class="btn btn-outline btn-sm" style="font-size:0.8rem;">📥 Exportar CSV</button>
@@ -496,13 +509,12 @@
       <thead>
         <tr>
           <th>Usuário / Email</th>
-          <th>Data Cadastro</th>
-          <th>Gênero / Idade</th>
-          <th>Objetivo / Peso</th>
+          <th>Gênero / Idade / Objetivo</th>
+          <th>Métricas Bio (Peso / IMC / TMB)</th>
           <th>Progresso / Racha</th>
-          <th>Indicações</th>
+          <th>Viralidade (Referidos)</th>
           <th>Status</th>
-          <th>Ação</th>
+          <th>Ações Rápidas</th>
         </tr>
       </thead>
       <tbody id="admin-users-table-body">
@@ -605,8 +617,8 @@
   </div>
 </div>
 
-<script src="js/supabase-config.js?v=32.0"></script>
-<script src="js/auth.js?v=32.0"></script>
-<script src="js/admin.js?v=32.0"></script>
+<script src="js/supabase-config.js?v=33.0"></script>
+<script src="js/auth.js?v=33.0"></script>
+<script src="js/admin.js?v=33.0"></script>
 </body>
 </html>
