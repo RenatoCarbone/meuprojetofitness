@@ -215,69 +215,73 @@ async function salvarPlanoNaNuvem(userId, dados = {}) {
   return true;
 }
 
-// ─── Incrementar contador del patrocinador y dar Premium al llegar a 3 ───
+// ─── Incrementar contador del patrocinador y dar Premium al llegar a 3 (Versión Inteligente Manus AI) ───
 async function processarIndicacaoNaNuvem(referrerCode, newUserId) {
   const client = getSupabase();
   if (!client || !referrerCode) return;
 
   try {
     const cleanCode = referrerCode.trim().toLowerCase();
+    const parts = cleanCode.split('_');
+    const namePart = parts[0] || '';
+    const idPart = parts[1] || '';
 
-    // 1. Buscar al usuario patrocinador por su código exacto de referido
-    let { data: referrer, error: searchErr } = await client
+    // 🛡️ BUSCA INTELIGENTE: Tenta código exato OU sufixo de ID (ex: %_bfc6) OU prefixo do nome
+    let referrer = null;
+
+    // 1. Coincidência exata
+    const { data: exact } = await client
       .from('planos')
       .select('*')
       .eq('referral_code', cleanCode)
       .maybeSingle();
 
-    // Fallback: si no lo encuentra con coincidencia exacta, buscar por el prefijo del nombre (ej: renato_)
-    if (!referrer) {
-      const codePart = cleanCode.split('_')[0];
-      if (codePart && codePart.length >= 3) {
-        const { data: fallbackList } = await client
-          .from('planos')
-          .select('*')
-          .ilike('referral_code', `${codePart}_%`);
+    referrer = exact;
 
-        if (fallbackList && fallbackList.length > 0) {
-          referrer = fallbackList[0];
-        }
-      }
+    // 2. Se não achou exato, tentar pelo ID único (ex: %_bfc6)
+    if (!referrer && idPart && idPart.length >= 3) {
+      const { data: idMatch } = await client
+        .from('planos')
+        .select('*')
+        .ilike('referral_code', `%_${idPart}`)
+        .limit(1)
+        .maybeSingle();
+      referrer = idMatch;
     }
 
-    if (searchErr || !referrer) {
-      console.log('Patrocinador no encontrado para el código:', cleanCode);
-      return;
+    // 3. Se não achou pelo ID, tentar pelo prefixo do nome (ex: renato_%)
+    if (!referrer && namePart && namePart.length >= 3) {
+      const { data: nameMatch } = await client
+        .from('planos')
+        .select('*')
+        .ilike('referral_code', `${namePart}_%`)
+        .limit(1)
+        .maybeSingle();
+      referrer = nameMatch;
     }
 
-    // Evitar que el patrocinador sea la misma persona
-    if (referrer.user_id === newUserId) return;
+    if (!referrer || referrer.user_id === newUserId) return;
 
-    let list = referrer.referrals_list || [];
-    if (!Array.isArray(list)) list = [];
-
-    // Si este nuevo usuario aún no ha sido contado para este patrocinador
+    // Gerenciar a lista e o contador
+    let list = Array.isArray(referrer.referrals_list) ? referrer.referrals_list : [];
     if (!list.includes(newUserId)) {
       list.push(newUserId);
+      const newCount = list.length;
+      const isNowPremium = referrer.is_premium || newCount >= 3;
+
+      await client.from('planos').update({
+        referrals_count: newCount,
+        referrals_list: list,
+        is_premium: isNowPremium,
+        updated_at: new Date().toISOString()
+      }).eq('user_id', referrer.user_id);
+
+      console.log(`🎉 Sucesso! Indicação creditada para ${referrer.user_name} (${referrer.referral_code}). Total: ${newCount}`);
+      localStorage.removeItem('miplanfit_ref_by');
+      sessionStorage.removeItem('miplanfit_ref_by');
     }
-
-    const newCount = list.length;
-    const shouldBePremium = referrer.is_premium || newCount >= 3;
-
-    await client.from('planos').update({
-      referrals_count: newCount,
-      referrals_list : list,
-      is_premium     : shouldBePremium,
-      updated_at     : new Date().toISOString()
-    }).eq('user_id', referrer.user_id);
-
-    console.log(`🎉 ¡Indicación procesada! ${referrer.user_name} ahora tiene ${newCount} referidos. Premium: ${shouldBePremium}`);
-
-    // Limpiar localStorage de invitación
-    localStorage.removeItem('miplanfit_ref_by');
-    sessionStorage.removeItem('miplanfit_ref_by');
   } catch(e) {
-    console.error('Error al procesar indicación:', e);
+    console.error('Erro ao processar indicação:', e);
   }
 }
 
