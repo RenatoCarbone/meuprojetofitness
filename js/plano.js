@@ -1475,10 +1475,35 @@ function toggleShoppingItem(weekNum, catIdx, itemIdx) {
   renderShoppingList(weekNum);
 }
 
-// ─── Modal Popup y Banner Compacto de Referidos ───
-function abrirModalReferidos() {
+async function abrirModalReferidos() {
   const modal = document.getElementById('modal-referidos');
-  if (modal) modal.style.display = 'flex';
+  if (!modal) return;
+
+  // 1. Mostrar o modal imediatamente para não dar lag
+  modal.style.display = 'flex';
+
+  // 2. Buscar dados frescos do Supabase para atualizar o contador
+  const usuario = window._currentUser || (typeof getUsuarioAtual === 'function' ? await getUsuarioAtual() : null);
+  
+  if (usuario && usuario.id !== 'local_user') {
+    const client = getSupabase();
+    if (client) {
+      const { data, error } = await client
+        .from('planos')
+        .select('referral_code, referrals_count, is_premium')
+        .eq('user_id', usuario.id)
+        .maybeSingle();
+
+      if (data && !error) {
+        window._userPlanNuvem = data;
+        actualizarCardReferidos(data.referral_code, data.referrals_count || 0, data.is_premium);
+        
+        if (data.is_premium || (data.referrals_count >= 3)) {
+          localStorage.setItem('miplanfit_premium', 'true');
+        }
+      }
+    }
+  }
 }
 
 function cerrarModalReferidos() {
@@ -1507,12 +1532,9 @@ function actualizarCardReferidos(refCode, refCount, esPremium) {
   const compactBanner = document.getElementById('referral-banner-compact');
   const userIsPremium = esPremium || (typeof isPremium === 'function' ? isPremium() : false);
 
-  // Si el usuario ya es Premium (pagado o por referidos), OCULTAR completamente el banner de referidos
-  if (userIsPremium) {
-    if (compactBanner) compactBanner.style.display = 'none';
-    return;
-  } else {
-    if (compactBanner) compactBanner.style.display = 'flex';
+  if (compactBanner) {
+    if (userIsPremium) compactBanner.style.display = 'none';
+    else compactBanner.style.display = 'flex';
   }
 
   // 1. Enlace de invitación
@@ -1535,9 +1557,10 @@ function actualizarCardReferidos(refCode, refCount, esPremium) {
   // Guardar link en global para botón copiar
   window.currentReferralUrl = shareUrl;
 
-  // 2. Progreso de referidos
-  const count = Math.min(refCount || 0, 3);
-  const pct = Math.round((count / 3) * 100);
+  // 2. Progreso de referidos (se o usuário é premium por 3 indicados, força count para no mínimo 3)
+  const rawCount = refCount || 0;
+  const count = userIsPremium ? Math.max(rawCount, 3) : Math.min(rawCount, 3);
+  const pct = Math.min(Math.round((count / 3) * 100), 100);
 
   const elText = document.getElementById('ref-progress-text');
   const elBar = document.getElementById('ref-progress-bar');
@@ -1547,7 +1570,7 @@ function actualizarCardReferidos(refCode, refCount, esPremium) {
   if (elText) elText.innerText = `${count} / 3 Amigas recomendadas`;
   if (elBar) elBar.style.width = `${pct}%`;
 
-  if (esPremium || count >= 3) {
+  if (userIsPremium || count >= 3) {
     if (elStatus) {
       elStatus.innerText = '✨ ¡DESBLOQUEADO DE FORMA VITALICIA!';
       elStatus.style.color = 'var(--green)';
@@ -1561,10 +1584,6 @@ function actualizarCardReferidos(refCode, refCount, esPremium) {
     if (elStatus) {
       elStatus.innerText = `Faltan ${faltan} amiga${faltan > 1 ? 's' : ''} para desbloquear`;
       elStatus.style.color = 'var(--amber)';
-    }
-    if (elSub) {
-      elSub.innerText = `Invita a 3 amigas (${count}/3) y accede gratis sin pagar (€0)`;
-      elSub.style.color = 'var(--green)';
     }
   }
 }
