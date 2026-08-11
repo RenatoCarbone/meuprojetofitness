@@ -157,15 +157,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     return;
   }
 
-  // Si el navegador viene estrictamente de una redirección OAuth de Google (access_token, code o pdata), enviar a plano.html
-  const hash = window.location.hash;
-  const search = window.location.search;
-  const isAuthCallback = hash.includes('access_token=') || search.includes('code=') || search.includes('pdata=');
-
-  if (isAuthCallback) {
-    window.location.href = 'plano.html' + search + hash;
-    return;
-  }
+  // Permitir que el usuario responda al cuestionario libremente en index.html
 
   // Si no hay sesión activa pero hay datos locales en el navegador, mostrar el banner de continuar
   const perfilGuardado = localStorage.getItem('miplanfit_perfil');

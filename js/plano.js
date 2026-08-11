@@ -18,28 +18,19 @@ function isPremium() {
 
 document.addEventListener('DOMContentLoaded', async function () {
 
-  // ─── 1. Verificar sesión de OAuth de forma asíncrona garantizada con retry ───
+  // ─── 1. Verificar sesión de OAuth de forma asíncrona garantizada ───
   let usuario = null;
   const hash = window.location.hash;
   const search = window.location.search;
-  const isAuthCallback = hash.includes('access_token=') || search.includes('code=') || search.includes('pdata=') || localStorage.getItem('miplanfit_quiz_pending_sync') === 'true';
+  const isAuthCallback = hash.includes('access_token=') || search.includes('code=');
 
   const client = getSupabase();
   if (client) {
     try {
-      let { data: { session } } = await client.auth.getSession();
+      // Si venimos de un Callback de OAuth (Google), forzar resolución de sesión
+      const { data: { session } } = await client.auth.getSession();
       if (session?.user) {
         usuario = session.user;
-      } else if (isAuthCallback) {
-        // Aguardar até 1.5s para o SDK do Supabase inicializar a sessão do Google no retorno OAuth
-        for (let i = 0; i < 15; i++) {
-          await new Promise(r => setTimeout(r, 100));
-          const res = await client.auth.getSession();
-          if (res?.data?.session?.user) {
-            usuario = res.data.session.user;
-            break;
-          }
-        }
       }
     } catch (e) {
       console.warn('Error resolviendo sesión de Supabase:', e);
@@ -47,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   }
 
   // Fallback a getUsuarioAtual si aún no se había asignado
-  if (!usuario && typeof getUsuarioAtual === 'function') {
+  if (!usuario) {
     try {
       usuario = await getUsuarioAtual();
     } catch(e) {}
@@ -55,8 +46,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 
   // Si no hay sesión de Google activa, marcar como usuario local
   if (!usuario) {
-    const perfilLocal = typeof recuperarPerfilQuiz === 'function' ? recuperarPerfilQuiz() : JSON.parse(localStorage.getItem('miplanfit_perfil') || '{}');
-    usuario = { id: 'local_user', user_metadata: { full_name: perfilLocal?.nombre || 'Usuario' } };
+    const perfilLocal = JSON.parse(localStorage.getItem('miplanfit_perfil') || '{}');
+    usuario = { id: 'local_user', user_metadata: { full_name: perfilLocal.nombre || 'Usuario' } };
   }
 
   // ─── Detectar pago confirmado desde Lemon Squeezy (?paid=true o ?order_id=...) ───
@@ -164,8 +155,7 @@ document.addEventListener('DOMContentLoaded', async function () {
       });
       if (salvo) localStorage.removeItem('miplanfit_quiz_pending_sync');
     }
-  } else if (usuario && usuario.id !== 'local_user' && !cloudHasValidPerfil && !perfilLocal) {
-    // Si la cuenta fue eliminada del Supabase o no tiene perfil registrado, forzar a responder el quiz en index.html
+  } else if (usuario && usuario.id !== 'local_user') {
     window.location.href = 'index.html?error=no_plan_found';
     return;
   }
