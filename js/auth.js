@@ -251,7 +251,7 @@ async function salvarPlanoNaNuvem(userId, dados = {}) {
   const client = getSupabase();
   if (!client || !userId) return false;
 
-  const perfil = normalizarPerfilQuiz(dados.perfil);
+  const perfil = normalizarPerfilQuiz(dados.perfil || JSON.parse(localStorage.getItem('miplanfit_perfil') || '{}'));
   if (!perfil) {
     console.error('Perfil inválido: o plano não foi salvo para evitar gravar perfil vazio.', dados.perfil);
     return false;
@@ -277,16 +277,31 @@ async function salvarPlanoNaNuvem(userId, dados = {}) {
   const urlRef = new URLSearchParams(window.location.search).get('ref');
   const referredByCode = dados.referred_by || localStorage.getItem('miplanfit_ref_by') || sessionStorage.getItem('miplanfit_ref_by') || urlRef || null;
 
+  // Recuperar métricas com fallbacks seguros
+  const imc = dados.imc || JSON.parse(localStorage.getItem('miplanfit_imc') || '{}');
+  const tmb = (typeof dados.tmb === 'number' && dados.tmb > 0) ? dados.tmb : parseInt(localStorage.getItem('miplanfit_tmb') || '0', 10);
+  const tdee = (typeof dados.tdee === 'number' && dados.tdee > 0) ? dados.tdee : parseInt(localStorage.getItem('miplanfit_tdee') || '0', 10);
+  const planId = dados.planId || dados.plan_id || localStorage.getItem('miplanfit_plan_id') || 'B';
+
   const payload = {
     user_id: userId,
     user_email: email,
     user_name: nombre,
     referral_code: myRefCode,
     perfil,
+    plan_id: planId,
+    imc,
+    tmb,
+    tdee,
     updated_at: new Date().toISOString()
   };
 
-  if (Array.isArray(dados.plan30)) payload.plan30 = dados.plan30;
+  if (Array.isArray(dados.plan30) && dados.plan30.length > 0) {
+    payload.plan30 = dados.plan30;
+  } else {
+    payload.plan30 = JSON.parse(localStorage.getItem('miplanfit_plan30') || '[]');
+  }
+
   if (referredByCode && referredByCode !== myRefCode) payload.referred_by = referredByCode;
 
   // 1. Tentar upsert primeiro
@@ -312,7 +327,7 @@ async function salvarPlanoNaNuvem(userId, dados = {}) {
     return false;
   }
 
-  console.log('Plano e perfil salvos com sucesso na nuvem:', myRefCode);
+  console.log('Plano e perfil salvos com sucesso na nuvem com métricas completas:', myRefCode);
 
   if (referredByCode && referredByCode !== myRefCode && !sessionStorage.getItem(`miplanfit_ref_credited_${userId}`)) {
     sessionStorage.setItem(`miplanfit_ref_credited_${userId}`, 'true');
