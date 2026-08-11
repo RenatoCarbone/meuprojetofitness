@@ -34,6 +34,22 @@ function parsePerfilQuiz(raw) {
 }
 
 function recuperarPerfilQuiz() {
+  // 1. Tenta pegar da URL (Prioridade Máxima no Retorno do Google)
+  const fullUrl = window.location.search + '&' + window.location.hash;
+  const pdataMatch = fullUrl.match(/[?&]pdata=([^&]+)/);
+  if (pdataMatch) {
+    try {
+      const rawB64 = decodeURIComponent(pdataMatch[1]).replace(/\s/g, '+');
+      const perfil = normalizarPerfilQuiz(JSON.parse(decodeURIComponent(escape(atob(rawB64)))));
+      if (perfil) {
+        console.log("✅ Perfil recuperado via URL (pdata)");
+        localStorage.setItem('miplanfit_perfil', JSON.stringify(perfil));
+        return perfil;
+      }
+    } catch (e) { console.error("Erro ao decodificar pdata da URL", e); }
+  }
+
+  // 2. Fallbacks de armazenamento local
   const fontes = [
     localStorage.getItem('miplanfit_perfil'),
     sessionStorage.getItem('miplanfit_perfil'),
@@ -54,16 +70,6 @@ function recuperarPerfilQuiz() {
     } catch (e) {}
   }
 
-  // Compatibilidade temporária com links OAuth criados por versões antigas.
-  const url = new URL(window.location.href);
-  const legacyPdata = url.searchParams.get('pdata');
-  if (legacyPdata) {
-    try {
-      const perfil = normalizarPerfilQuiz(JSON.parse(decodeURIComponent(escape(atob(legacyPdata.replace(/\s/g, '+'))))));
-      if (perfil) return perfil;
-    } catch (e) {}
-  }
-
   return null;
 }
 
@@ -79,18 +85,32 @@ async function loginComGoogle() {
   const client = getSupabase();
   if (!client) return false;
 
-  // O localStorage/sessionStorage do mesmo domínio permanece disponível após OAuth.
-  // Não enviar dados de saúde do usuário na URL de redirecionamento.
+  const localPerfil = localStorage.getItem('miplanfit_perfil') || sessionStorage.getItem('miplanfit_perfil_backup');
   const refCode = localStorage.getItem('miplanfit_ref_by') || sessionStorage.getItem('miplanfit_ref_by') || new URLSearchParams(window.location.search).get('ref');
-  let redirectTarget = SITE_URL + '/plano.html';
 
-  if (refCode) {
-    redirectTarget += `?ref=${encodeURIComponent(refCode.trim().toLowerCase())}`;
+  let redirectTarget = SITE_URL + '/plano.html';
+  const params = new URLSearchParams();
+
+  if (refCode) params.set('ref', refCode.trim().toLowerCase());
+
+  if (localPerfil) {
+    try {
+      const b64 = btoa(unescape(encodeURIComponent(localPerfil)));
+      params.set('pdata', b64);
+    } catch(e) { console.error("Erro ao codificar pdata", e); }
   }
+
+  if ([...params].length > 0) {
+    redirectTarget += `?${params.toString()}`;
+  }
+
+  console.log("🚀 Iniciando OAuth com redirecionamento para:", redirectTarget);
 
   const { error } = await client.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: redirectTarget }
+    options: {
+      redirectTo: redirectTarget
+    }
   });
 
   if (error) {
