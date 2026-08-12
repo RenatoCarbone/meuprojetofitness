@@ -1630,12 +1630,19 @@ function abrirModalNuevoCiclo() {
     }
   }
 
-  // Si el usuario aún no ha completado los 30 días completos (o no tiene 30+ días de racha)
+  // ✅ FIX: Usuarios Premium → reiniciar ciclo automáticamente sin popup de paywall
+  if (isPremium()) {
+    confirmarNuevoCicloAuto(currentStreak);
+    return;
+  }
+
+  // Usuarios gratuitos que no completaron 30 días → mostrar modal de paywall
   if (currentStreak < 30 && diasComp < 30) {
     abrirModalBloqueoCiclo(currentStreak, diasComp);
     return;
   }
 
+  // Usuarios gratuitos con 30+ días → mostrar modal normal de nuevo ciclo
   const modal = document.getElementById('modal-nuevo-ciclo');
   const inputPeso = document.getElementById('cycle-input-peso');
   const elStreak = document.getElementById('cycle-modal-streak');
@@ -1649,6 +1656,60 @@ function abrirModalNuevoCiclo() {
   }
 
   if (modal) modal.style.display = 'flex';
+}
+
+// ✅ Reinicio automático de ciclo para usuarios Premium (sin popup, mantiene racha)
+async function confirmarNuevoCicloAuto(currentStreak) {
+  const nombre = (perfil && perfil.nombre) ? perfil.nombre : 'Usuario';
+  const streakKey = `miplanfit_streak_${nombre.replace(/\s/g,'_')}`;
+  let estadoStreak = JSON.parse(localStorage.getItem(streakKey) || '{}');
+
+  // Preservar a racha acumulada — NÃO zerar
+  const rachaAnterior = currentStreak || estadoStreak.streakActual || 0;
+  estadoStreak.rachaAcumulada = Math.max(estadoStreak.rachaAcumulada || 0, rachaAnterior);
+  estadoStreak.streakActual   = estadoStreak.rachaAcumulada; // mantém acumulada
+  estadoStreak.maxStreak      = Math.max(estadoStreak.maxStreak || 0, estadoStreak.rachaAcumulada);
+  estadoStreak.diasCompletados = []; // destick todos os dias — pronto para novo ciclo
+  estadoStreak.fechaInicio    = new Date().toISOString();
+
+  if (perfil) {
+    perfil.rachaAcumulada = estadoStreak.rachaAcumulada;
+    localStorage.setItem('miplanfit_perfil', JSON.stringify(perfil));
+  }
+
+  localStorage.setItem(streakKey, JSON.stringify(estadoStreak));
+  localStorage.setItem('miplanfit_dia_atual', '1');
+  localStorage.setItem('miplanfit_premium', 'true'); // garante que permanece premium
+
+  // Regenerar plan con el peso actual (sin pedir nuevo peso)
+  const nuevoPlanId = typeof recomendarPlan === 'function' ? recomendarPlan(perfil) : (planId || 'B');
+  const nuevoPlan30 = typeof generarPlan30Dias === 'function' ? generarPlan30Dias(perfil, nuevoPlanId) : plan30;
+  plan30 = nuevoPlan30;
+  planId = nuevoPlanId;
+  diaAtual = 1;
+  localStorage.setItem('miplanfit_plan30', JSON.stringify(plan30));
+  localStorage.setItem('miplanfit_plan_id', planId);
+
+  // Sincronizar en Supabase
+  const usuario = typeof getUsuarioAtual === 'function' ? await getUsuarioAtual() : null;
+  if (usuario && usuario.id !== 'local_user') {
+    const client = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (client) {
+      try {
+        await client.from('planos').update({
+          dias_completados : [],
+          streak_actual    : estadoStreak.rachaAcumulada,
+          max_streak       : estadoStreak.maxStreak,
+          is_premium       : true,
+          updated_at       : new Date().toISOString()
+        }).eq('user_id', usuario.id);
+      } catch(e) {
+        console.warn('Advertencia al actualizar nuevo ciclo premium en Supabase:', e);
+      }
+    }
+  }
+
+  window.location.href = 'plano.html?day=1';
 }
 
 function cerrarModalNuevoCiclo() {
