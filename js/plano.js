@@ -67,6 +67,13 @@ document.addEventListener('DOMContentLoaded', async function () {
     try {
       // Si venimos de un Callback de OAuth (Google), forzar resolución de sesión
       const { data: { session } } = await client.auth.getSession();
+
+      // 🛡️ PROTEÇÃO DE ROTA: Sem sessão ativa = redireciona para index
+      if (!session) {
+        window.location.href = 'index.html';
+        return;
+      }
+
       if (session?.user) {
         usuario = session.user;
       }
