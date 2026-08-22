@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>¡Tu Menú está en camino! — MiPlanFit</title>
+  <link rel="icon" href="img/logo.png" type="image/png" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0a0f1a;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      text-align: center;
+      padding: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .logo { font-size: 1.4rem; font-weight: 800; color: #10b981; }
+    .logo span { color: #fff; }
+
+    .main {
+      flex: 1;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 50px 20px;
+      text-align: center;
+    }
+
+    /* ── CHECK ANIMATION ── */
+    .check-wrap {
+      width: 80px;
+      height: 80px;
+      background: rgba(16,185,129,0.15);
+      border: 2px solid #10b981;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 28px;
+      font-size: 2rem;
+      animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes popIn {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    h1 {
+      font-size: clamp(1.7rem, 4.5vw, 2.4rem);
+      font-weight: 900;
+      margin-bottom: 14px;
+      line-height: 1.2;
+    }
+    h1 .name { color: #10b981; }
+    .subtitle {
+      font-size: 1.05rem;
+      color: #94a3b8;
+      line-height: 1.7;
+      margin-bottom: 40px;
+    }
+    .subtitle strong { color: #fff; }
+
+    /* ── INFO BOX ── */
+    .info-box {
+      background: rgba(16,185,129,0.08);
+      border: 1px solid rgba(16,185,129,0.25);
+      border-radius: 16px;
+      padding: 22px 24px;
+      margin-bottom: 40px;
+      text-align: left;
+    }
+    .info-box p {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      line-height: 1.7;
+    }
+    .info-box strong { color: #10b981; }
+
+    /* ── DIVIDER ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 30px;
+      color: #475569;
+      font-size: 0.85rem;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+
+    /* ── VIDEO SECTION ── */
+    .video-section { margin-bottom: 36px; }
+    .video-section h2 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .video-section p {
+      font-size: 0.9rem;
+      color: #64748b;
+      margin-bottom: 20px;
+    }
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      border-radius: 16px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      aspect-ratio: 9/16;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .video-placeholder {
+      text-align: center;
+      padding: 40px 20px;
+      color: #475569;
+    }
+    .video-placeholder .play-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+    .video-placeholder p { font-size: 0.85rem; }
+    /* If video URL is set, show iframe */
+    .video-wrapper iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* ── CTA BUTTON ── */
+    .cta-section { margin-top: 10px; }
+    .cta-section h2 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+    .cta-section p {
+      font-size: 0.9rem;
+      color: #64748b;
+      margin-bottom: 22px;
+    }
+    .btn-main {
+      display: inline-block;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      font-size: 1.05rem;
+      font-weight: 800;
+      padding: 16px 32px;
+      border-radius: 14px;
+      text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+      letter-spacing: 0.3px;
+    }
+    .btn-main:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(16,185,129,0.35);
+    }
+    .btn-sub {
+      display: inline-block;
+      background: transparent;
+      color: #64748b;
+      font-size: 0.85rem;
+      padding: 10px 20px;
+      text-decoration: none;
+      margin-top: 10px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px 20px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      color: #475569;
+      font-size: 0.8rem;
+    }
+    footer a { color: #64748b; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">MiPlan<span>Fit</span>.es</div>
+</header>
+
+<div class="main">
+  <div class="check-wrap">✅</div>
+
+  <h1>¡Listo, <span class="name" id="displayName">guapa</span>! 🎉<br>Tu menú está en camino</h1>
+
+  <p class="subtitle">
+    Revisa tu bandeja de entrada en los próximos <strong>5 minutos</strong>.<br>
+    Si no lo ves, mira en la carpeta de <strong>Spam o Promociones</strong> 📩
+  </p>
+
+  <div class="info-box">
+    <p>
+      📧 Hemos enviado el <strong>Menú de 7 días para Desinflamar la Barriga</strong>
+      a tu correo. Incluye desayunos, comidas, cenas y lista de la compra
+      para que empieces esta misma semana. 🥑
+    </p>
+  </div>
+
+  <div class="divider">Mientras tanto, mira esto 👇</div>
+
+  <div class="video-section">
+    <h2>¿Cómo funciona MiPlanFit? 🤔</h2>
+    <p>Tu menú personalizado de 30 días generado por IA en 2 minutos</p>
+
+    <div class="video-wrapper" id="videoWrapper">
+      <!-- PLACEHOLDER: replace src with your video URL when ready -->
+      <div class="video-placeholder" id="videoPlaceholder">
+        <div class="play-icon">▶️</div>
+        <p>Video tutorial<br>próximamente</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-section">
+    <h2>¿Quieres tu plan de 30 días? 🚀</h2>
+    <p>Crea tu menú personalizado con IA gratis ahora mismo y<br>empieza a ver resultados reales</p>
+    <a href="https://miplanfit.es" class="btn-main">
+      🥑 Crear mi Plan Personalizado Gratis
+    </a>
+    <br>
+    <a href="https://miplanfit.es" class="btn-sub">
+      Ver cómo funciona →
+    </a>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 MiPlanFit.es — <a href="legal.html">Aviso Legal</a> · <a href="legal.html">Privacidad</a></p>
+</footer>
+
+<script>
+  // Get name from URL params
+  const params = new URLSearchParams(window.location.search);
+  const nombre = params.get('nombre');
+  if (nombre) {
+    document.getElementById('displayName').textContent = nombre.split(' ')[0];
+  }
+
+  // VIDEO: Set your video URL here when ready
+  // To embed your tutorial video, replace the placeholder below
+  const VIDEO_URL = ''; // e.g. 'https://www.youtube.com/embed/XXXXXXX'
+
+  if (VIDEO_URL) {
+    const wrapper = document.getElementById('videoWrapper');
+    const placeholder = document.getElementById('videoPlaceholder');
+    placeholder.style.display = 'none';
+    const iframe = document.createElement('iframe');
+    iframe.src = VIDEO_URL;
+    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+    iframe.allowFullscreen = true;
+    wrapper.appendChild(iframe);
+  }
+</script>
+
+</body>
+</html>

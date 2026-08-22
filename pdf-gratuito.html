@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Menú Gratuito 7 Días — MiPlanFit</title>
+  <meta name="description" content="Descarga GRATIS el Menú de 7 días para Desinflamar la Barriga. Plan de alimentación antiinflamatorio personalizado." />
+  <link rel="icon" href="img/logo.png" type="image/png" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0a0f1a;
+      color: #fff;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      text-align: center;
+      padding: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .logo {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #10b981;
+      letter-spacing: -0.5px;
+    }
+    .logo span { color: #fff; }
+
+    /* ── HERO ── */
+    .hero {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 50px 20px 30px;
+      text-align: center;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(16,185,129,0.15);
+      border: 1px solid rgba(16,185,129,0.4);
+      color: #10b981;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 50px;
+      margin-bottom: 22px;
+    }
+    .hero h1 {
+      font-size: clamp(1.9rem, 5vw, 2.8rem);
+      font-weight: 900;
+      line-height: 1.15;
+      margin-bottom: 18px;
+    }
+    .hero h1 .highlight {
+      background: linear-gradient(90deg, #10b981, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: 1.1rem;
+      color: #94a3b8;
+      line-height: 1.7;
+      margin-bottom: 36px;
+    }
+
+    /* ── BENEFITS ── */
+    .benefits {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 36px;
+      text-align: left;
+    }
+    .benefit {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 14px 18px;
+    }
+    .benefit-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .benefit-text { font-size: 0.95rem; color: #e2e8f0; }
+    .benefit-text strong { color: #fff; }
+
+    /* ── FORM CARD ── */
+    .form-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(16,185,129,0.3);
+      border-radius: 20px;
+      padding: 36px 28px;
+      margin-bottom: 40px;
+    }
+    .form-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+    .form-subtitle {
+      font-size: 0.9rem;
+      color: #64748b;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #94a3b8;
+      margin-bottom: 8px;
+    }
+    .form-group input {
+      width: 100%;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 1rem;
+      color: #fff;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group input::placeholder { color: #475569; }
+    .form-group input:focus {
+      border-color: #10b981;
+      background: rgba(16,185,129,0.06);
+    }
+    .btn-cta {
+      width: 100%;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 800;
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      margin-top: 8px;
+      letter-spacing: 0.3px;
+    }
+    .btn-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(16,185,129,0.35);
+    }
+    .btn-cta:active { transform: translateY(0); }
+    .btn-cta:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .privacy {
+      font-size: 0.78rem;
+      color: #475569;
+      text-align: center;
+      margin-top: 14px;
+    }
+
+    /* ── ERROR / SUCCESS ── */
+    .msg {
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      margin-top: 12px;
+      display: none;
+    }
+    .msg.error { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
+    .msg.success { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; }
+
+    /* ── WHAT'S INSIDE ── */
+    .inside {
+      max-width: 680px;
+      margin: 0 auto 50px;
+      padding: 0 20px;
+    }
+    .inside h2 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .day-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .day-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #10b981;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .day-name { font-size: 0.9rem; color: #e2e8f0; font-weight: 600; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 30px 20px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      color: #475569;
+      font-size: 0.8rem;
+    }
+    footer a { color: #64748b; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">MiPlan<span>Fit</span>.es</div>
+</header>
+
+<section class="hero">
+  <div class="badge">🎁 100% Gratuito — Sin tarjeta</div>
+
+  <h1>El Menú de <span class="highlight">7 Días</span><br>para Desinflamar<br>la Barriga</h1>
+
+  <p>Desayunos, comidas y cenas pensadas para reducir<br>
+  la inflamación, perder grasa abdominal y<br>
+  <strong style="color:#fff">sentirte ligera sin pasar hambre.</strong></p>
+
+  <div class="benefits">
+    <div class="benefit">
+      <div class="benefit-icon">🥗</div>
+      <div class="benefit-text"><strong>7 días completos</strong> de menú antiinflamatorio</div>
+    </div>
+    <div class="benefit">
+      <div class="benefit-icon">🛒</div>
+      <div class="benefit-text"><strong>Lista de la compra</strong> incluida para ir al súper</div>
+    </div>
+    <div class="benefit">
+      <div class="benefit-icon">⏱️</div>
+      <div class="benefit-text"><strong>Recetas en menos de 30 minutos</strong> — sin complicaciones</div>
+    </div>
+    <div class="benefit">
+      <div class="benefit-icon">🔥</div>
+      <div class="benefit-text"><strong>Sin dietas raras</strong> — comida real y deliciosa</div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <div class="form-title">¿Dónde te enviamos tu menú gratis? 📩</div>
+    <div class="form-subtitle">Lo recibirás en tu email en menos de 5 minutos</div>
+
+    <form id="leadForm" onsubmit="handleSubmit(event)">
+      <div class="form-group">
+        <label for="nombre">Tu nombre</label>
+        <input type="text" id="nombre" placeholder="Ej: María" required autocomplete="given-name" />
+      </div>
+      <div class="form-group">
+        <label for="email">Tu email</label>
+        <input type="email" id="email" placeholder="tucorreo@ejemplo.com" required autocomplete="email" />
+      </div>
+      <button type="submit" class="btn-cta" id="btnSubmit">
+        🥑 Quiero mi Menú Gratis
+      </button>
+      <div class="msg error" id="msgError">Ha ocurrido un error. Inténtalo de nuevo.</div>
+      <div class="msg success" id="msgSuccess">¡Perfecto! Redirigiendo...</div>
+    </form>
+
+    <p class="privacy">🔒 Tu email está seguro. Sin spam, puedes darte de baja cuando quieras.</p>
+  </div>
+</section>
+
+<section class="inside">
+  <h2>¿Qué encontrarás dentro? 👀</h2>
+  <div class="days-grid">
+    <div class="day-card"><div class="day-label">Día 1 — Lunes</div><div class="day-name">Reset & Energía</div></div>
+    <div class="day-card"><div class="day-label">Día 2 — Martes</div><div class="day-name">Proteína & Fuerza</div></div>
+    <div class="day-card"><div class="day-label">Día 3 — Miércoles</div><div class="day-name">Detox Natural</div></div>
+    <div class="day-card"><div class="day-label">Día 4 — Jueves</div><div class="day-name">Fibra & Saciedad</div></div>
+    <div class="day-card"><div class="day-label">Día 5 — Viernes</div><div class="day-name">Grasas Buenas</div></div>
+    <div class="day-card"><div class="day-label">Día 6 — Sábado</div><div class="day-name">Recargo & Sabor</div></div>
+    <div class="day-card"><div class="day-label">Día 7 — Domingo</div><div class="day-name">Cierre & Balance</div></div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 MiPlanFit.es — <a href="legal.html">Aviso Legal</a> · <a href="legal.html">Privacidad</a></p>
+</footer>
+
+<script>
+  const MAILRELAY_API_URL   = 'https://miplanfit.ipzmarketing.com/api/v1';
+  const MAILRELAY_API_TOKEN = 'eQfsDz5ZM5uRxiC8hEAyeyctapan6DcxsC5RcToV';
+  const MAILRELAY_GROUP_PDF = 4; // Grupo: Leads PDF Gratuito
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+
+    const nombre  = document.getElementById('nombre').value.trim();
+    const email   = document.getElementById('email').value.trim().toLowerCase();
+    const btn     = document.getElementById('btnSubmit');
+    const msgErr  = document.getElementById('msgError');
+    const msgOk   = document.getElementById('msgSuccess');
+
+    if (!email || !nombre) return;
+
+    btn.disabled = true;
+    btn.textContent = '⏳ Enviando...';
+    msgErr.style.display = 'none';
+
+    try {
+      // 1. Add subscriber to Mailrelay group 4 (PDF leads)
+      const payload = {
+        email,
+        name: nombre || 'amiga',
+        group_ids: [MAILRELAY_GROUP_PDF, 2],
+        status: 'active'
+      };
+
+      const res = await fetch(`${MAILRELAY_API_URL}/subscribers`, {
+        method: 'POST',
+        headers: {
+          'X-AUTH-TOKEN': MAILRELAY_API_TOKEN,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      // 2. Redirect to thank you page regardless (even if already subscribed)
+      msgOk.style.display = 'block';
+      setTimeout(() => {
+        window.location.href = `gracias.html?nombre=${encodeURIComponent(nombre)}&email=${encodeURIComponent(email)}`;
+      }, 1200);
+
+    } catch (err) {
+      console.error(err);
+      btn.disabled = false;
+      btn.textContent = '🥑 Quiero mi Menú Gratis';
+      msgErr.style.display = 'block';
+    }
+  }
+</script>
+
+</body>
+</html>

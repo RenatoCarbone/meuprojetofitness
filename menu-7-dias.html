@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Menú 7 Días Antiinflamatorio — MiPlanFit</title>
+  <style>
+    @media print {
+      body { background: #fff !important; color: #000 !important; }
+      .no-print { display: none !important; }
+      .page-break { page-break-before: always; }
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+    }
+
+    /* ── PRINT BUTTON ── */
+    .no-print {
+      background: #10b981;
+      color: #fff;
+      border: none;
+      padding: 14px 28px;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 24px auto;
+      display: block;
+      max-width: 260px;
+      text-align: center;
+    }
+
+    /* ── COVER PAGE ── */
+    .cover {
+      background: linear-gradient(135deg, #0a4a3a 0%, #0a2a1a 100%);
+      color: #fff;
+      padding: 60px 40px;
+      text-align: center;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .cover-logo { font-size: 1.6rem; font-weight: 900; color: #10b981; margin-bottom: 40px; letter-spacing: -0.5px; }
+    .cover-logo span { color: #fff; }
+    .cover-badge {
+      display: inline-block;
+      background: rgba(16,185,129,0.2);
+      border: 1px solid rgba(16,185,129,0.5);
+      color: #6ee7b7;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 6px 18px;
+      border-radius: 50px;
+      margin-bottom: 28px;
+    }
+    .cover h1 {
+      font-size: 2.6rem;
+      font-weight: 900;
+      line-height: 1.15;
+      margin-bottom: 20px;
+    }
+    .cover h1 em { color: #10b981; font-style: normal; }
+    .cover p {
+      font-size: 1.1rem;
+      color: #94a3b8;
+      line-height: 1.7;
+      max-width: 500px;
+      margin: 0 auto 40px;
+    }
+    .cover-features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 50px;
+    }
+    .cover-feature {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-size: 0.9rem;
+      color: #e2e8f0;
+    }
+    .cover-footer { color: #475569; font-size: 0.85rem; }
+
+    /* ── WEEK HEADER ── */
+    .week-header {
+      background: #fff;
+      border-bottom: 3px solid #10b981;
+      padding: 40px 40px 30px;
+      text-align: center;
+    }
+    .week-header h2 {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+    .week-header p { color: #64748b; font-size: 0.95rem; }
+
+    /* ── DAYS CONTAINER ── */
+    .days-container { padding: 24px 20px; max-width: 900px; margin: 0 auto; }
+
+    /* ── DAY CARD ── */
+    .day-card {
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 20px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .day-header {
+      background: linear-gradient(135deg, #10b981, #059669);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .day-number {
+      width: 36px;
+      height: 36px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 900;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .day-info h3 { font-size: 1.1rem; font-weight: 800; color: #fff; }
+    .day-info p { font-size: 0.8rem; color: rgba(255,255,255,0.75); }
+
+    .meals { padding: 20px 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
+    .meal { border-left: 3px solid #10b981; padding-left: 12px; }
+    .meal-type { font-size: 0.7rem; font-weight: 700; color: #10b981; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+    .meal-name { font-size: 0.92rem; font-weight: 600; color: #1e293b; margin-bottom: 3px; }
+    .meal-detail { font-size: 0.78rem; color: #64748b; }
+
+    /* ── SHOPPING LIST ── */
+    .shopping-section {
+      background: #fff;
+      max-width: 900px;
+      margin: 0 auto 40px;
+      padding: 32px 40px;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+    }
+    .shopping-section h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 6px; }
+    .shopping-section > p { color: #64748b; font-size: 0.9rem; margin-bottom: 24px; }
+    .shopping-categories { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+    .shopping-cat h4 { font-size: 0.85rem; font-weight: 700; color: #10b981; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
+    .shopping-cat ul { list-style: none; }
+    .shopping-cat li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.88rem;
+      color: #374151;
+      padding: 5px 0;
+      border-bottom: 1px dashed #f1f5f9;
+    }
+    .shopping-cat li::before {
+      content: '☐';
+      color: #10b981;
+      flex-shrink: 0;
+    }
+
+    /* ── TIPS ── */
+    .tips-section {
+      background: #0a4a3a;
+      color: #fff;
+      max-width: 900px;
+      margin: 0 auto 40px;
+      padding: 32px 40px;
+      border-radius: 16px;
+    }
+    .tips-section h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 20px; }
+    .tips-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+    .tip { background: rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; }
+    .tip-icon { font-size: 1.4rem; margin-bottom: 8px; }
+    .tip-text { font-size: 0.85rem; color: #d1fae5; line-height: 1.6; }
+    .tip-text strong { color: #6ee7b7; }
+
+    /* ── CTA SECTION ── */
+    .cta-section {
+      text-align: center;
+      padding: 50px 20px;
+      background: #f1f5f9;
+    }
+    .cta-section h2 { font-size: 1.7rem; font-weight: 900; margin-bottom: 12px; color: #0f172a; }
+    .cta-section p { color: #64748b; margin-bottom: 24px; }
+    .btn-cta {
+      display: inline-block;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 800;
+      padding: 16px 36px;
+      border-radius: 14px;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+<button class="no-print" onclick="window.print()">📥 Guardar como PDF</button>
+
+<!-- ── COVER ── -->
+<div class="cover">
+  <div class="cover-logo">MiPlan<span>Fit</span>.es</div>
+  <div class="cover-badge">🎁 Guía Gratuita Exclusiva</div>
+  <h1>Menú de <em>7 Días</em><br>para Desinflamar<br>la Barriga</h1>
+  <p>Plan de alimentación antiinflamatorio completo con desayunos, comidas, cenas y lista de la compra. Sin dietas raras, sin pasar hambre.</p>
+  <div class="cover-features">
+    <div class="cover-feature">🥗 7 días completos</div>
+    <div class="cover-feature">🛒 Lista de la compra</div>
+    <div class="cover-feature">⏱️ Recetas en 30 min</div>
+    <div class="cover-feature">🔥 Sin restricciones extremas</div>
+  </div>
+  <div class="cover-footer">Creado por MiPlanFit.es · Lucía Vega, Nutrición Saludable</div>
+</div>
+
+<!-- ── WEEK ── -->
+<div class="page-break"></div>
+<div class="week-header">
+  <h2>🗓️ Los 7 Días</h2>
+  <p>Plan antiinflamatorio para reducir la grasa abdominal</p>
+</div>
+
+<div class="days-container">
+
+  <!-- DAY 1 -->
+  <div class="day-card">
+    <div class="day-header">
+      <div class="day-number">1</div>
+      <div class="day-info"><h3>Lunes — Reset & Energía</h3><p>Empezamos con alimentos que desinflaман y activan el metabolismo</p></div>
+    </div>
+    <div class="meals">
+      <div class="meal"><div class="meal-type">☀️ Desayuno</div><div class="meal-name">Tostada integral con aguacate y huevo pochado</div><div class="meal-detail">Pan integral · ½ aguacate · 1 huevo · sal y AOVE</div></div>
+      <div class="meal"><div class="meal-type">🍽️ Almuerzo</div><div class="meal-name">Ensalada de pollo a la plancha con espinacas y tomate</div><div class="meal-detail">150g pechuga · espinacas · tomate cherry · AOVE y limón</div></div>
+      <div class="meal"><div class="meal-type">🍎 Merienda</div><div class="meal-name">Yogur griego 0% con arándanos y nueces</div><div class="meal-detail">200g yogur · 80g arándanos · 10 nueces</div></div>
+      <div class="meal"><div class="meal-type">🌙 Cena</div><div class="meal-name">Salmón al horno con brócoli y limón</div><div class="meal-detail">150g salmón · 200g brócoli · ajo · limón · AOVE</div></div>
+    </div>
+  </div>
+
+  <!-- DAY 2 -->
+  <div class="day-card">
+    <div class="day-header">
+      <div class="day-number">2</div>
+      <div class="day-info"><h3>Martes — Proteína & Fuerza</h3><p>Proteína de calidad para mantener músculo y perder grasa</p></div>
+    </div>
+    <div class="meals">
+      <div class="meal"><div class="meal-type">☀️ Desayuno</div><div class="meal-name">Avena con plátano, canela y leche de avena</div><div class="meal-detail">60g avena · 1 plátano · canela · 200ml leche avena</div></div>
+      <div class="meal"><div class="meal-type">🍽️ Almuerzo</div><div class="meal-name">Lentejas con verduras y pimentón</div><div class="meal-detail">200g lentejas cocidas · zanahoria · cebolla · pimentón</div></div>
+      <div class="meal"><div class="meal-type">🍎 Merienda</div><div class="meal-name">Manzana con 1 puñado de almendras</div><div class="meal-detail">1 manzana mediana · 20g almendras crudas</div></div>
+      <div class="meal"><div class="meal-type">🌙 Cena</div><div class="meal-name">Pechuga de pollo a la plancha con espinacas salteadas</div><div class="meal-detail">150g pechuga · 200g espinacas · ajo · AOVE</div></div>
+    </div>
+  </div>
+
+  <!-- DAY 3 -->
+  <div class="day-card">
+    <div class="day-header">
+      <div class="day-number">3</div>
+      <div class="day-info"><h3>Miércoles — Detox Natural</h3><p>Alimentos que eliminan toxinas y reducen la retención</p></div>
+    </div>
+    <div class="meals">
+      <div class="meal"><div class="meal-type">☀️ Desayuno</div><div class="meal-name">Tortilla de 2 huevos con tomate y orégano</div><div class="meal-detail">2 huevos · 1 tomate · orégano · AOVE</div></div>
+      <div class="meal"><div class="meal-type">🍽️ Almuerzo</div><div class="meal-name">Crema de calabaza con jengibre y pan integral</div><div class="meal-detail">300g calabaza · jengibre · caldo vegetal · 1 tostada</div></div>
+      <div class="meal"><div class="meal-type">🍎 Merienda</div><div class="meal-name">Yogur griego con nueces y miel</div><div class="meal-detail">200g yogur · 10 nueces · 1 cdita de miel</div></div>
+      <div class="meal"><div class="meal-type">🌙 Cena</div><div class="meal-name">Merluza al vapor con patata cocida y perejil</div><div class="meal-detail">150g merluza · 1 patata mediana · perejil · limón</div></div>
+    </div>
+  </div>
+
+  <!-- DAY 4 -->
+  <div class="day-card">
+    <div class="day-header">
+      <div class="day-number">4</div>
+      <div class="day-info"><h3>Jueves — Fibra & Saciedad</h3><p>Mucha fibra para regular el tránsito y mantener la saciedad</p></div>
+    </div>
+    <div class="meals">
+      <div class="meal"><div class="meal-type">☀️ Desayuno</div><div class="meal-name">Smoothie verde: espinacas, plátano y leche de almendras</div><div class="meal-detail">1 puñado espinacas · 1 plátano · 200ml leche almendras</div></div>
+      <div class="meal"><div class="meal-type">🍽️ Almuerzo</div><div class="meal-name">Ensalada mediterránea con atún, pepino y aceitunas</div><div class="meal-detail">1 lata atún · pepino · tomate · aceitunas · AOVE</div></div>
+      <div class="meal"><div class="meal-type">🍎 Merienda</div><div class="meal-name">Hummus con palitos de zanahoria y pepino</div><div class="meal-detail">4 cdas hummus · 1 zanahoria · ½ pepino</div></div>
+      <div class="meal"><div class="meal-type">🌙 Cena</div><div class="meal-name">Pavo a la plancha con judías verdes salteadas</div><div class="meal-detail">150g pavo · 200g judías verdes · ajo · AOVE</div></div>
+    </div>
+  </div>
+
+  <!-- DAY 5 -->
+  <div class="day-card">
+    <div class="day-header">
+      <div class="day-number">5</div>
+      <div class="day-info"><h3>Viernes — Grasas Buenas</h3><p>Omega 3 y grasas saludables para reducir la inflamación</p></div>
+    </div>
+    <div class="meals">
+      <div class="meal"><div class="meal-type">☀️ Desayuno</div><div class="meal-name">Tostada con queso fresco, pavo y tomate</div><div class="meal-detail">2 tostadas · queso fresco · 2 lonchas pavo · tomate</div></div>
+      <div class="meal"><div class="meal-type">🍽️ Almuerzo</div><div class="meal-name">Garbanzos con espinacas y pimentón</div><div class="meal-detail">200g garbanzos cocidos · espinacas · pimentón · AOVE</div></div>
+      <div class="meal"><div class="meal-type">🍎 Merienda</div><div class="meal-name">Naranja + puñado de nueces</div><div class="meal-detail">1 naranja grande · 20g nueces</div></div>
+      <div class="meal"><div class="meal-type">🌙 Cena</div><div class="meal-name">Dorada al horno con limón, ajo y verduras</div><div class="meal-detail">150g dorada · ½ pimiento · cebolla · limón · AOVE</div></div>
+    </div>
+  </div>
+
+  <!-- DAY 6 -->
+  <div class="day-card">
+    <div class="day-header">
+      <div class="day-number">6</div>
+      <div class="day-info"><h3>Sábado — Recarga & Sabor</h3><p>Día de disfrute sin abandonar los principios antiinflamatorios</p></div>
+    </div>
+    <div class="meals">
+      <div class="meal"><div class="meal-type">☀️ Desayuno</div><div class="meal-name">Copos de avena con leche de almendras, fresas y chía</div><div class="meal-detail">60g avena · 150ml leche almendras · fresas · 1 cdita chía</div></div>
+      <div class="meal"><div class="meal-type">🍽️ Almuerzo</div><div class="meal-name">Pollo al curry suave con arroz integral</div><div class="meal-detail">150g pollo · 80g arroz integral · curry · leche de coco</div></div>
+      <div class="meal"><div class="meal-type">🍎 Merienda</div><div class="meal-name">Infusión de jengibre con canela + manzana</div><div class="meal-detail">Infusión natural · 1 manzana</div></div>
+      <div class="meal"><div class="meal-type">🌙 Cena</div><div class="meal-name">Ensalada de quinoa con pepino, aguacate y tomate</div><div class="meal-detail">80g quinoa cocida · ½ aguacate · pepino · tomate · limón</div></div>
+    </div>
+  </div>
+
+  <!-- DAY 7 -->
+  <div class="day-card">
+    <div class="day-header">
+      <div class="day-number">7</div>
+      <div class="day-info"><h3>Domingo — Cierre & Balance</h3><p>Cerramos la semana reforzando los hábitos antiinflamatorios</p></div>
+    </div>
+    <div class="meals">
+      <div class="meal"><div class="meal-type">☀️ Desayuno</div><div class="meal-name">Huevos revueltos con champiñones y pimiento</div><div class="meal-detail">2 huevos · 150g champiñones · ½ pimiento · AOVE</div></div>
+      <div class="meal"><div class="meal-type">🍽️ Almuerzo</div><div class="meal-name">Sopa de verduras con fideos integrales</div><div class="meal-detail">Zanahoria · calabacín · puerro · fideos integrales</div></div>
+      <div class="meal"><div class="meal-type">🍎 Merienda</div><div class="meal-name">Kéfir con arándanos y semillas de lino</div><div class="meal-detail">200ml kéfir · 80g arándanos · 1 cdita semillas lino</div></div>
+      <div class="meal"><div class="meal-type">🌙 Cena</div><div class="meal-name">Bacalao al horno con pisto de verduras</div><div class="meal-detail">150g bacalao · calabacín · pimiento · tomate · AOVE</div></div>
+    </div>
+  </div>
+
+</div><!-- end days-container -->
+
+<!-- ── SHOPPING LIST ── -->
+<div class="page-break"></div>
+<div class="days-container">
+  <div class="shopping-section">
+    <h2>🛒 Lista de la Compra — Semana Completa</h2>
+    <p>Todo lo que necesitas para los 7 días. Marca lo que ya tienes en casa.</p>
+    <div class="shopping-categories">
+      <div class="shopping-cat">
+        <h4>🥩 Proteínas</h4>
+        <ul>
+          <li>Pechugas de pollo (600g)</li>
+          <li>Salmón fresco (300g)</li>
+          <li>Merluza (300g)</li>
+          <li>Dorada (300g)</li>
+          <li>Bacalao (300g)</li>
+          <li>Pavo lonchas (200g)</li>
+          <li>Atún en lata (2 latas)</li>
+          <li>Huevos (1 docena)</li>
+          <li>Yogur griego 0% (4 uds)</li>
+          <li>Kéfir (500ml)</li>
+          <li>Queso fresco (250g)</li>
+        </ul>
+      </div>
+      <div class="shopping-cat">
+        <h4>🥦 Verduras</h4>
+        <ul>
+          <li>Espinacas frescas (2 bolsas)</li>
+          <li>Brócoli (1 ud grande)</li>
+          <li>Tomates (1kg)</li>
+          <li>Tomates cherry (250g)</li>
+          <li>Pepino (2 uds)</li>
+          <li>Calabaza (500g)</li>
+          <li>Pimientos (3 uds)</li>
+          <li>Zanahoria (1 bolsa)</li>
+          <li>Calabacín (2 uds)</li>
+          <li>Judías verdes (300g)</li>
+          <li>Champiñones (250g)</li>
+          <li>Puerro (1 ud)</li>
+          <li>Cebolla (2 uds)</li>
+        </ul>
+      </div>
+      <div class="shopping-cat">
+        <h4>🍎 Frutas</h4>
+        <ul>
+          <li>Plátanos (5 uds)</li>
+          <li>Arándanos (300g)</li>
+          <li>Manzanas (4 uds)</li>
+          <li>Naranja (2 uds)</li>
+          <li>Fresas (250g)</li>
+          <li>Aguacates (3 uds)</li>
+          <li>Limones (4 uds)</li>
+        </ul>
+      </div>
+      <div class="shopping-cat">
+        <h4>🌾 Cereales & Legumbres</h4>
+        <ul>
+          <li>Avena en copos (500g)</li>
+          <li>Arroz integral (500g)</li>
+          <li>Quinoa (300g)</li>
+          <li>Lentejas cocidas (2 botes)</li>
+          <li>Garbanzos cocidos (2 botes)</li>
+          <li>Pan integral (1 barra)</li>
+          <li>Fideos integrales (200g)</li>
+        </ul>
+      </div>
+      <div class="shopping-cat">
+        <h4>🥛 Lácteos & Bebidas veg.</h4>
+        <ul>
+          <li>Leche de avena (1L)</li>
+          <li>Leche de almendras (1L)</li>
+          <li>Leche de coco (1 lata)</li>
+        </ul>
+      </div>
+      <div class="shopping-cat">
+        <h4>🫒 Básicos & Extras</h4>
+        <ul>
+          <li>Aceite de oliva AOVE (1 botella)</li>
+          <li>Hummus (1 tarro)</li>
+          <li>Nueces (200g)</li>
+          <li>Almendras crudas (200g)</li>
+          <li>Aceitunas (1 tarro)</li>
+          <li>Semillas de chía (100g)</li>
+          <li>Semillas de lino (100g)</li>
+          <li>Miel (1 tarro pequeño)</li>
+          <li>Jengibre fresco (1 trozo)</li>
+          <li>Ajo (1 cabeza)</li>
+          <li>Curry en polvo</li>
+          <li>Canela en polvo</li>
+          <li>Pimentón dulce</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TIPS ── -->
+<div class="days-container">
+  <div class="tips-section">
+    <h2>💡 5 Hábitos Antiinflamatorios Clave</h2>
+    <div class="tips-grid">
+      <div class="tip"><div class="tip-icon">💧</div><div class="tip-text"><strong>Bebe 2L de agua al día.</strong> La hidratación reduce la inflamación y ayuda al riñón a eliminar toxinas.</div></div>
+      <div class="tip"><div class="tip-icon">🛌</div><div class="tip-text"><strong>Duerme 7-8 horas.</strong> La falta de sueño dispara la inflamación crónica. Es tan importante como la comida.</div></div>
+      <div class="tip"><div class="tip-icon">🚶</div><div class="tip-text"><strong>30 min de movimiento.</strong> No hace falta gimnasio. Un paseo a paso ligero activa el metabolismo.</div></div>
+      <div class="tip"><div class="tip-icon">🧂</div><div class="tip-text"><strong>Reduce la sal y el azúcar.</strong> Son los dos mayores promotores de inflamación y retención de líquidos.</div></div>
+      <div class="tip"><div class="tip-icon">🍵</div><div class="tip-text"><strong>Infusión de jengibre en ayunas.</strong> Poderoso antiinflamatorio natural. Añade limón para potenciar el efecto.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CTA ── -->
+<div class="cta-section no-print">
+  <h2>¿Quieres un plan personalizado de 30 días? 🚀</h2>
+  <p>La IA de MiPlanFit crea tu menú adaptado a tu peso, edad y objetivos. 100% gratis para empezar.</p>
+  <a href="https://miplanfit.es" class="btn-cta">🥑 Crear mi Plan Personalizado Gratis</a>
+</div>
+
+</body>
+</html>
